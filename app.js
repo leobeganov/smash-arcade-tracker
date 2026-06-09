@@ -567,13 +567,15 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
           <div class="match-card-meta">${new Date(m.timestamp).toLocaleDateString()} ${new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
         </div>
-        <div class="match-card-players-grid">
+        <div class="match-card-players-grid ${m.players && m.players.length > 4 ? 'large-lobby' : ''}">
           ${m.players.map(p => `
             <div class="history-player-row ${p.placement === 1 ? 'winner' : ''}">
-              <div class="history-p-placement">${p.placement === 1 ? '1ST' : p.placement === 2 ? '2ND' : p.placement === 3 ? '3RD' : p.placement + 'TH'}</div>
-              <div class="history-p-details">
-                <div class="history-p-name text-glow-${p.placement === 1 ? 'yellow' : 'cyan'}" style="cursor: pointer;" onclick="window.location.hash = '#player/${p.playerName.toLowerCase().replace(/\s+/g, '-')}'">${p.playerName}</div>
-                <div class="history-p-char" style="cursor: pointer;" onclick="window.location.hash = '#fighter/${p.character.toLowerCase().replace(/\s+/g, '-')}'">${p.character}</div>
+              <div class="history-p-top-row">
+                <div class="history-p-placement">${p.placement === 1 ? '1ST' : p.placement === 2 ? '2ND' : p.placement === 3 ? '3RD' : p.placement + 'TH'}</div>
+                <div class="history-p-details">
+                  <div class="history-p-name text-glow-${p.placement === 1 ? 'yellow' : 'cyan'}" style="cursor: pointer;" onclick="window.location.hash = '#player/${p.playerName.toLowerCase().replace(/\s+/g, '-')}'">${p.playerName}</div>
+                  <div class="history-p-char" style="cursor: pointer;" onclick="window.location.hash = '#fighter/${p.character.toLowerCase().replace(/\s+/g, '-')}'">${p.character}</div>
+                </div>
               </div>
               <div class="history-p-stats-badges">
                 <span class="player-stat-badge ko">Kills: ${p.kos !== undefined ? p.kos : 0}</span>
