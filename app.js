@@ -813,11 +813,6 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.hash = "#home";
   };
 
-  // Nav Leaderboard button click
-  document.getElementById("nav-btn-leaderboard").onclick = () => {
-    window.location.hash = "#leaderboard";
-  };
-
   // "Back to Select Select" / Home clicks
   const backButtons = document.getElementsByClassName("btn-back-home");
   for (let i = 0; i < backButtons.length; i++) {
