@@ -1,0 +1,1285 @@
+/* 
+  Super Smash Brothers Retro Match Tracker - CSS Stylesheet
+  Homage to 1994 OG Tekken / Early 90s Combat Arcade Cabinets
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Press+Start+2P&family=Share+Tech+Mono&display=swap');
+
+/* --- Theme Variables --- */
+:root {
+  --bg-obsidian: #08080a;
+  --bg-iron: #14161a;
+  --bg-metal: #22252c;
+  --bg-grid: #0d0f14;
+
+  --color-neon-cyan: #00f0ff;
+  --color-neon-magenta: #ff007f;
+  --color-neon-yellow: #ffe600;
+  --color-neon-orange: #ff5d00;
+  --color-text-white: #f5f6fa;
+  --color-border-dark: #3a3f4a;
+
+  --font-arcade: 'Press Start 2P', monospace;
+  --font-header: 'Orbitron', sans-serif;
+  --font-stats: 'Share Tech Mono', monospace;
+}
+
+/* --- Base & Reset --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-color: var(--bg-obsidian);
+  color: var(--color-text-white);
+  font-family: var(--font-stats);
+  font-size: 18px;
+  overflow-x: hidden;
+  height: 100vh;
+  width: 100vw;
+  position: relative;
+}
+
+/* Retro Cabinet Scanline CRT Overlay */
+.crt-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.25) 50%
+  ), radial-gradient(
+    rgba(0, 0, 0, 0) 60%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+  background-size: 100% 4px, 100% 100%;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Digital Grid Cyber Background */
+.grid-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-grid);
+  background-image: 
+    linear-gradient(rgba(0, 240, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  z-index: -1;
+  perspective: 1000px;
+}
+
+/* --- Scrollbar Customization --- */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-obsidian);
+  border-left: 2px solid var(--color-border-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bg-metal);
+  border: 2px solid var(--color-neon-magenta);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neon-magenta);
+}
+
+/* --- Reusable Retro UI Utilities --- */
+
+/* Beveled Metal Panels */
+.panel-beveled {
+  background-color: var(--bg-iron);
+  border: 6px outset #4c525f;
+  padding: 20px;
+  box-shadow: 0 10px 0 #000;
+  position: relative;
+}
+
+.panel-beveled.neon-cyan {
+  border-color: var(--color-neon-cyan);
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.3), 0 8px 0 #000;
+}
+
+.panel-beveled.neon-magenta {
+  border-color: var(--color-neon-magenta);
+  box-shadow: 0 0 15px rgba(255, 0, 127, 0.3), 0 8px 0 #000;
+}
+
+.panel-beveled.neon-yellow {
+  border-color: var(--color-neon-yellow);
+  box-shadow: 0 0 15px rgba(255, 230, 0, 0.3), 0 8px 0 #000;
+}
+
+/* Glow Text Styles */
+.text-glow-cyan {
+  color: var(--color-neon-cyan);
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.8), 0 0 20px rgba(0, 240, 255, 0.4);
+}
+
+.text-glow-magenta {
+  color: var(--color-neon-magenta);
+  text-shadow: 0 0 10px rgba(255, 0, 127, 0.8), 0 0 20px rgba(255, 0, 127, 0.4);
+}
+
+.text-glow-yellow {
+  color: var(--color-neon-yellow);
+  text-shadow: 0 0 10px rgba(255, 230, 0, 0.8), 0 0 20px rgba(255, 230, 0, 0.4);
+}
+
+/* Buttons */
+.btn-arcade {
+  display: inline-block;
+  padding: 12px 24px;
+  font-family: var(--font-arcade);
+  font-size: 14px;
+  color: var(--color-text-white);
+  background-color: var(--bg-metal);
+  border: 4px outset #666;
+  cursor: pointer;
+  text-decoration: none;
+  user-select: none;
+  transition: all 0.1s ease;
+}
+
+.btn-arcade:active {
+  border-style: inset;
+  transform: translateY(2px);
+}
+
+.btn-arcade.magenta {
+  border-color: var(--color-neon-magenta);
+  box-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
+}
+.btn-arcade.magenta:hover {
+  background-color: var(--color-neon-magenta);
+  box-shadow: 0 0 15px rgba(255, 0, 127, 0.8);
+  color: #000;
+}
+
+.btn-arcade.cyan {
+  border-color: var(--color-neon-cyan);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+}
+.btn-arcade.cyan:hover {
+  background-color: var(--color-neon-cyan);
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.8);
+  color: #000;
+}
+
+/* Layout Core Wrapper */
+#app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 20px;
+  position: relative;
+  z-index: 10;
+}
+
+/* --- Header & Navigation Bar --- */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  gap: 20px;
+}
+
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.logo-main {
+  font-family: var(--font-arcade);
+  font-size: 24px;
+  line-height: 1.2;
+  letter-spacing: -1px;
+  transform: skewX(-8deg);
+  text-transform: uppercase;
+}
+
+.logo-sub {
+  font-family: var(--font-header);
+  font-size: 14px;
+  letter-spacing: 4px;
+  color: var(--color-neon-cyan);
+  text-transform: uppercase;
+}
+
+/* Search Dropdown Layout */
+.search-container {
+  flex-grow: 1;
+  max-width: 500px;
+  position: relative;
+}
+
+.search-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 20px 12px 40px;
+  background-color: var(--bg-iron);
+  border: 4px outset var(--color-border-dark);
+  font-family: var(--font-header);
+  color: var(--color-text-white);
+  font-size: 16px;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: var(--color-neon-cyan);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+}
+
+.search-icon-decor {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-neon-cyan);
+  font-family: var(--font-arcade);
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.search-results-dropdown {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  width: 100%;
+  background-color: var(--bg-iron);
+  border: 4px outset var(--color-neon-cyan);
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 100;
+  display: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+}
+
+.search-result-item {
+  padding: 12px 20px;
+  font-family: var(--font-header);
+  cursor: pointer;
+  border-bottom: 2px solid var(--bg-metal);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.1s ease;
+}
+
+.search-result-item:hover, 
+.search-result-item.highlighted {
+  background-color: var(--color-neon-cyan);
+  color: #000;
+}
+
+.search-result-item .result-type {
+  font-family: var(--font-arcade);
+  font-size: 9px;
+  padding: 4px 8px;
+  border: 1px solid currentColor;
+}
+
+/* --- Views Layout Container --- */
+.view-container {
+  flex-grow: 1;
+  display: none; /* App router toggles active view */
+}
+
+.view-container.active {
+  display: block;
+  animation: viewFadeIn 0.3s steps(5) forwards;
+}
+
+@keyframes viewFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- VIEW: HOME (The Main Stage) --- */
+.home-view-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+}
+
+.marquee-banner {
+  text-align: center;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.marquee-banner h2 {
+  font-family: var(--font-arcade);
+  font-size: 26px;
+  letter-spacing: -2px;
+  color: var(--color-neon-yellow);
+}
+
+/* Olympic Style 3D Podium Grid */
+.podium-stage {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  width: 100%;
+  max-width: 1125px; /* Scaled from 900px */
+  height: 625px;     /* Scaled from 500px */
+  margin-top: 50px;  /* Scaled from 40px */
+  position: relative;
+}
+
+.podium-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 30%;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+/* Fighter standing on podium */
+.podium-fighter-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  height: 350px;     /* Scaled from 280px */
+  margin-bottom: -19px; /* Scaled from -15px to sit flat on top of scaled ellipse cap */
+  z-index: 3;
+}
+
+/* Floating Gold Crown for the #1 Fighter */
+.podium-column.tier-1 .podium-fighter-container::before {
+  content: "👑";
+  position: absolute;
+  top: -25px; /* Floats perfectly above their head */
+  left: 50%;
+  font-size: 56px;
+  z-index: 10;
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+  animation: crownFloat 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes crownFloat {
+  0%, 100% { transform: translateX(-50%) translateY(0) rotate(-8deg); }
+  50% { transform: translateX(-50%) translateY(-10px) rotate(-8deg); }
+}
+
+.podium-fighter-img {
+  height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+  filter: drop-shadow(0 0 15px rgba(0, 240, 255, 0.4));
+  animation: floatBreathing 3s ease-in-out infinite;
+}
+
+/* Distinct animation triggers for podium tiers to avoid synchronized movement */
+.podium-column.tier-1 .podium-fighter-img { animation-delay: 0s; }
+.podium-column.tier-2 .podium-fighter-img { animation-delay: 0.5s; }
+.podium-column.tier-3 .podium-fighter-img { animation-delay: 1s; }
+
+@keyframes floatBreathing {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); } /* Scaled slightly from -8px */
+}
+
+/* Soft contact shadow pulsing under each fighter */
+.podium-fighter-container::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 162px;       /* Scaled from 130px */
+  height: 20px;       /* Scaled from 16px */
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0) 70%);
+  border-radius: 50%;
+  z-index: -1;
+  animation: shadowPulse 3s ease-in-out infinite;
+}
+
+.podium-column.tier-1 .podium-fighter-container::after { animation-delay: 0s; }
+.podium-column.tier-2 .podium-fighter-container::after { animation-delay: 0.5s; }
+.podium-column.tier-3 .podium-fighter-container::after { animation-delay: 1s; }
+
+@keyframes shadowPulse {
+  0%, 100% { transform: translateX(-50%) scale(1); opacity: 1; }
+  50% { transform: translateX(-50%) scale(0.85); opacity: 0.6; }
+}
+
+/* Realistic 3D Volumetric Cylinder Podiums */
+.podium-block {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 31px 19px 19px; /* Scaled from 25px 15px 15px */
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
+  position: relative;
+  overflow: visible; /* don't clip 3D cap and bottom shadow */
+  border-radius: 0 0 19px 19px; /* Scaled from 15px */
+  border: none;
+}
+
+/* 3D Elliptical Cap Top Plate */
+.podium-block::before {
+  content: "";
+  position: absolute;
+  top: -19px;        /* Scaled from -15px */
+  left: 0;
+  width: 100%;
+  height: 38px;       /* Scaled from 30px */
+  border-radius: 50%;
+  z-index: 2;
+  box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.6), 0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+/* Ambient Base Shadow for columns */
+.podium-block::after {
+  content: "";
+  position: absolute;
+  bottom: -12px;     /* Scaled from -10px */
+  left: 5%;
+  width: 90%;
+  height: 25px;       /* Scaled from 20px */
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  filter: blur(10px); /* Scaled from 8px */
+  z-index: -2;
+}
+
+/* Tier Specific Heights, Volumetric Cylinder reflections & Gradients */
+.tier-1 .podium-block {
+  height: 225px;     /* Scaled from 180px */
+  background: 
+    linear-gradient(90deg, rgba(0, 0, 0, 0.45) 0%, rgba(255, 223, 0, 0.25) 25%, rgba(255, 255, 255, 0.45) 50%, rgba(168, 129, 0, 0.35) 75%, rgba(0, 0, 0, 0.65) 100%),
+    #a88100;
+}
+.tier-1 .podium-block::before {
+  background: radial-gradient(circle, #ffe875 0%, #ffd700 70%, #a88100 100%);
+}
+
+.tier-2 .podium-block {
+  height: 175px;     /* Scaled from 140px */
+  background: 
+    linear-gradient(90deg, rgba(0, 0, 0, 0.4) 0%, rgba(255, 255, 255, 0.2) 25%, rgba(255, 255, 255, 0.4) 50%, rgba(112, 112, 112, 0.3) 75%, rgba(0, 0, 0, 0.6) 100%),
+    #707070;
+}
+.tier-2 .podium-block::before {
+  background: radial-gradient(circle, #ffffff 0%, #c0c0c0 70%, #707070 100%);
+}
+
+.tier-3 .podium-block {
+  height: 138px;     /* Scaled from 110px */
+  background: 
+    linear-gradient(90deg, rgba(0, 0, 0, 0.45) 0%, rgba(241, 170, 120, 0.25) 25%, rgba(255, 255, 255, 0.45) 50%, rgba(114, 64, 17, 0.35) 75%, rgba(0, 0, 0, 0.65) 100%),
+    #724011;
+}
+.tier-3 .podium-block::before {
+  background: radial-gradient(circle, #f1aa78 0%, #cd7f32 70%, #724011 100%);
+}
+
+.podium-num {
+  font-family: var(--font-arcade);
+  font-size: 55px;   /* Scaled from 44px */
+  color: #fff;
+  text-shadow: 4px 4px 0 #000, -4px -4px 0 #000, 4px -4px 0 #000, -4px 4px 0 #000; /* Scaled text-shadow outlines */
+  margin-bottom: 10px; /* Scaled from 8px */
+  z-index: 3;
+}
+
+/* Player plaques styled as actual engraved metallic trophies */
+.podium-plaque {
+  padding: 10px 15px; /* Scaled from 8px 12px */
+  width: 85%;
+  max-width: 250px;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 6px;
+  position: relative;
+  z-index: 3;
+  transition: all 0.25s ease;
+}
+
+/* 1st Place - Engraved Gold Plaque */
+.tier-1 .podium-plaque {
+  background: linear-gradient(135deg, #ffe066 0%, #f5b000 50%, #996e00 100%);
+  border: 3px ridge #fff6b3;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.6),
+    0 1px 3px rgba(0, 0, 0, 0.4);
+}
+.tier-1 .podium-plaque .podium-player-name {
+  color: #211600;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+.tier-1 .podium-plaque .podium-combo-stat {
+  color: #3b2800;
+  font-weight: bold;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.tier-1 .podium-plaque:hover {
+  transform: translateY(-2px) scale(1.02);
+  border-color: #fff;
+  box-shadow: 
+    0 0 20px rgba(255, 215, 0, 0.6),
+    0 6px 15px rgba(0, 0, 0, 0.7);
+}
+
+/* 2nd Place - Engraved Silver Plaque */
+.tier-2 .podium-plaque {
+  background: linear-gradient(135deg, #ffffff 0%, #b3b3b3 50%, #666666 100%);
+  border: 3px ridge #f2f2f2;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.6),
+    0 1px 3px rgba(0, 0, 0, 0.4);
+}
+.tier-2 .podium-plaque .podium-player-name {
+  color: #1a1a1a;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+.tier-2 .podium-plaque .podium-combo-stat {
+  color: #333333;
+  font-weight: bold;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.tier-2 .podium-plaque:hover {
+  transform: translateY(-2px) scale(1.02);
+  border-color: #fff;
+  box-shadow: 
+    0 0 20px rgba(255, 255, 255, 0.6),
+    0 6px 15px rgba(0, 0, 0, 0.7);
+}
+
+/* 3rd Place - Engraved Bronze Plaque */
+.tier-3 .podium-plaque {
+  background: linear-gradient(135deg, #ffbc80 0%, #b36b30 50%, #593310 100%);
+  border: 3px ridge #ffd2a6;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.6),
+    0 1px 3px rgba(0, 0, 0, 0.4);
+}
+.tier-3 .podium-plaque .podium-player-name {
+  color: #210d00;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.tier-3 .podium-plaque .podium-combo-stat {
+  color: #381a02;
+  font-weight: bold;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.tier-3 .podium-plaque:hover {
+  transform: translateY(-2px) scale(1.02);
+  border-color: #ffd2a6;
+  box-shadow: 
+    0 0 20px rgba(205, 127, 50, 0.6),
+    0 6px 15px rgba(0, 0, 0, 0.7);
+}
+
+.podium-player-name {
+  font-family: var(--font-arcade);
+  font-size: 15px;   /* Scaled from 12px */
+  text-transform: uppercase;
+}
+
+.podium-combo-stat {
+  font-family: var(--font-stats);
+  font-size: 16px;   /* Scaled from 13px */
+  margin-top: 4px;
+}
+
+
+/* ==========================================================
+   THEME: Player Profile (Neon Magenta Scoreboard Theme)
+   ========================================================== */
+#player-profile-view .profile-view-layout {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 40px;
+  padding: 20px;
+  align-items: start;
+}
+
+#player-profile-view .profile-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+#player-profile-view .fighter-card-box {
+  background: var(--bg-metal);
+  border: 4px solid var(--color-neon-magenta);
+  box-shadow: 0 0 30px rgba(255, 0, 128, 0.25), inset 0 0 20px rgba(255, 0, 128, 0.15);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 30px;
+  position: relative;
+}
+
+#player-profile-view .fighter-card-box::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(255,0,128,0.1) 0%, rgba(0,0,0,0) 100%);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+#player-profile-view .fighter-card-img {
+  width: 220px;
+  height: 220px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 15px rgba(255, 0, 128, 0.5));
+}
+
+#player-profile-view .profile-title-name {
+  font-family: var(--font-arcade);
+  font-size: 32px;
+  color: #fff;
+  text-shadow: 0 0 10px var(--color-neon-magenta), 0 0 20px var(--color-neon-magenta);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 10px;
+  margin-bottom: 8px;
+}
+
+#player-profile-view .profile-tagline {
+  font-family: var(--font-header);
+  font-size: 13px;
+  color: var(--color-neon-yellow);
+  text-shadow: 0 0 5px rgba(255,242,0,0.5);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+#player-profile-view .profile-content-area {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+#player-profile-view .stats-grid-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+#player-profile-view .stat-cell-retro {
+  background: linear-gradient(180deg, var(--bg-obsidian) 0%, #12001a 100%);
+  border: 3px solid var(--color-neon-magenta);
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(255, 0, 128, 0.2);
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-align: center;
+}
+
+#player-profile-view .stat-cell-retro:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 25px rgba(255, 0, 128, 0.4);
+}
+
+#player-profile-view .stat-cell-retro .stat-title {
+  font-family: var(--font-header);
+  font-size: 12px;
+  color: #fff;
+  opacity: 0.8;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+#player-profile-view .stat-cell-retro .stat-num {
+  font-family: var(--font-arcade);
+  font-size: 38px;
+  line-height: 1;
+}
+
+
+/* ==========================================================
+   THEME: Fighter Profile (Neon Cyan Cyber Tech Spec Theme)
+   ========================================================== */
+#fighter-profile-view .fighter-view-layout {
+  display: grid;
+  grid-template-columns: 1.2fr 2fr;
+  gap: 40px;
+  padding: 20px;
+  align-items: start;
+}
+
+#fighter-profile-view .profile-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+#fighter-profile-view .fighter-card-box {
+  background: transparent;
+  border: 1px solid var(--color-neon-cyan);
+  border-radius: 0; /* Cyber spec layout is strictly blocky */
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 30px;
+  position: relative;
+}
+
+#fighter-profile-view .fighter-card-box::before {
+  content: "FIGHTER-SPEC // 01";
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  font-family: monospace;
+  font-size: 9px;
+  color: var(--color-neon-cyan);
+  opacity: 0.7;
+  letter-spacing: 1px;
+}
+
+#fighter-profile-view .fighter-card-img {
+  width: 220px;
+  height: 220px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 15px rgba(0, 240, 255, 0.6));
+}
+
+#fighter-profile-view .fighter-title-name {
+  font-family: var(--font-arcade);
+  font-size: 32px;
+  color: var(--color-neon-cyan);
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.7);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 15px;
+  margin-bottom: 12px;
+}
+
+#fighter-profile-view .fighter-bio-text {
+  font-family: monospace;
+  font-size: 13px;
+  color: var(--color-neon-cyan);
+  opacity: 0.85;
+  line-height: 1.6;
+  text-align: left;
+  border-top: 1px dashed var(--color-neon-cyan);
+  margin-top: 20px;
+  padding-top: 15px;
+}
+
+#fighter-profile-view .profile-content-area {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+#fighter-profile-view .stats-grid-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+#fighter-profile-view .stat-cell-retro {
+  background: rgba(0, 10, 20, 0.45);
+  border: 1px solid var(--color-neon-cyan);
+  border-radius: 0;
+  box-shadow: none;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  transition: background-color 0.2s ease;
+  text-align: center;
+}
+
+#fighter-profile-view .stat-cell-retro:hover {
+  background: rgba(0, 240, 255, 0.08);
+}
+
+/* Micro-decoration crosshairs on technical stat frames */
+#fighter-profile-view .stat-cell-retro::before {
+  content: "";
+  position: absolute;
+  top: -2px; left: -2px;
+  width: 6px; height: 6px;
+  border-top: 2px solid var(--color-neon-cyan);
+  border-left: 2px solid var(--color-neon-cyan);
+}
+
+#fighter-profile-view .stat-cell-retro::after {
+  content: "";
+  position: absolute;
+  bottom: -2px; right: -2px;
+  width: 6px; height: 6px;
+  border-bottom: 2px solid var(--color-neon-cyan);
+  border-right: 2px solid var(--color-neon-cyan);
+}
+
+#fighter-profile-view .stat-cell-retro .stat-title {
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 11px;
+  color: var(--color-neon-cyan);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  opacity: 0.8;
+}
+
+#fighter-profile-view .stat-cell-retro .stat-num {
+  font-family: var(--font-arcade);
+  font-size: 34px;
+  color: #fff;
+  text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+  line-height: 1;
+}
+
+
+/* --- VIEW: GLOBAL LEADERBOARD --- */
+.leaderboard-view-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.leaderboard-control-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 4px solid var(--color-border-dark);
+}
+
+.mode-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.mode-toggle-label {
+  font-family: var(--font-arcade);
+  font-size: 11px;
+  color: #ccc;
+}
+
+/* Retro Toggle Button styling */
+.toggle-switch-beveled {
+  display: flex;
+  background-color: var(--bg-obsidian);
+  border: 4px inset var(--color-border-dark);
+  padding: 4px;
+}
+
+.toggle-switch-beveled .toggle-btn {
+  padding: 8px 16px;
+  font-family: var(--font-arcade);
+  font-size: 10px;
+  color: #888;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.toggle-switch-beveled .toggle-btn.active {
+  color: #000;
+  background-color: var(--color-neon-yellow);
+  box-shadow: 0 0 10px var(--color-neon-yellow);
+}
+
+.leaderboard-title {
+  font-family: var(--font-arcade);
+  font-size: 18px;
+  color: var(--color-neon-magenta);
+}
+
+/* High Fidelity Retro Leaderboard Table */
+.leaderboard-table-container {
+  overflow-x: auto;
+  border: 6px outset #4c525f;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.8);
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-iron);
+}
+
+.leaderboard-table th, 
+.leaderboard-table td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 2px solid var(--bg-metal);
+}
+
+.leaderboard-table th {
+  background-color: var(--bg-metal);
+  font-family: var(--font-header);
+  font-size: 13px;
+  color: var(--color-neon-cyan);
+  cursor: pointer;
+  user-select: none;
+  text-transform: uppercase;
+}
+
+.leaderboard-table th:hover {
+  background-color: var(--bg-iron);
+  color: var(--color-neon-yellow);
+}
+
+.leaderboard-table th.sorted-desc::after {
+  content: " \25bc";
+  color: var(--color-neon-yellow);
+}
+
+.leaderboard-table th.sorted-asc::after {
+  content: " \25b2";
+  color: var(--color-neon-yellow);
+}
+
+.leaderboard-table td {
+  font-family: var(--font-stats);
+  font-size: 16px;
+}
+
+.leaderboard-table tr:hover td {
+  background-color: rgba(255, 0, 127, 0.1);
+}
+
+.leaderboard-table td.rank-cell {
+  font-family: var(--font-arcade);
+  font-size: 11px;
+  color: var(--color-neon-yellow);
+}
+
+.leaderboard-table td.name-cell {
+  font-family: var(--font-arcade);
+  font-size: 11px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.leaderboard-table td.name-cell:hover {
+  color: var(--color-neon-cyan);
+  text-decoration: underline;
+}
+
+.leaderboard-table td.numeric-cell {
+  font-family: var(--font-stats);
+  font-size: 18px;
+}
+
+
+/* --- VIEW TRANSITION OVERLAY: THE "VS SCREEN" --- */
+#vs-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9998;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease-in-out;
+  background-color: #000;
+}
+
+#vs-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Diagonal Zebra-striped curtains */
+.vs-stripe-curtain-top, 
+.vs-stripe-curtain-bottom {
+  position: absolute;
+  width: 200vw;
+  height: 55vh;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--bg-obsidian),
+    var(--bg-obsidian) 40px,
+    var(--color-neon-magenta) 40px,
+    var(--color-neon-magenta) 80px
+  );
+  transition: transform 0.3s cubic-bezier(0.85, 0, 0.15, 1);
+  z-index: 1;
+}
+
+.vs-stripe-curtain-top {
+  top: 0;
+  left: -50vw;
+  transform: translateY(-100%);
+}
+
+.vs-stripe-curtain-bottom {
+  bottom: 0;
+  right: -50vw;
+  transform: translateY(100%);
+}
+
+#vs-overlay.active .vs-stripe-curtain-top {
+  transform: translateY(0);
+}
+
+#vs-overlay.active .vs-stripe-curtain-bottom {
+  transform: translateY(0);
+}
+
+/* Versus middle content */
+.vs-middle-stage {
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  width: 100%;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s;
+}
+
+#vs-overlay.active .vs-middle-stage {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.vs-logo-text {
+  font-family: var(--font-arcade);
+  font-size: 56px;
+  color: var(--color-neon-yellow);
+  text-shadow: 4px 4px 0 #000, 8px 8px 0 var(--color-neon-magenta);
+  transform: skewX(-10deg);
+  letter-spacing: -2px;
+  animation: logoShake 0.15s infinite;
+}
+
+@keyframes logoShake {
+  0%, 100% { transform: skewX(-10deg) translate(0, 0); }
+  25% { transform: skewX(-10deg) translate(-2px, 1px); }
+  75% { transform: skewX(-10deg) translate(2px, -1px); }
+}
+
+.vs-sub-marquee {
+  font-family: var(--font-header);
+  font-size: 16px;
+  letter-spacing: 5px;
+  color: var(--color-neon-cyan);
+  text-transform: uppercase;
+}
+
+.vs-portraits-slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 80px;
+  margin-top: 30px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.vs-fighter-card {
+  width: 200px;
+  height: 200px;
+  background-color: var(--bg-iron);
+  border: 6px outset var(--color-neon-cyan);
+  overflow: hidden;
+  position: relative;
+}
+
+.vs-fighter-card.magenta {
+  border-color: var(--color-neon-magenta);
+}
+
+.vs-fighter-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.vs-fighter-name-label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  padding: 8px 5px;
+  text-align: center;
+  font-family: var(--font-arcade);
+  font-size: 10px;
+  color: #fff;
+  text-transform: uppercase;
+  border-top: 3px solid currentColor;
+}
+
+
+/* --- Stage Select Retro Stage Overlay --- */
+.back-button-footer {
+  margin-top: 30px;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* --- Profile Meta Stats Rows & Cards --- */
+.profile-meta-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  width: 100%;
+}
+
+.meta-card {
+  padding: 20px !important; /* Slightly more compact padding to leave room for details */
+}
+
+.meta-content-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 20px;
+  width: 100%;
+  height: 100%;
+  margin-top: 5px;
+}
+
+.meta-avatar {
+  height: 70px;
+  width: 70px;
+  object-fit: contain;
+  transition: transform 0.2s ease;
+}
+
+.meta-card:hover .meta-avatar {
+  transform: scale(1.1) rotate(5deg);
+}
+
+#player-profile-view .meta-avatar {
+  filter: drop-shadow(0 0 10px rgba(255, 0, 128, 0.6));
+}
+
+#fighter-profile-view .meta-avatar {
+  filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.6));
+}
+
+.meta-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 6px;
+  flex-grow: 1;
+}
+
+.meta-details.no-img {
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  padding: 10px 0;
+}
+
+.meta-name {
+  font-family: var(--font-arcade);
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.meta-sub {
+  font-family: var(--font-stats);
+  font-size: 14px;
+  color: #ccc;
+  letter-spacing: 1px;
+}
+
+/* Top Players dynamic list styling inside Fighter Profile */
+.top-players-list {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  margin-top: 5px;
+}
+
+.top-player-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  background: rgba(0, 240, 255, 0.04);
+  border: 1px dashed rgba(0, 240, 255, 0.2);
+  font-family: var(--font-stats);
+  font-size: 14px;
+  transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.top-player-item:hover {
+  background: rgba(0, 240, 255, 0.12);
+  border-style: solid;
+  border-color: var(--color-neon-cyan);
+  transform: translateX(6px);
+}
+
+.top-player-rank {
+  font-family: var(--font-arcade);
+  font-size: 10px;
+  color: var(--color-neon-yellow);
+}
+
+.top-player-name {
+  font-family: var(--font-arcade);
+  font-size: 10px;
+  flex-grow: 1;
+  text-align: left;
+  margin-left: 15px;
+  text-transform: uppercase;
+}
+
+.top-player-count {
+  font-size: 14px;
+  color: #fff;
+  opacity: 0.8;
+}

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Super Smash Brothers Retro Match Results Tracker - 1994 Arcade Style Prototype">
+  <title>MATCH TRACKER</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+  <!-- Retro Cabinet overlays -->
+  <div class="crt-overlay"></div>
+  <div class="grid-background"></div>
+
+  <!-- Main Application Frame -->
+  <div id="app-container">
+    
+    <!-- Header Marquee & Navigation -->
+    <header>
+      <div class="logo-container" id="nav-logo-home" style="cursor: pointer; user-select: none;">
+        <div class="logo-sub text-glow-magenta" style="font-family: var(--font-arcade); font-size: 14px; letter-spacing: 2px;">[ HOME ]</div>
+      </div>
+
+      <!-- Autocomplete Search Bar -->
+      <div class="search-container">
+        <div class="search-input-wrapper">
+          <span class="search-icon-decor">&gt;</span>
+          <input type="text" class="search-input" id="search-box" placeholder="SEARCH FIGHTER OR PLAYER..." autocomplete="off">
+        </div>
+        <!-- Autocomplete Suggestions List -->
+        <div class="search-results-dropdown" id="search-dropdown"></div>
+      </div>
+
+      <!-- Leaderboard Action Button -->
+      <div>
+        <button class="btn-arcade magenta" id="nav-btn-leaderboard">LEADERBOARD</button>
+      </div>
+    </header>
+
+    <!-- ========================================== -->
+    <!-- VIEW: HOME / podium view -->
+    <!-- ========================================== -->
+    <main class="view-container" id="home-view">
+      <div class="home-view-layout">
+
+        <!-- 3D Olympic Podium -->
+        <div class="podium-stage">
+          
+          <!-- 2nd Place: Silver -->
+          <div class="podium-column tier-2" id="podium-silver">
+            <div class="podium-fighter-container">
+              <img src="" alt="" class="podium-fighter-img" id="podium-silver-img">
+            </div>
+            <div class="podium-block">
+              <div class="podium-num">2</div>
+              <div class="podium-plaque" id="podium-silver-plaque">
+                <div class="podium-player-name" id="podium-silver-name">Loading...</div>
+                <div class="podium-combo-stat" id="podium-silver-stat">-</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1st Place: Gold -->
+          <div class="podium-column tier-1" id="podium-gold">
+            <div class="podium-fighter-container">
+              <img src="" alt="" class="podium-fighter-img" id="podium-gold-img">
+            </div>
+            <div class="podium-block">
+              <div class="podium-num">1</div>
+              <div class="podium-plaque" id="podium-gold-plaque">
+                <div class="podium-player-name" id="podium-gold-name">Loading...</div>
+                <div class="podium-combo-stat" id="podium-gold-stat">-</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3rd Place: Bronze -->
+          <div class="podium-column tier-3" id="podium-bronze">
+            <div class="podium-fighter-container">
+              <img src="" alt="" class="podium-fighter-img" id="podium-bronze-img">
+            </div>
+            <div class="podium-block">
+              <div class="podium-num">3</div>
+              <div class="podium-plaque" id="podium-bronze-plaque">
+                <div class="podium-player-name" id="podium-bronze-name">Loading...</div>
+                <div class="podium-combo-stat" id="podium-bronze-stat">-</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+
+    <!-- ========================================== -->
+    <!-- VIEW: PLAYER PROFILE -->
+    <!-- ========================================== -->
+    <main class="view-container" id="player-profile-view">
+      <div class="profile-view-layout">
+        
+        <!-- Sidebar profile box -->
+        <div class="profile-sidebar">
+          <div class="panel-beveled neon-magenta fighter-card-box">
+            <img src="" alt="" class="fighter-card-img" id="player-profile-fighter-img">
+            <h2 class="profile-title-name" id="player-profile-name">Bob</h2>
+            <div class="profile-tagline" id="player-profile-tagline">Combo King</div>
+          </div>
+          <button class="btn-arcade cyan btn-back-home" style="width: 100%;">&lt; SELECT SELECT</button>
+        </div>
+
+        <!-- Main stats panels -->
+        <div class="profile-content-area">
+          
+          <!-- Numerical stats grid -->
+          <div class="stats-grid-container">
+            <div class="stat-cell-retro">
+              <div class="stat-title" id="player-stat-wins-title">Adj Wins</div>
+              <div class="stat-num text-glow-yellow" id="player-stat-wins">-</div>
+              <div class="stat-sub-label" id="player-stat-wins-raw" style="font-size: 13px; opacity: 0.6; font-family: var(--font-stats); margin-top: 4px;">-</div>
+            </div>
+            <div class="stat-cell-retro">
+              <div class="stat-title">Losses</div>
+              <div class="stat-num text-glow-magenta" id="player-stat-losses">-</div>
+            </div>
+            <div class="stat-cell-retro">
+              <div class="stat-title">Win Rate</div>
+              <div class="stat-num text-glow-yellow" id="player-stat-winrate">-%</div>
+            </div>
+            <div class="stat-cell-retro">
+              <div class="stat-title">K/D Ratio</div>
+              <div class="stat-num text-glow-magenta" id="player-stat-kd">-</div>
+            </div>
+          </div>
+
+          <!-- Meta stats grid -->
+          <div class="profile-meta-row">
+            <div class="stat-cell-retro meta-card" id="player-sig-card" style="cursor: pointer;">
+              <div class="stat-title">Signature Fighter</div>
+              <div class="meta-content-wrapper">
+                <img src="" alt="" class="meta-avatar" id="player-sig-img">
+                <div class="meta-details">
+                  <div class="meta-name text-glow-yellow" id="player-sig-name">-</div>
+                  <div class="meta-sub" id="player-sig-count">- matches</div>
+                </div>
+              </div>
+            </div>
+            <div class="stat-cell-retro meta-card" id="player-nemesis-card" style="cursor: pointer;">
+              <div class="stat-title">Arch Nemesis</div>
+              <div class="meta-content-wrapper">
+                <div class="meta-details no-img">
+                  <div class="meta-name text-glow-magenta" id="player-nemesis-name">-</div>
+                  <div class="meta-sub" id="player-nemesis-count">- encounters</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+
+    <!-- ========================================== -->
+    <!-- VIEW: FIGHTER PROFILE -->
+    <!-- ========================================== -->
+    <main class="view-container" id="fighter-profile-view">
+      <div class="fighter-view-layout">
+        
+        <!-- Sidebar layout -->
+        <div class="profile-sidebar">
+          <div class="panel-beveled neon-cyan fighter-card-box">
+            <img src="" alt="" class="fighter-card-img" id="fighter-profile-img">
+            <h2 class="fighter-title-name text-glow-cyan" id="fighter-profile-name">Mario</h2>
+            <p class="fighter-bio-text" id="fighter-profile-bio">Loading details...</p>
+          </div>
+          <button class="btn-arcade magenta btn-back-home" style="width: 100%;">&lt; SELECT SELECT</button>
+        </div>
+
+        <!-- Main stats columns -->
+        <div class="profile-content-area">
+          
+          <!-- Numerical stats grid -->
+          <div class="stats-grid-container">
+            <div class="stat-cell-retro">
+              <div class="stat-title" id="fighter-stat-wins-title">Adj Wins</div>
+              <div class="stat-num text-glow-yellow" id="fighter-stat-wins">-</div>
+              <div class="stat-sub-label" id="fighter-stat-wins-raw" style="font-size: 13px; opacity: 0.6; font-family: var(--font-stats); margin-top: 4px;">-</div>
+            </div>
+            <div class="stat-cell-retro">
+              <div class="stat-title">Fighter Losses</div>
+              <div class="stat-num text-glow-magenta" id="fighter-stat-losses">-</div>
+            </div>
+            <div class="stat-cell-retro">
+              <div class="stat-title">Win Rate</div>
+              <div class="stat-num text-glow-yellow" id="fighter-stat-winrate">-%</div>
+            </div>
+            <div class="stat-cell-retro">
+              <div class="stat-title">K/D Ratio</div>
+              <div class="stat-num text-glow-magenta" id="fighter-stat-kd">-</div>
+            </div>
+          </div>
+
+          <!-- Meta stats grid -->
+          <div class="profile-meta-row">
+            <div class="stat-cell-retro meta-card">
+              <div class="stat-title">Nemesis Fighter</div>
+              <div class="meta-content-wrapper">
+                <img src="" alt="" class="meta-avatar" id="fighter-nemesis-img">
+                <div class="meta-details">
+                  <div class="meta-name text-glow-cyan" id="fighter-nemesis-name">-</div>
+                  <div class="meta-sub" id="fighter-nemesis-count">- matchups</div>
+                </div>
+              </div>
+            </div>
+            <div class="stat-cell-retro meta-card">
+              <div class="stat-title">Top Players</div>
+              <div class="meta-content-wrapper top-players-list" id="fighter-top-players">
+                <!-- Injected dynamically by JS -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+
+    <!-- ========================================== -->
+    <!-- VIEW: GLOBAL LEADERBOARD -->
+    <!-- ========================================== -->
+    <main class="view-container" id="leaderboard-view">
+      <div class="leaderboard-view-layout">
+        
+        <div class="leaderboard-control-row">
+          <h2 class="leaderboard-title" id="leaderboard-header-title">RANKINGS: PLAYER MODE</h2>
+          
+          <div class="mode-toggle-wrapper">
+            <span class="mode-toggle-label">TOGGLE MODE:</span>
+            <div class="toggle-switch-beveled">
+              <button class="toggle-btn active" id="toggle-btn-players">Players</button>
+              <button class="toggle-btn" id="toggle-btn-fighters">Fighters</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Leaderboard high-fidelity table -->
+        <div class="leaderboard-table-container">
+          <table class="leaderboard-table" id="leaderboard-grid">
+            <thead>
+              <tr id="leaderboard-table-headers">
+                <!-- Headers dynamically populated by JS depending on mode -->
+              </tr>
+            </thead>
+            <tbody id="leaderboard-rows">
+              <!-- Rows injected by JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="back-button-footer">
+          <button class="btn-arcade cyan btn-back-home">&lt; HOME MARQUEE</button>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- ========================================== -->
+  <!-- TRANSITION OVERLAY: THE "VS SCREEN" -->
+  <!-- ========================================== -->
+  <div id="vs-overlay">
+    <div class="vs-stripe-curtain-top"></div>
+    <div class="vs-stripe-curtain-bottom"></div>
+  </div>
+
+  <!-- Load mock database scripts -->
+  <script src="mockData.js"></script>
+  <script src="apiService.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
