@@ -1,39 +1,147 @@
 // Retro Super Smash Brothers Asynchronous API Service
 // Fully mimics network latency to model real-world API queries.
+// Re-architected to pull data dynamically from window.Database (localStorage).
 
 const apiDelay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+let rosterData = [];
+
+async function initRoster() {
+  if (rosterData.length > 0) return;
+  try {
+    const res = await fetch('assets/roster_slots.json');
+    rosterData = await res.json();
+  } catch (e) {
+    console.error("Failed to load roster slots in apiService:", e);
+  }
+}
+
+// Dynamically compile player profiles from Database and mockData
+function getPlayersList() {
+  const basePlayers = [
+    { id: "1", name: "Bob", tagline: "The Combo King" },
+    { id: "2", name: "Alice", tagline: "The Technical Prodigy" },
+    { id: "3", name: "Charlie", tagline: "The Unpredictable Tactician" },
+    { id: "4", name: "David", tagline: "The Wall of Defense" },
+    { id: "5", name: "Eva", tagline: "The Aggressive Rusher" }
+  ];
+
+  if (!window.Database) return basePlayers;
+
+  const matches = window.Database.getMatches();
+  const seenNames = new Set(basePlayers.map(p => p.name.toLowerCase()));
+
+  matches.forEach(m => {
+    if (m.players) {
+      m.players.forEach(p => {
+        const name = p.playerName;
+        if (name && !seenNames.has(name.toLowerCase())) {
+          seenNames.add(name.toLowerCase());
+          basePlayers.push({
+            id: name.toLowerCase().replace(/\s+/g, '-'),
+            name: name,
+            tagline: "The Rising Challenger"
+          });
+        }
+      });
+    }
+  });
+
+  return basePlayers;
+}
+
+// Dynamically resolve details for any fighter in Smash Ultimate
+function getFighterDetails(fighterNameOrId) {
+  if (!fighterNameOrId) {
+    return { id: "unknown", name: "Unknown", img: "assets/mario.png?v=5", bio: "A mysterious newcomer." };
+  }
+
+  const baseFighters = [
+    { id: "mario", name: "Mario", img: "assets/mario.png?v=5", bio: "The versatile jumpman. An all-around fighting champion." },
+    { id: "link", name: "Link", img: "assets/link.png?v=5", bio: "The hero of Hyrule. Lethal with master sword and bombs." },
+    { id: "samus", name: "Samus", img: "assets/samus.png?v=5", bio: "Intergalactic bounty hunter armed with a devastating arm cannon." },
+    { id: "fox", name: "Fox", img: "assets/fox.png?v=5", bio: "Leader of Star Fox. Blazing fast speed and laser reflector." },
+    { id: "pikachu", name: "Pikachu", img: "assets/pikachu.png?v=5", bio: "The electric mouse. Shocks opponents with lightning speed." },
+    { id: "donkey_kong", name: "Donkey Kong", img: "assets/donkey_kong.png?v=5", bio: "The powerhouse of Kong Island. Devastating giant punches." }
+  ];
+
+  // Try exact match on ID or name
+  const foundBase = baseFighters.find(f => 
+    f.id.toLowerCase() === fighterNameOrId.toLowerCase() || 
+    f.name.toLowerCase() === fighterNameOrId.toLowerCase()
+  );
+  if (foundBase) return foundBase;
+
+  // Search roster_slots data
+  if (Array.isArray(rosterData)) {
+    const foundRoster = rosterData.find(r => 
+      r.name.toLowerCase() === fighterNameOrId.toLowerCase() || 
+      r.slug.toLowerCase() === fighterNameOrId.toLowerCase() ||
+      (r.variants && r.variants.some(v => v.name.toLowerCase() === fighterNameOrId.toLowerCase()))
+    );
+
+    if (foundRoster) {
+      const imgUrl = foundRoster.alts && foundRoster.alts[0] ? foundRoster.alts[0].image : "assets/mario.png?v=5";
+      const bioText = foundRoster.variants && foundRoster.variants[0] && foundRoster.variants[0].boxing_ring_title
+        ? foundRoster.variants[0].boxing_ring_title
+        : "A legendary champion of the Smash arena.";
+      return {
+        id: foundRoster.slug,
+        name: foundRoster.name,
+        img: imgUrl,
+        bio: bioText
+      };
+    }
+  }
+
+  // Fallback slug generation
+  return {
+    id: fighterNameOrId.toLowerCase().trim().replace(/\s+/g, '-'),
+    name: fighterNameOrId,
+    img: "assets/mario.png?v=5",
+    bio: "A mysterious challenger from another dimension."
+  };
+}
 
 const apiService = {
   // 1. Get Top 3 Player-Fighter Combinations for the Olympic Podium
   async getPodium() {
+    await initRoster();
     await apiDelay(250);
-    const { MATCHES, PLAYERS, FIGHTERS } = window.SMASH_MOCK_DATA;
 
-    // Aggregate wins and total games per Player-Fighter combo
+    if (!window.Database) return [];
+
+    const matches = window.Database.getMatches();
+    const playersList = getPlayersList();
     const comboStats = {};
-    MATCHES.forEach(match => {
-      const winKey = `${match.winnerId}-${match.winnerFighter}`;
-      if (!comboStats[winKey]) {
-        comboStats[winKey] = {
-          playerId: match.winnerId,
-          fighterId: match.winnerFighter,
-          wins: 0,
-          total: 0
-        };
-      }
-      comboStats[winKey].wins += 1;
-      comboStats[winKey].total += 1;
 
-      const loseKey = `${match.loserId}-${match.loserFighter}`;
-      if (!comboStats[loseKey]) {
-        comboStats[loseKey] = {
-          playerId: match.loserId,
-          fighterId: match.loserFighter,
-          wins: 0,
-          total: 0
-        };
-      }
-      comboStats[loseKey].total += 1;
+    matches.forEach(match => {
+      if (!match.players) return;
+      match.players.forEach(p => {
+        const playerName = p.playerName;
+        const playerObj = playersList.find(pl => pl.name.toLowerCase() === playerName.toLowerCase());
+        const playerId = playerObj ? playerObj.id : playerName.toLowerCase().replace(/\s+/g, '-');
+        
+        const fighterObj = getFighterDetails(p.character);
+        const fighterId = fighterObj.id;
+
+        const comboKey = `${playerId}-${fighterId}`;
+        if (!comboStats[comboKey]) {
+          comboStats[comboKey] = {
+            playerId: playerId,
+            fighterId: fighterId,
+            playerName: playerName,
+            fighterName: p.character,
+            wins: 0,
+            total: 0
+          };
+        }
+        
+        comboStats[comboKey].total += 1;
+        if (p.placement === 1) {
+          comboStats[comboKey].wins += 1;
+        }
+      });
     });
 
     // Compute Adjusted Wins score for each combo using the formula: wins^2.5 / total^1.5
@@ -54,8 +162,12 @@ const apiService = {
 
     // Populate combo details with full player and fighter models
     return sortedCombos.map((combo, index) => {
-      const player = PLAYERS.find(p => p.id === combo.playerId);
-      const fighter = FIGHTERS.find(f => f.id === combo.fighterId);
+      const player = playersList.find(p => p.id === combo.playerId) || { 
+        id: combo.playerId, 
+        name: combo.playerName, 
+        tagline: "The Challenger" 
+      };
+      const fighter = getFighterDetails(combo.fighterId);
       return {
         rank: index + 1,
         wins: combo.wins,
@@ -70,14 +182,15 @@ const apiService = {
   // 2. Search Autocomplete
   async search(query) {
     if (!query || query.trim() === "") return [];
+    await initRoster();
     await apiDelay(100);
-    const { PLAYERS, FIGHTERS } = window.SMASH_MOCK_DATA;
     const lowerQuery = query.toLowerCase();
 
     const results = [];
 
     // Search players
-    PLAYERS.forEach(player => {
+    const playersList = getPlayersList();
+    playersList.forEach(player => {
       if (player.name.toLowerCase().includes(lowerQuery)) {
         results.push({
           id: player.id,
@@ -90,29 +203,64 @@ const apiService = {
     });
 
     // Search fighters
-    FIGHTERS.forEach(fighter => {
-      if (fighter.name.toLowerCase().includes(lowerQuery)) {
+    const seenFighterSlugs = new Set();
+    const baseFighters = [
+      { id: "mario", name: "Mario" },
+      { id: "link", name: "Link" },
+      { id: "samus", name: "Samus" },
+      { id: "fox", name: "Fox" },
+      { id: "pikachu", name: "Pikachu" },
+      { id: "donkey_kong", name: "Donkey Kong" }
+    ];
+
+    baseFighters.forEach(f => {
+      if (f.name.toLowerCase().includes(lowerQuery)) {
+        const details = getFighterDetails(f.id);
+        seenFighterSlugs.add(details.id);
         results.push({
-          id: fighter.id,
-          name: fighter.name,
+          id: details.id,
+          name: details.name,
           type: "fighter",
-          label: `${fighter.name} (fighter)`,
-          img: fighter.img
+          label: `${details.name} (fighter)`,
+          img: details.img
         });
       }
     });
+
+    if (Array.isArray(rosterData)) {
+      rosterData.forEach(r => {
+        if (r.name.toLowerCase().includes(lowerQuery) && !seenFighterSlugs.has(r.slug)) {
+          const details = getFighterDetails(r.slug);
+          seenFighterSlugs.add(details.id);
+          results.push({
+            id: details.id,
+            name: details.name,
+            type: "fighter",
+            label: `${details.name} (fighter)`,
+            img: details.img
+          });
+        }
+      });
+    }
 
     return results;
   },
 
   // 3. Get Player Profile Stats
   async getPlayerProfile(playerId) {
+    await initRoster();
     await apiDelay(250);
-    const { MATCHES, PLAYERS, FIGHTERS } = window.SMASH_MOCK_DATA;
-    const player = PLAYERS.find(p => p.id === playerId);
+
+    if (!window.Database) return null;
+
+    const playersList = getPlayersList();
+    const player = playersList.find(p => p.id === playerId || p.name.toLowerCase() === playerId.toLowerCase());
     if (!player) return null;
 
-    const playerMatches = MATCHES.filter(m => m.winnerId === playerId || m.loserId === playerId);
+    const matches = window.Database.getMatches();
+    const playerMatches = matches.filter(m => 
+      m.players && m.players.some(p => p.playerName.toLowerCase() === player.name.toLowerCase())
+    );
     const totalMatches = playerMatches.length;
 
     let wins = 0;
@@ -125,27 +273,29 @@ const apiService = {
     const fighterCounts = {};
 
     playerMatches.forEach(match => {
-      const isWinner = match.winnerId === playerId;
-      
-      if (isWinner) {
-        wins++;
-        falls += match.winnerFalls;
-        KOs += match.winnerKOs;
-        damageDealtSum += match.winnerDamageDealt;
-        damageTakenSum += match.winnerDamageTaken;
+      const pRec = match.players.find(p => p.playerName.toLowerCase() === player.name.toLowerCase());
+      if (!pRec) return;
 
-        // Record opponent player and fighter played
-        opponentCounts[match.loserId] = (opponentCounts[match.loserId] || 0) + 1;
-        fighterCounts[match.winnerFighter] = (fighterCounts[match.winnerFighter] || 0) + 1;
-      } else {
-        falls += match.loserFalls;
-        KOs += match.loserKOs;
-        damageDealtSum += match.loserDamageDealt;
-        damageTakenSum += match.loserDamageTaken;
+      const isWin = pRec.placement === 1;
+      if (isWin) wins++;
 
-        opponentCounts[match.winnerId] = (opponentCounts[match.winnerId] || 0) + 1;
-        fighterCounts[match.loserFighter] = (fighterCounts[match.loserFighter] || 0) + 1;
-      }
+      falls += Math.abs(pRec.falls || 0);
+      KOs += (pRec.kos || 0);
+      damageDealtSum += (pRec.damageDealt || 0);
+      damageTakenSum += (pRec.damageTaken || 0);
+
+      // Record opponent player and fighter played
+      match.players.forEach(otherP => {
+        if (otherP.playerName.toLowerCase() !== player.name.toLowerCase()) {
+          const oppName = otherP.playerName;
+          const oppObj = playersList.find(pl => pl.name.toLowerCase() === oppName.toLowerCase());
+          const oppId = oppObj ? oppObj.id : oppName.toLowerCase().replace(/\s+/g, '-');
+          opponentCounts[oppId] = (opponentCounts[oppId] || 0) + 1;
+        }
+      });
+
+      const fighterDetails = getFighterDetails(pRec.character);
+      fighterCounts[fighterDetails.id] = (fighterCounts[fighterDetails.id] || 0) + 1;
     });
 
     // Find rival (most played against player, which is our Arch Nemesis)
@@ -157,18 +307,18 @@ const apiService = {
         rivalId = oppId;
       }
     });
-    const rival = PLAYERS.find(p => p.id === rivalId);
+    const rival = playersList.find(p => p.id === rivalId) || (rivalId ? { id: rivalId, name: rivalId.charAt(0).toUpperCase() + rivalId.slice(1) } : null);
 
     // Find most used fighter (our Signature Fighter)
     let mostUsedFighterId = null;
     let fighterCount = 0;
-    Object.entries(fighterCounts).forEach(([fighterId, count]) => {
+    Object.entries(fighterCounts).forEach(([fid, count]) => {
       if (count > fighterCount) {
         fighterCount = count;
-        mostUsedFighterId = fighterId;
+        mostUsedFighterId = fid;
       }
     });
-    const mostUsedFighter = FIGHTERS.find(f => f.id === mostUsedFighterId);
+    const mostUsedFighter = mostUsedFighterId ? getFighterDetails(mostUsedFighterId) : null;
 
     const adjustedWins = totalMatches > 0
       ? Math.pow(wins, 2.5) / Math.pow(totalMatches, 1.5)
@@ -193,13 +343,30 @@ const apiService = {
 
   // 4. Get Fighter Profile Stats
   async getFighterProfile(fighterId) {
+    await initRoster();
     await apiDelay(250);
-    const { MATCHES, PLAYERS, FIGHTERS } = window.SMASH_MOCK_DATA;
-    const fighter = FIGHTERS.find(f => f.id === fighterId);
+
+    if (!window.Database) return null;
+
+    const fighter = getFighterDetails(fighterId);
     if (!fighter) return null;
 
-    const fighterMatches = MATCHES.filter(m => m.winnerFighter === fighterId || m.loserFighter === fighterId);
-    const totalMatches = fighterMatches.length;
+    const matches = window.Database.getMatches();
+    const playersList = getPlayersList();
+    
+    // Find all player records in any match that played this fighter
+    const fighterRecords = [];
+    matches.forEach(match => {
+      if (!match.players) return;
+      match.players.forEach(p => {
+        const fDetails = getFighterDetails(p.character);
+        if (fDetails.id === fighter.id) {
+          fighterRecords.push({ match, playerRec: p });
+        }
+      });
+    });
+
+    const totalMatches = fighterRecords.length;
 
     let wins = 0;
     let falls = 0;
@@ -210,44 +377,49 @@ const apiService = {
     const matchupCounts = {};
     const playerUsage = {};
 
-    fighterMatches.forEach(match => {
-      const isWinnerFighter = match.winnerFighter === fighterId;
+    fighterRecords.forEach(({ match, playerRec }) => {
+      const isWin = playerRec.placement === 1;
+      if (isWin) wins++;
 
-      if (isWinnerFighter) {
-        wins++;
-        falls += match.winnerFalls;
-        KOs += match.winnerKOs;
-        damageDealtSum += match.winnerDamageDealt;
-        damageTakenSum += match.winnerDamageTaken;
+      falls += Math.abs(playerRec.falls || 0);
+      KOs += (playerRec.kos || 0);
+      damageDealtSum += (playerRec.damageDealt || 0);
+      damageTakenSum += (playerRec.damageTaken || 0);
 
-        matchupCounts[match.loserFighter] = (matchupCounts[match.loserFighter] || 0) + 1;
-        playerUsage[match.winnerId] = (playerUsage[match.winnerId] || 0) + 1;
-      } else {
-        falls += match.loserFalls;
-        KOs += match.loserKOs;
-        damageDealtSum += match.loserDamageDealt;
-        damageTakenSum += match.loserDamageTaken;
+      // Record matchup frequencies against other fighters in the same match
+      match.players.forEach(otherP => {
+        const otherF = getFighterDetails(otherP.character);
+        if (otherF.id !== fighter.id) {
+          matchupCounts[otherF.id] = (matchupCounts[otherF.id] || 0) + 1;
+        }
+      });
 
-        matchupCounts[match.winnerFighter] = (matchupCounts[match.winnerFighter] || 0) + 1;
-        playerUsage[match.loserId] = (playerUsage[match.loserId] || 0) + 1;
-      }
+      // Record which players used this fighter
+      const pName = playerRec.playerName;
+      const pObj = playersList.find(pl => pl.name.toLowerCase() === pName.toLowerCase());
+      const pId = pObj ? pObj.id : pName.toLowerCase().replace(/\s+/g, '-');
+      playerUsage[pId] = (playerUsage[pId] || 0) + 1;
     });
 
-    // Find nemesis (most vs'd fighter)
+    // Find nemesis (most vs'd other fighter)
     let nemesisFighterId = null;
     let nemesisCount = 0;
-    Object.entries(matchupCounts).forEach(([oppFighterId, count]) => {
+    Object.entries(matchupCounts).forEach(([fid, count]) => {
       if (count > nemesisCount) {
         nemesisCount = count;
-        nemesisFighterId = oppFighterId;
+        nemesisFighterId = fid;
       }
     });
-    const nemesisFighter = FIGHTERS.find(f => f.id === nemesisFighterId);
+    const nemesisFighter = nemesisFighterId ? getFighterDetails(nemesisFighterId) : null;
 
     // Find top 3 players who use this fighter most
     const topPlayers = Object.entries(playerUsage)
-      .map(([playerId, count]) => {
-        const player = PLAYERS.find(p => p.id === playerId);
+      .map(([pId, count]) => {
+        const player = playersList.find(p => p.id === pId) || { 
+          id: pId, 
+          name: pId.charAt(0).toUpperCase() + pId.slice(1), 
+          tagline: "The Challenger" 
+        };
         return { player, count };
       })
       .sort((a, b) => b.count - a.count)
@@ -276,15 +448,17 @@ const apiService = {
 
   // 5. Get Combined Global Leaderboard Stats
   async getLeaderboard(sortBy = "wins", isFighterMode = false) {
+    await initRoster();
     await apiDelay(250);
-    const { PLAYERS, FIGHTERS } = window.SMASH_MOCK_DATA;
 
     let records = [];
 
     if (!isFighterMode) {
       // Gather Player Stats
-      for (const player of PLAYERS) {
+      const playersList = getPlayersList();
+      for (const player of playersList) {
         const stats = await this.getPlayerProfile(player.id);
+        if (!stats) continue;
         const totalGames = stats.totalMatches;
         const adjustedWins = totalGames > 0
           ? Math.pow(stats.wins, 2.5) / Math.pow(totalGames, 1.5)
@@ -308,19 +482,35 @@ const apiService = {
       }
     } else {
       // Gather Fighter Stats
-      for (const fighter of FIGHTERS) {
-        const stats = await this.getFighterProfile(fighter.id);
+      // Dynamically compile slugs of fighters that exist in match history + base fighters
+      const baseSlugs = ["mario", "link", "samus", "fox", "pikachu", "donkey_kong"];
+      const playedSlugs = new Set(baseSlugs);
+      
+      if (window.Database) {
+        const matches = window.Database.getMatches();
+        matches.forEach(m => {
+          if (m.players) {
+            m.players.forEach(p => {
+              const f = getFighterDetails(p.character);
+              playedSlugs.add(f.id);
+            });
+          }
+        });
+      }
+
+      for (const fId of playedSlugs) {
+        const stats = await this.getFighterProfile(fId);
+        if (!stats) continue;
         const totalGames = stats.totalMatches;
         const adjustedWins = totalGames > 0
           ? Math.pow(stats.wins, 2.5) / Math.pow(totalGames, 1.5)
           : 0;
         
-        // Find player with most wins on this fighter
         const topPlayerRecord = stats.topPlayers[0];
 
         records.push({
-          id: fighter.id,
-          name: fighter.name,
+          id: stats.fighter.id,
+          name: stats.fighter.name,
           type: "fighter",
           wins: stats.wins,
           totalGames,
@@ -336,7 +526,7 @@ const apiService = {
       }
     }
 
-    // Determine actual sorting field (wins -> adjustedWins)
+    // Determine actual sorting field
     const sortField = sortBy === "wins" ? "adjustedWins" : sortBy;
 
     // Sort records dynamically
@@ -344,7 +534,6 @@ const apiService = {
       let valA = a[sortField];
       let valB = b[sortField];
 
-      // Handle fallback string sorting if any
       if (typeof valA === "string") {
         return valB.localeCompare(valA);
       }
@@ -356,6 +545,26 @@ const apiService = {
       rank: index + 1,
       ...record
     }));
+  },
+
+  // Get all fighter names for dropdown lists
+  async getAllFighters() {
+    await initRoster();
+    const baseFighters = ["Mario", "Link", "Samus", "Fox", "Pikachu", "Donkey Kong"];
+    const rosterNames = Array.isArray(rosterData) ? rosterData.map(r => r.name) : [];
+    return Array.from(new Set([...baseFighters, ...rosterNames])).sort();
+  },
+
+  // Get all stage names for dropdown lists
+  async getAllStages() {
+    try {
+      const res = await fetch('assets/stages.json');
+      const stages = await res.json();
+      return stages.map(s => s.name).sort();
+    } catch (e) {
+      console.error("Failed to load stages in apiService:", e);
+      return ["Battlefield", "Small Battlefield", "Final Destination", "Yoshi's Story", "Town and City", "Smashville", "Lylat Cruise", "Kalos Pokémon League", "Pokémon Stadium 2"].sort();
+    }
   }
 };
 
