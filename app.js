@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentSortBy = "wins";
   let activeSearchHighlightIndex = -1;
   let searchResults = [];
+  let lastScannedMatch = null;
 
   // --- DOM Elements ---
   const views = {
@@ -28,17 +29,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const vsOverlay = document.getElementById("vs-overlay");
 
   // ==========================================
-  // 2. VS Screen Loading Transition Controller (Simplified Curtains Only)
+  // 2. VS Screen Loading Transition Controller (Sleek Curtains)
   // ==========================================
   async function runVsTransition() {
     vsOverlay.classList.add("active");
-    // Wait for curtains to close (e.g. 250ms)
-    await new Promise(resolve => setTimeout(resolve, 250));
+    // Wait for curtains to close (150ms)
+    await new Promise(resolve => setTimeout(resolve, 150));
   }
 
   async function endVsTransition() {
-    // Wait a brief moment before sliding curtains out
-    await new Promise(resolve => setTimeout(resolve, 50));
+    // Wait a brief moment before sliding curtains out (30ms)
+    await new Promise(resolve => setTimeout(resolve, 30));
     vsOverlay.classList.remove("active");
   }
 
@@ -291,7 +292,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const headers = [
       { key: "rank", label: "Rank" },
       { key: "name", label: isFighterMode ? "Fighter" : "Player" },
-      { key: "wins", label: "Adj Wins" },
+      { key: "wins", label: "Rating" },
       { key: "KOs", label: "KOs" },
       { key: "winRate", label: "Win %" },
       { key: "kd", label: "K/D" },
@@ -462,89 +463,34 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function showConfirmEditor(data) {
-    const confirmStage = document.getElementById("confirm-stage");
-    const confirmMode = document.getElementById("confirm-mode");
-    const confirmRules = document.getElementById("confirm-rules");
-    const confirmStyle = document.getElementById("confirm-style");
+    lastScannedMatch = data;
+
+    document.getElementById("confirm-mode-val").textContent = data.gameMode || "N/A";
+    document.getElementById("confirm-rules-val").textContent = data.rules || "N/A";
+    document.getElementById("confirm-style-val").textContent = data.gameStyle || "N/A";
+
     const tableBody = document.getElementById("confirm-players-list");
-
-    // Populate stage options
-    confirmStage.innerHTML = "";
-    const stages = await api.getAllStages();
-    stages.forEach(s => {
-      const opt = document.createElement("option");
-      opt.value = s;
-      opt.textContent = s;
-      confirmStage.appendChild(opt);
-    });
-
-    confirmStage.value = data.stage || stages[0] || "Small Battlefield";
-    confirmMode.value = data.gameMode || "4-Player";
-    confirmRules.value = data.rules || "3 Stock, 5:00";
-    confirmStyle.value = data.gameStyle || "Free-for-All";
-
     tableBody.innerHTML = "";
-    const fighters = await api.getAllFighters();
+
     if (data.players && data.players.length > 0) {
-      for (const p of data.players) {
-        const row = await renderConfirmRow(p, fighters);
-        tableBody.appendChild(row);
-      }
+      data.players.forEach(p => {
+        const tr = document.createElement("tr");
+        tr.className = "confirm-player-row-static";
+        tr.innerHTML = `
+          <td><span class="rank-badge rank-${p.placement}">${p.placement}</span></td>
+          <td class="player-cell">${p.playerName || 'N/A'}</td>
+          <td class="character-cell">${p.character || 'N/A'}</td>
+          <td class="ko-cell">${p.kos !== undefined ? p.kos : 0}</td>
+          <td class="fall-cell">${p.falls !== undefined ? Math.abs(p.falls) : 0}</td>
+          <td class="sd-cell">${p.sds !== undefined ? Math.abs(p.sds) : 0}</td>
+          <td class="time-cell">${p.outAt || (p.placement === 1 ? '---' : '5:00')}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
     }
 
     document.getElementById("scanner-confirm-panel").style.display = "block";
     document.getElementById("scanner-confirm-panel").scrollIntoView({ behavior: "smooth" });
-  }
-
-  async function renderConfirmRow(p, fighters) {
-    const tr = document.createElement("tr");
-    tr.className = "confirm-player-row";
-    tr.innerHTML = `
-      <td>
-        <input type="number" class="retro-input table-cell-input confirm-p-placement" value="${p.placement}" min="1" max="8" style="width: 50px;" required>
-      </td>
-      <td>
-        <input type="text" class="retro-input table-cell-input confirm-p-name" value="${p.playerName || ''}" placeholder="Name" style="width: 90px;" required>
-      </td>
-      <td>
-        <select class="retro-select table-cell-input confirm-p-character" style="width: 130px;" required>
-          ${fighters.map(f => `<option value="${f}" ${f.toLowerCase() === (p.character || "").toLowerCase() ? 'selected' : ''}>${f}</option>`).join('')}
-        </select>
-      </td>
-      <td>
-        <input type="number" class="retro-input table-cell-input confirm-p-kos" value="${p.kos !== undefined ? p.kos : 0}" min="0" style="width: 50px;" required>
-      </td>
-      <td>
-        <input type="number" class="retro-input table-cell-input confirm-p-falls" value="${p.falls !== undefined ? Math.abs(p.falls) : 0}" min="0" style="width: 50px;" required>
-      </td>
-      <td>
-        <input type="number" class="retro-input table-cell-input confirm-p-sds" value="${p.sds !== undefined ? Math.abs(p.sds) : 0}" min="0" style="width: 50px;" required>
-      </td>
-      <td>
-        <input type="text" class="retro-input table-cell-input confirm-p-outat" value="${p.outAt || (p.placement === 1 ? '---' : '5:00')}" placeholder="Min:Sec" style="width: 70px;" required>
-      </td>
-      <td>
-        <button type="button" class="btn-arcade magenta btn-remove-row" style="padding: 2px 8px; font-size: 11px;">X</button>
-      </td>
-    `;
-
-    tr.querySelector(".btn-remove-row").onclick = () => {
-      tr.remove();
-      updateConfirmMode();
-    };
-
-    return tr;
-  }
-
-  function updateConfirmMode() {
-    const tableBody = document.getElementById("confirm-players-list");
-    const count = tableBody.children.length;
-    const modeSelect = document.getElementById("confirm-mode");
-    if (count === 2) {
-      modeSelect.value = "1v1";
-    } else if (count >= 3 && count <= 8) {
-      modeSelect.value = `${count}-Player`;
-    }
   }
 
 
@@ -553,20 +499,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // ==========================================
   async function renderHistory() {
     // Populate dropdown lists if empty
-    const filterStage = document.getElementById("filter-stage");
     const filterChar = document.getElementById("filter-character");
     const filterPlayer = document.getElementById("filter-player");
-
-    // Only populate if they only have the default 'All' option
-    if (filterStage.children.length <= 1) {
-      const stages = await api.getAllStages();
-      stages.forEach(s => {
-        const opt = document.createElement("option");
-        opt.value = s;
-        opt.textContent = s;
-        filterStage.appendChild(opt);
-      });
-    }
 
     if (filterChar.children.length <= 1) {
       const fighters = await api.getAllFighters();
@@ -594,16 +528,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function renderHistoryList() {
-    const stage = document.getElementById("filter-stage").value;
     const mode = document.getElementById("filter-mode").value;
     const player = document.getElementById("filter-player").value;
     const character = document.getElementById("filter-character").value;
 
     let matches = window.Database.getMatches();
 
-    if (stage && stage !== "All") {
-      matches = matches.filter(m => m.stage === stage);
-    }
     if (mode && mode !== "All") {
       matches = matches.filter(m => m.gameMode === mode);
     }
@@ -629,7 +559,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       card.innerHTML = `
         <div class="match-card-header">
-          <div class="match-card-title">${m.gameMode.toUpperCase()} - ${m.stage.toUpperCase()}</div>
+          <div class="match-card-title">
+            <span class="match-card-mode-text">${m.gameMode.toUpperCase()}</span>
+            <span class="match-style-badge ${m.gameStyle && m.gameStyle.toLowerCase() === 'teams' ? 'badge-teams' : 'badge-ffa'}">
+              ${m.gameStyle && m.gameStyle.toLowerCase() === 'teams' ? 'TEAMS' : 'FREE-FOR-ALL'}
+            </span>
+          </div>
           <div class="match-card-meta">${new Date(m.timestamp).toLocaleDateString()} ${new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
         </div>
         <div class="match-card-players-grid">
@@ -641,8 +576,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="history-p-char" style="cursor: pointer;" onclick="window.location.hash = '#fighter/${p.character.toLowerCase().replace(/\s+/g, '-')}'">${p.character}</div>
               </div>
               <div class="history-p-stats-badges">
-                <span class="player-stat-badge ko">K: ${p.kos || 0}</span>
-                <span class="player-stat-badge fall">F: ${Math.abs(p.falls || 0)}</span>
+                <span class="player-stat-badge ko">Kills: ${p.kos !== undefined ? p.kos : 0}</span>
+                <span class="player-stat-badge fall">Falls: ${p.falls !== undefined ? Math.abs(p.falls) : 0}</span>
+                <span class="player-stat-badge sd">SDs: ${p.sds !== undefined ? Math.abs(p.sds) : 0}</span>
+                <span class="player-stat-badge out">Out: ${p.outAt || (p.placement === 1 ? '---' : '5:00')}</span>
               </div>
             </div>
           `).join('')}
@@ -666,7 +603,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("tel-kpi-matches").textContent = stats.totalMatches;
     document.getElementById("tel-kpi-player").textContent = stats.topPlayer;
     document.getElementById("tel-kpi-character").textContent = stats.dominantCharacter;
-    document.getElementById("tel-kpi-stage").textContent = stats.mostActiveStage;
 
     // Trigger SVG Renderings
     if (window.Charts) {
@@ -903,81 +839,32 @@ document.addEventListener("DOMContentLoaded", () => {
     btnCancelScan.onclick = () => {
       if (confirm("DISCARD THIS CAPTURE SESSION?")) {
         document.getElementById("scanner-confirm-panel").style.display = "none";
+        lastScannedMatch = null;
       }
     };
   }
 
-  const btnAddConfirmPlayer = document.getElementById("btn-add-confirm-player");
-  if (btnAddConfirmPlayer) {
-    btnAddConfirmPlayer.onclick = async () => {
-      const tableBody = document.getElementById("confirm-players-list");
-      const fighters = await api.getAllFighters();
-      const nextPlacement = tableBody.children.length + 1;
-      const newRow = await renderConfirmRow({
-        placement: nextPlacement,
-        playerName: `Player ${nextPlacement}`,
-        character: fighters[0] || "Mario",
-        kos: 0,
-        falls: 3,
-        sds: 0,
-        outAt: "5:00"
-      }, fighters);
-      tableBody.appendChild(newRow);
-      updateConfirmMode();
-    };
-  }
-
-  const scannerConfirmForm = document.getElementById("scanner-confirm-form");
-  if (scannerConfirmForm) {
-    scannerConfirmForm.onsubmit = (e) => {
-      e.preventDefault();
-
-      const stage = document.getElementById("confirm-stage").value;
-      const gameMode = document.getElementById("confirm-mode").value;
-      const rules = document.getElementById("confirm-rules").value;
-      const gameStyle = document.getElementById("confirm-style").value;
-
-      const rows = document.querySelectorAll("#confirm-players-list tr");
-      const players = [];
-
-      rows.forEach((row, index) => {
-        const placement = parseInt(row.querySelector(".confirm-p-placement").value);
-        const playerName = row.querySelector(".confirm-p-name").value.trim();
-        const character = row.querySelector(".confirm-p-character").value;
-        const kos = parseInt(row.querySelector(".confirm-p-kos").value);
-        const falls = -Math.abs(parseInt(row.querySelector(".confirm-p-falls").value));
-        const sds = parseInt(row.querySelector(".confirm-p-sds").value);
-        const outAt = row.querySelector(".confirm-p-outat").value.trim();
-
-        players.push({
-          playerNumber: `P${index + 1}`,
-          playerName,
-          character,
-          placement,
-          kos,
-          falls,
-          sds,
-          outAt
-        });
-      });
-
-      if (players.length === 0) {
-        alert("AT LEAST ONE PLAYER SLOT MUST BE POPULATED.");
+  const btnSaveMatch = document.getElementById("btn-save-match");
+  if (btnSaveMatch) {
+    btnSaveMatch.onclick = () => {
+      if (!lastScannedMatch) {
+        alert("NO CAPTURE ENCOUNTERED.");
         return;
       }
 
-      const newMatch = {
-        timestamp: Date.now(),
-        screenType: "EndScreen",
-        stage,
-        rules,
-        gameMode,
-        gameStyle,
-        players
-      };
+      const matchToSave = JSON.parse(JSON.stringify(lastScannedMatch));
+      matchToSave.timestamp = Date.now();
+      if (matchToSave.players) {
+        matchToSave.players.forEach(p => {
+          if (p.falls !== undefined) {
+            p.falls = -Math.abs(p.falls);
+          }
+        });
+      }
 
-      window.Database.addMatch(newMatch);
+      window.Database.addMatch(matchToSave);
       document.getElementById("scanner-confirm-panel").style.display = "none";
+      lastScannedMatch = null;
       window.location.hash = "#history";
     };
   }
@@ -997,7 +884,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // History filters
-  ["filter-stage", "filter-mode", "filter-player", "filter-character"].forEach(id => {
+  ["filter-mode", "filter-player", "filter-character"].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener("change", renderHistoryList);
   });

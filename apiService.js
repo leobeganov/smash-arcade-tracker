@@ -16,38 +16,43 @@ async function initRoster() {
   }
 }
 
-// Dynamically compile player profiles from Database and mockData
 function getPlayersList() {
-  const basePlayers = [
-    { id: "1", name: "Bob", tagline: "The Combo King" },
-    { id: "2", name: "Alice", tagline: "The Technical Prodigy" },
-    { id: "3", name: "Charlie", tagline: "The Unpredictable Tactician" },
-    { id: "4", name: "David", tagline: "The Wall of Defense" },
-    { id: "5", name: "Eva", tagline: "The Aggressive Rusher" }
-  ];
-
-  if (!window.Database) return basePlayers;
+  if (!window.Database) return [];
 
   const matches = window.Database.getMatches();
-  const seenNames = new Set(basePlayers.map(p => p.name.toLowerCase()));
+  const playersMap = {};
+
+  const specialTaglines = {
+    "jack": "The Combo King",
+    "polo": "The Technical Prodigy",
+    "matt": "The Wall of Defense",
+    "sylv": "The Aggressive Rusher",
+    "bob": "The Combo King",
+    "alice": "The Technical Prodigy",
+    "charlie": "The Unpredictable Tactician",
+    "david": "The Wall of Defense",
+    "eva": "The Aggressive Rusher"
+  };
 
   matches.forEach(m => {
     if (m.players) {
       m.players.forEach(p => {
         const name = p.playerName;
-        if (name && !seenNames.has(name.toLowerCase())) {
-          seenNames.add(name.toLowerCase());
-          basePlayers.push({
-            id: name.toLowerCase().replace(/\s+/g, '-'),
-            name: name,
-            tagline: "The Rising Challenger"
-          });
+        if (name) {
+          const lower = name.toLowerCase().trim();
+          if (!playersMap[lower]) {
+            playersMap[lower] = {
+              id: lower.replace(/\s+/g, '-'),
+              name: name,
+              tagline: specialTaglines[lower] || "The Rising Challenger"
+            };
+          }
         }
       });
     }
   });
 
-  return basePlayers;
+  return Object.values(playersMap);
 }
 
 // Dynamically resolve details for any fighter in Smash Ultimate
