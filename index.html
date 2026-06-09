@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Super Smash Brothers Retro Match Results Tracker - 1994 Arcade Style Prototype">
-  <title>MATCH TRACKER</title>
+  <meta name="description" content="Smashalytics - Super Smash Brothers Ultimate AI Screenshot Results Scanner & Retro Match Tracker">
+  <title>SMASHALYTICS // ARCADE CABINET</title>
   <link rel="stylesheet" href="index.css">
 </head>
-<body>
+<body class="theme-storm">
 
   <!-- Retro Cabinet overlays -->
   <div class="crt-overlay"></div>
@@ -19,29 +19,35 @@
     <!-- Header Marquee & Navigation -->
     <header>
       <div class="logo-container" id="nav-logo-home" style="cursor: pointer; user-select: none;">
-        <div class="logo-sub text-glow-magenta" style="font-family: var(--font-arcade); font-size: 14px; letter-spacing: 2px;">[ HOME ]</div>
+        <span class="logo-main text-glow-cyan" style="font-family: var(--font-header); font-weight: 900; font-size: 24px; letter-spacing: -1px;">SMASH</span>
+        <span class="logo-sub text-glow-magenta" style="font-family: var(--font-arcade); font-size: 11px; letter-spacing: 1px; display: block; margin-top: -2px;">ALYTICS</span>
       </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="arcade-nav">
+        <a href="#home" class="nav-item active" id="nav-tab-home">[ STAGE SELECT ]</a>
+        <a href="#leaderboard" class="nav-item" id="nav-tab-leaderboard">[ LEADERBOARD ]</a>
+        <a href="#scanner" class="nav-item" id="nav-tab-scanner">[ OCR SCANNER ]</a>
+        <a href="#history" class="nav-item" id="nav-tab-history">[ BATTLE LOG ]</a>
+        <a href="#telemetry" class="nav-item" id="nav-tab-telemetry">[ TELEMETRY ]</a>
+        <a href="#settings" class="nav-item" id="nav-tab-settings">[ SPEC CONFIG ]</a>
+      </nav>
 
       <!-- Autocomplete Search Bar -->
       <div class="search-container">
         <div class="search-input-wrapper">
           <span class="search-icon-decor">&gt;</span>
-          <input type="text" class="search-input" id="search-box" placeholder="SEARCH FIGHTER OR PLAYER..." autocomplete="off">
+          <input type="text" class="search-input" id="search-box" placeholder="SEARCH OR PIN CODES..." autocomplete="off">
         </div>
         <!-- Autocomplete Suggestions List -->
         <div class="search-results-dropdown" id="search-dropdown"></div>
-      </div>
-
-      <!-- Leaderboard Action Button -->
-      <div>
-        <button class="btn-arcade magenta" id="nav-btn-leaderboard">LEADERBOARD</button>
       </div>
     </header>
 
     <!-- ========================================== -->
     <!-- VIEW: HOME / podium view -->
     <!-- ========================================== -->
-    <main class="view-container" id="home-view">
+    <main class="view-container active" id="home-view">
       <div class="home-view-layout">
 
         <!-- 3D Olympic Podium -->
@@ -106,7 +112,7 @@
             <h2 class="profile-title-name" id="player-profile-name">Bob</h2>
             <div class="profile-tagline" id="player-profile-tagline">Combo King</div>
           </div>
-          <button class="btn-arcade cyan btn-back-home" style="width: 100%;">&lt; SELECT SELECT</button>
+          <button class="btn-arcade cyan btn-back-home" style="width: 100%;">&lt; BACK SELECT</button>
         </div>
 
         <!-- Main stats panels -->
@@ -174,7 +180,7 @@
             <h2 class="fighter-title-name text-glow-cyan" id="fighter-profile-name">Mario</h2>
             <p class="fighter-bio-text" id="fighter-profile-bio">Loading details...</p>
           </div>
-          <button class="btn-arcade magenta btn-back-home" style="width: 100%;">&lt; SELECT SELECT</button>
+          <button class="btn-arcade magenta btn-back-home" style="width: 100%;">&lt; BACK SELECT</button>
         </div>
 
         <!-- Main stats columns -->
@@ -265,6 +271,293 @@
       </div>
     </main>
 
+    <!-- ========================================== -->
+    <!-- VIEW: OCR SCANNER -->
+    <!-- ========================================== -->
+    <main class="view-container" id="scanner-view">
+      <div class="scanner-view-layout">
+        <div class="panel-beveled neon-magenta diagnostic-cabinet">
+          <div class="cabinet-header">
+            <h2 class="text-glow-magenta font-arcade title-blink">SYSTEM DIAGNOSTIC: SCREEN SCANNER</h2>
+            <p class="cabinet-subtitle">DROP SCREENSHOT TO PARSE GAME TELEMETRY</p>
+          </div>
+
+          <!-- Drag and Drop area -->
+          <div class="drop-zone panel-beveled" id="scanner-drop-zone">
+            <div class="drop-zone-content">
+              <div class="scanner-icon">⛶</div>
+              <p class="font-arcade text-glow-cyan drop-text">INSERT RESULT SCREENSHOT</p>
+              <p class="drop-subtext">DRAG & DROP OR CLICK TO MOUNT DRIVE</p>
+              <input type="file" id="scanner-file-input" accept="image/*" style="display: none;">
+            </div>
+            <!-- Laser Sweep effect -->
+            <div class="laser-sweep-overlay" id="scanner-laser" style="display: none;">
+              <div class="laser-line"></div>
+            </div>
+          </div>
+
+          <!-- Gemini OCR API Configuration prompt (if key is missing) -->
+          <div class="api-warning-prompt" id="api-key-warning" style="display: none;">
+            <p class="text-glow-yellow">⚠️ ATTENTION: GEMINI API KEY MISSING. USING MOCK OCR PARSER.</p>
+            <p>PROVIDE KEY IN <a href="#settings" class="text-glow-cyan" style="text-decoration: underline;">[ SPEC CONFIG ]</a> FOR LIVE OCR SCREENSHOT SCANNING.</p>
+          </div>
+
+          <!-- Scanning/Analyzing Screen -->
+          <div class="scanning-status-panel" id="scanner-status" style="display: none;">
+            <div class="status-indicator">
+              <span class="pulse-dot"></span>
+              <span class="status-text font-arcade text-glow-yellow" id="scanner-status-text">ANALYZING WITH GEMINI...</span>
+            </div>
+            <div class="progress-bar-retro">
+              <div class="progress-bar-fill" id="scanner-progress-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Confirmation / Correction Form -->
+        <div class="panel-beveled neon-cyan confirmation-cabinet" id="scanner-confirm-panel" style="display: none;">
+          <div class="cabinet-header">
+            <h2 class="text-glow-cyan font-arcade">CONFIRM MATCH LOG</h2>
+            <p class="cabinet-subtitle">VERIFY CHRONOLOGICAL RESULTS DATA VALUES</p>
+          </div>
+
+          <form id="scanner-confirm-form" class="retro-form">
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="font-arcade">STAGE</label>
+                <select id="confirm-stage" class="retro-select" required></select>
+              </div>
+              <div class="form-group">
+                <label class="font-arcade">MODE</label>
+                <select id="confirm-mode" class="retro-select" required>
+                  <option value="1v1">1v1</option>
+                  <option value="3-Player">3-Player</option>
+                  <option value="4-Player">4-Player</option>
+                  <option value="5-Player">5-Player</option>
+                  <option value="6-Player">6-Player</option>
+                  <option value="7-Player">7-Player</option>
+                  <option value="8-Player">8-Player</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="font-arcade">RULES</label>
+                <input type="text" id="confirm-rules" class="retro-input" value="3 Stock, 5:00" required>
+              </div>
+              <div class="form-group">
+                <label class="font-arcade">STYLE</label>
+                <input type="text" id="confirm-style" class="retro-input" value="Free-for-All" required>
+              </div>
+            </div>
+
+            <h3 class="form-section-title font-arcade text-glow-yellow">PLAYER PLACEMENT SLOTS</h3>
+            <div class="confirm-players-table-container">
+              <table class="retro-form-table">
+                <thead>
+                  <tr>
+                    <th>PLACEMENT</th>
+                    <th>PLAYER NAME</th>
+                    <th>FIGHTER</th>
+                    <th>KOs</th>
+                    <th>FALLS</th>
+                    <th>SDs</th>
+                    <th>OUT AT</th>
+                  </tr>
+                </thead>
+                <tbody id="confirm-players-list">
+                  <!-- Editable Player Rows injected dynamically -->
+                </tbody>
+              </table>
+            </div>
+
+            <div class="form-actions-row">
+              <button type="button" class="btn-arcade magenta" id="btn-add-confirm-player">+ SLOT</button>
+              <div style="flex-grow: 1;"></div>
+              <button type="button" class="btn-arcade cyan" id="btn-cancel-scan">ABORT</button>
+              <button type="submit" class="btn-arcade yellow" id="btn-save-match">WRITE MATCH TO LOG</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <!-- ========================================== -->
+    <!-- VIEW: BATTLE LOG (HISTORY) -->
+    <!-- ========================================== -->
+    <main class="view-container" id="history-view">
+      <div class="history-view-layout">
+        <div class="panel-beveled neon-cyan history-control-panel">
+          <h2 class="text-glow-cyan font-arcade">BATTLE RECORDS AUDIT</h2>
+          <p class="cabinet-subtitle">HISTORICAL GAMEPLAY LOG LISTING</p>
+
+          <div class="filters-row panel-beveled">
+            <div class="filter-group">
+              <label>STAGE</label>
+              <select id="filter-stage" class="retro-select">
+                <option value="All">All Stages</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label>MODE</label>
+              <select id="filter-mode" class="retro-select">
+                <option value="All">All Modes</option>
+                <option value="1v1">1v1</option>
+                <option value="3-Player">3-Player</option>
+                <option value="4-Player">4-Player</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label>PLAYER</label>
+              <select id="filter-player" class="retro-select">
+                <option value="All">All Players</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label>FIGHTER</label>
+              <select id="filter-character" class="retro-select">
+                <option value="All">All Fighters</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Match log entries -->
+        <div class="history-list-container" id="history-matches-list">
+          <!-- Dynamic listing of match panels -->
+        </div>
+      </div>
+    </main>
+
+    <!-- ========================================== -->
+    <!-- VIEW: TELEMETRY (CHARTS) -->
+    <!-- ========================================== -->
+    <main class="view-container" id="telemetry-view">
+      <div class="telemetry-view-layout">
+        <div class="panel-beveled neon-magenta stats-dashboard-header">
+          <h2 class="text-glow-magenta font-arcade">INTERACTIVE TELEMETRY</h2>
+          <p class="cabinet-subtitle">DATA-DRIVEN PERFORMANCE GAUGES</p>
+          
+          <div class="telemetry-stats-row">
+            <div class="tel-kpi-box">
+              <div class="kpi-title">TOTAL MATCHES</div>
+              <div class="kpi-value text-glow-cyan" id="tel-kpi-matches">0</div>
+            </div>
+            <div class="tel-kpi-box">
+              <div class="kpi-title">TOP PLAYER</div>
+              <div class="kpi-value text-glow-yellow" id="tel-kpi-player">N/A</div>
+            </div>
+            <div class="tel-kpi-box">
+              <div class="kpi-title">DOMINANT FIGHTER</div>
+              <div class="kpi-value text-glow-magenta" id="tel-kpi-character">N/A</div>
+            </div>
+            <div class="tel-kpi-box">
+              <div class="kpi-title">ACTIVE ARENA</div>
+              <div class="kpi-value text-glow-cyan" id="tel-kpi-stage">N/A</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="telemetry-grid">
+          <!-- Win Rates / Gauges -->
+          <div class="panel-beveled tel-chart-box neon-cyan">
+            <h3 class="font-arcade text-glow-cyan chart-box-title">WIN RATE PERFORMANCE</h3>
+            <div class="chart-content" id="win-rate-gauges-container">
+              <!-- Injected SVGs of Glowing Win Rate Gauges -->
+            </div>
+          </div>
+
+          <!-- Fighter Popularity Donut -->
+          <div class="panel-beveled tel-chart-box neon-magenta">
+            <h3 class="font-arcade text-glow-magenta chart-box-title">FIGHTER SPECTRUM POPULARITY</h3>
+            <div class="chart-content flex-center">
+              <div id="popularity-donut-chart-container" style="width:100%; height:100%; min-height:240px; display:flex; align-items:center; justify-content:center;">
+                <!-- Donut Chart SVG -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Stage Outcomes Stacked Bar -->
+          <div class="panel-beveled tel-chart-box neon-yellow full-width-chart">
+            <h3 class="font-arcade text-glow-yellow chart-box-title">ARENA PLAYLOADS & STACKED OUTCOMES</h3>
+            <div class="chart-content" style="min-height: 250px;">
+              <div id="outcomes-stacked-bar-container" style="width:100%; height:100%; min-height:220px;">
+                <!-- Stacked Bar Chart SVG -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ========================================== -->
+    <!-- VIEW: SPEC CONFIG (SETTINGS) -->
+    <!-- ========================================== -->
+    <main class="view-container" id="settings-view">
+      <div class="settings-view-layout">
+        <div class="form-grid-2">
+          <!-- Column 1: API Configuration -->
+          <div class="panel-beveled neon-yellow cabinet-spec-panel">
+            <div class="cabinet-header">
+              <h2 class="text-glow-yellow font-arcade">GEMINI INTEGRATION</h2>
+              <p class="cabinet-subtitle">CONFIG LIVE SCREENSHOT PARSING DRIVERS</p>
+            </div>
+            
+            <div class="panel-beveled spec-inner-box">
+              <label class="font-arcade text-glow-cyan" style="display: block; margin-bottom: 12px; font-size: 13px;">GEMINI API KEY</label>
+              <input type="password" id="settings-api-key" class="retro-input" placeholder="ENTER YOUR API KEY..." style="width: 100%; margin-bottom: 15px;">
+              <button class="btn-arcade cyan" id="btn-save-api-key" style="width: 100%;">MOUNT ENCRYPTION KEY</button>
+              <p class="input-tip text-glow-yellow" style="margin-top: 12px; font-size: 13px; font-family: var(--font-stats); line-height: 1.4;">YOUR KEY SECURELY BINDS LOCALLY IN CLIENT STORAGE. IT NEVER ENTERS NETWORK LOGS.</p>
+            </div>
+          </div>
+
+          <!-- Column 2: Storage Diagnostics -->
+          <div class="panel-beveled neon-magenta cabinet-spec-panel">
+            <div class="cabinet-header">
+              <h2 class="text-glow-magenta font-arcade">DB MAINTENANCE</h2>
+              <p class="cabinet-subtitle">LOCAL MEMORY SEED ACTIONS</p>
+            </div>
+
+            <div class="panel-beveled spec-inner-box diagnostics-actions">
+              <button class="btn-arcade cyan" id="btn-export-db" style="width: 100%; margin-bottom: 12px; font-size: 11px;">DUMP DATABASE (.JSON)</button>
+              
+              <div class="import-wrapper" style="position: relative; margin-bottom: 12px;">
+                <input type="file" id="import-db-file" accept=".json" style="display: none;">
+                <button class="btn-arcade magenta" id="btn-trigger-import" style="width: 100%; font-size: 11px;">MOUNT DUMP ARCHIVE</button>
+              </div>
+
+              <button class="btn-arcade yellow" id="btn-reset-db" style="width: 100%; margin-bottom: 12px; font-size: 11px;">RESTORE FACTORY SEEDS</button>
+              <button class="btn-arcade magenta" id="btn-clear-db" style="width: 100%; background-color: rgba(255,0,127,0.15); border-color: var(--color-neon-magenta); font-size: 11px;">CLEAR ALL LOGS</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Theme config -->
+        <div class="panel-beveled neon-cyan settings-theme-row" style="margin-top: 25px;">
+          <h3 class="font-arcade text-glow-cyan" style="font-size: 13px; margin-bottom: 15px;">CABINET PALETTE</h3>
+          <div class="theme-swatches">
+            <div class="theme-swatch swatch-storm active" data-theme="storm" title="Cyber Storm">
+              <div class="swatch-color" style="background: linear-gradient(135deg, #00f0ff, #ff007f);"></div>
+              <span style="font-family: var(--font-arcade); font-size: 10px;">STORM</span>
+            </div>
+            <div class="theme-swatch swatch-vapor" data-theme="vapor" title="Vapor neon">
+              <div class="swatch-color" style="background: linear-gradient(135deg, #ffe600, #ff007f);"></div>
+              <span style="font-family: var(--font-arcade); font-size: 10px;">VAPOR</span>
+            </div>
+            <div class="theme-swatch swatch-cyber" data-theme="cyber" title="Matrix Grid">
+              <div class="swatch-color" style="background: linear-gradient(135deg, #00ff66, #001100);"></div>
+              <span style="font-family: var(--font-arcade); font-size: 10px;">GRID</span>
+            </div>
+            <div class="theme-swatch swatch-retro" data-theme="retro" title="N64 Classic">
+              <div class="swatch-color" style="background: linear-gradient(135deg, #7a7a7a, #333333);"></div>
+              <span style="font-family: var(--font-arcade); font-size: 10px;">N64</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
   </div>
 
   <!-- ========================================== -->
@@ -275,9 +568,12 @@
     <div class="vs-stripe-curtain-bottom"></div>
   </div>
 
-  <!-- Load mock database scripts -->
+  <!-- Load mock database and SPA modules -->
   <script src="mockData.js"></script>
+  <script src="database.js"></script>
   <script src="apiService.js"></script>
+  <script src="gemini.js"></script>
+  <script src="charts.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
