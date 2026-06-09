@@ -155,6 +155,11 @@ const Database = {
     if (!match.timestamp) {
       match.timestamp = Date.now();
     }
+    // Automatically set 2-player matches to "1v1" mode and style
+    if (match.players && match.players.length === 2) {
+      match.gameMode = "1v1";
+      match.gameStyle = "1v1";
+    }
     matches.unshift(match);
     this.saveMatches(matches);
     return match;
@@ -176,7 +181,13 @@ const Database = {
     let matches = this.getMatches();
     const index = matches.findIndex(m => m.id === id);
     if (index !== -1) {
-      matches[index] = { ...matches[index], ...updatedMatch, id };
+      const merged = { ...matches[index], ...updatedMatch, id };
+      // Automatically set 2-player matches to "1v1" mode and style
+      if (merged.players && merged.players.length === 2) {
+        merged.gameMode = "1v1";
+        merged.gameStyle = "1v1";
+      }
+      matches[index] = merged;
       this.saveMatches(matches);
       return matches[index];
     }

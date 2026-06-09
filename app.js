@@ -528,12 +528,23 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function renderHistoryList() {
+    const style = document.getElementById("filter-style").value;
     const mode = document.getElementById("filter-mode").value;
     const player = document.getElementById("filter-player").value;
     const character = document.getElementById("filter-character").value;
 
     let matches = window.Database.getMatches();
 
+    if (style && style !== "All") {
+      const lowerStyle = style.toLowerCase();
+      if (lowerStyle === "1v1") {
+        matches = matches.filter(m => (m.gameMode && m.gameMode.toLowerCase() === "1v1") || (m.gameStyle && m.gameStyle.toLowerCase() === "1v1"));
+      } else if (lowerStyle === "free-for-all") {
+        matches = matches.filter(m => m.gameStyle && m.gameStyle.toLowerCase() === "free-for-all" && m.gameMode && m.gameMode.toLowerCase() !== "1v1");
+      } else if (lowerStyle === "teams") {
+        matches = matches.filter(m => m.gameStyle && m.gameStyle.toLowerCase() === "teams");
+      }
+    }
     if (mode && mode !== "All") {
       matches = matches.filter(m => m.gameMode === mode);
     }
@@ -886,10 +897,21 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // History filters
-  ["filter-mode", "filter-player", "filter-character"].forEach(id => {
+  ["filter-style", "filter-mode", "filter-player", "filter-character"].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener("change", renderHistoryList);
   });
+
+  const btnClearFilters = document.getElementById("btn-clear-history-filters");
+  if (btnClearFilters) {
+    btnClearFilters.onclick = () => {
+      ["filter-style", "filter-mode", "filter-player", "filter-character"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = "All";
+      });
+      renderHistoryList();
+    };
+  }
 
   // Database maintenance controls
   const btnExportDb = document.getElementById("btn-export-db");
