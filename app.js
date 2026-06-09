@@ -514,7 +514,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Always refresh players list as new players might have been scanned
     const currentVal = filterPlayer.value || "All";
-    filterPlayer.innerHTML = '<option value="All">All Players</option>';
+    filterPlayer.innerHTML = '<option value="All">All players</option>';
     const stats = window.Database.getStats();
     stats.players.forEach(p => {
       const opt = document.createElement("option");
@@ -889,7 +889,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const btn = e.target.closest(".delete-match-btn");
       if (!btn) return;
       const matchId = btn.getAttribute("data-id");
-      if (confirm("ERASE THIS GAMEPLAY RECORD FROM CAB MEMORY?")) {
+      if (confirm("Are you sure you want to delete this record?")) {
         window.Database.deleteMatch(matchId);
         await renderHistoryList();
       }
