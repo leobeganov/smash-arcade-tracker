@@ -1003,6 +1003,40 @@ body {
   background-color: rgba(255, 230, 0, 0.1);
 }
 
+/* Retro Dropdown Select */
+.retro-dropdown-select {
+  background-color: var(--bg-obsidian);
+  border: 4px inset var(--color-border-dark);
+  color: var(--color-neon-yellow);
+  font-family: var(--font-arcade);
+  font-size: 10px;
+  padding: 4px 30px 4px 10px;
+  height: 32px;
+  text-transform: uppercase;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23ffe600' height='10' viewBox='0 0 24 24' width='10' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+.retro-dropdown-select:hover, .retro-dropdown-select:focus {
+  border-color: var(--color-neon-yellow);
+  box-shadow: 0 0 10px var(--color-neon-yellow);
+}
+
+.retro-dropdown-select option {
+  background-color: var(--color-bg-dark);
+  color: #fff;
+  font-family: var(--font-stats);
+  font-size: 11px;
+}
+
 .leaderboard-title {
   font-family: var(--font-arcade);
   font-size: 18px;

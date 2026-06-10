@@ -121,10 +121,17 @@ document.addEventListener("DOMContentLoaded", () => {
   async function renderHome() {
     // Gather selected styles
     const activeStyles = [];
-    const activeStyleBtns = document.querySelectorAll("#podium-style-filters .toggle-btn.active");
-    activeStyleBtns.forEach(btn => {
-      activeStyles.push(btn.getAttribute("data-style"));
-    });
+    const styleSelect = document.getElementById("podium-style-select");
+    if (styleSelect) {
+      const val = styleSelect.value;
+      if (val === 'all') {
+        activeStyles.push('1v1', 'free-for-all', 'teams');
+      } else {
+        activeStyles.push(val);
+      }
+    } else {
+      activeStyles.push('1v1', 'free-for-all', 'teams');
+    }
 
     const podiumData = await api.getPodium(currentPodiumTimeframe, activeStyles, selectedSearchPlayers, selectedSearchFighters);
 
@@ -630,12 +637,19 @@ document.addEventListener("DOMContentLoaded", () => {
       matches = matches.filter(m => m.timestamp >= thirtyDaysAgo);
     }
 
-    // 2. Style Filter (Multiple Select)
+    // 2. Style Filter (Dropdown Select)
     const activeStyles = [];
-    const activeStyleBtns = document.querySelectorAll("#podium-style-filters .toggle-btn.active");
-    activeStyleBtns.forEach(btn => {
-      activeStyles.push(btn.getAttribute("data-style").toLowerCase());
-    });
+    const styleSelect = document.getElementById("podium-style-select");
+    if (styleSelect) {
+      const val = styleSelect.value.toLowerCase();
+      if (val === 'all') {
+        activeStyles.push('1v1', 'free-for-all', 'teams');
+      } else {
+        activeStyles.push(val);
+      }
+    } else {
+      activeStyles.push('1v1', 'free-for-all', 'teams');
+    }
 
     matches = matches.filter(m => {
       const is1v1 = (m.gameMode && m.gameMode.toLowerCase() === '1v1') || 
@@ -993,42 +1007,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Podium Style Isolation Filters
-  const podiumStyleFilters = document.getElementById("podium-style-filters");
-  if (podiumStyleFilters) {
-    podiumStyleFilters.addEventListener("click", (e) => {
-      const btn = e.target.closest(".toggle-btn");
-      if (!btn) return;
-      
-      const allBtns = podiumStyleFilters.querySelectorAll(".toggle-btn");
-      const activeBtns = podiumStyleFilters.querySelectorAll(".toggle-btn.active");
-      const isClickedActive = btn.classList.contains("active");
-      
-      if (isClickedActive) {
-        if (activeBtns.length === 1) {
-          // Reset: activate all style buttons
-          allBtns.forEach(b => b.classList.add("active"));
-        } else {
-          // Isolate clicked button
-          allBtns.forEach(b => {
-            if (b === btn) {
-              b.classList.add("active");
-            } else {
-              b.classList.remove("active");
-            }
-          });
-        }
-      } else {
-        // Isolate clicked button
-        allBtns.forEach(b => {
-          if (b === btn) {
-            b.classList.add("active");
-          } else {
-            b.classList.remove("active");
-          }
-        });
-      }
-      
+  // Podium Style Dropdown Filter
+  const podiumStyleSelect = document.getElementById("podium-style-select");
+  if (podiumStyleSelect) {
+    podiumStyleSelect.addEventListener("change", () => {
       renderHome();
     });
   }
