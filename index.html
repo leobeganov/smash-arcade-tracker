@@ -71,6 +71,28 @@
               </select>
             </div>
 
+            <!-- Custom Multi-select Player Dropdown -->
+            <div class="retro-multi-select-container" id="multi-select-players-container">
+              <button type="button" class="retro-select retro-multi-select-btn" id="btn-multi-players" style="min-width: 220px; font-size: 11px; height: 32px; text-align: left; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--color-border-dark); background: var(--color-bg-dark); color: #fff; padding: 0 10px; font-family: var(--font-stats); letter-spacing: 0.5px;">
+                <span class="selected-text">ALL PLAYERS</span>
+                <span class="dropdown-caret" style="font-size: 9px; opacity: 0.7;">▼</span>
+              </button>
+              <div class="retro-multi-select-dropdown dropdown-hidden" id="dropdown-multi-players">
+                <!-- Dynamic JS options -->
+              </div>
+            </div>
+
+            <!-- Custom Multi-select Fighter Dropdown -->
+            <div class="retro-multi-select-container" id="multi-select-fighters-container">
+              <button type="button" class="retro-select retro-multi-select-btn" id="btn-multi-fighters" style="min-width: 220px; font-size: 11px; height: 32px; text-align: left; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--color-border-dark); background: var(--color-bg-dark); color: #fff; padding: 0 10px; font-family: var(--font-stats); letter-spacing: 0.5px;">
+                <span class="selected-text">ALL FIGHTERS</span>
+                <span class="dropdown-caret" style="font-size: 9px; opacity: 0.7;">▼</span>
+              </button>
+              <div class="retro-multi-select-dropdown dropdown-hidden" id="dropdown-multi-fighters">
+                <!-- Dynamic JS options -->
+              </div>
+            </div>
+
             <!-- Timeframe Filter -->
             <div class="podium-filter-wrapper">
               <div class="toggle-switch-beveled" id="podium-timeframe-filters">
@@ -79,53 +101,6 @@
                 <button class="toggle-btn" data-timeframe="30days">30 Days</button>
               </div>
             </div>
-
-            <!-- Search Toggle Button -->
-            <div class="podium-search-toggle-wrapper">
-              <button class="btn-arcade search-toggle-btn" id="btn-toggle-search" title="Search Players & Fighters" style="font-size: 14px; padding: 4px 12px; height: 32px; display: flex; align-items: center; justify-content: center; gap: 5px;">
-                <span>🔍</span>
-                <span class="search-badge" id="search-active-badge" style="display: none; background: var(--color-neon-yellow); color: #000; font-size: 9px; font-weight: bold; border-radius: 50%; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; margin-left: 2px;">0</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Search Drawer (initially hidden) -->
-        <div class="podium-search-drawer panel-beveled neon-cyan" id="podium-search-drawer" style="display: none; width: 100%; max-width: 1125px; margin-top: 10px; padding: 15px; box-sizing: border-box; flex-direction: row; gap: 20px; align-items: center; justify-content: center; border-color: var(--color-neon-cyan);">
-          <div style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 25px; align-items: center; width: 100%;">
-            
-            <!-- Custom Multi-select Player Dropdown -->
-            <div class="filter-group" style="display: flex; flex-direction: row; align-items: center; gap: 10px; margin-bottom: 0; position: relative;">
-              <span class="mode-toggle-label" style="font-size: 11px; font-weight: bold; color: var(--color-neon-cyan); letter-spacing: 0.5px;">PLAYERS:</span>
-              <div class="retro-multi-select-container" id="multi-select-players-container">
-                <button type="button" class="retro-select retro-multi-select-btn" id="btn-multi-players" style="min-width: 220px; font-size: 11px; height: 32px; text-align: left; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--color-border-dark); background: var(--color-bg-dark); color: #fff; padding: 0 10px; font-family: var(--font-stats); letter-spacing: 0.5px;">
-                  <span class="selected-text">ALL PLAYERS</span>
-                  <span class="dropdown-caret" style="font-size: 9px; opacity: 0.7;">▼</span>
-                </button>
-                <div class="retro-multi-select-dropdown dropdown-hidden" id="dropdown-multi-players">
-                  <!-- Dynamic JS options -->
-                </div>
-              </div>
-            </div>
-
-            <!-- Custom Multi-select Fighter Dropdown -->
-            <div class="filter-group" style="display: flex; flex-direction: row; align-items: center; gap: 10px; margin-bottom: 0; position: relative;">
-              <span class="mode-toggle-label" style="font-size: 11px; font-weight: bold; color: var(--color-neon-cyan); letter-spacing: 0.5px;">FIGHTERS:</span>
-              <div class="retro-multi-select-container" id="multi-select-fighters-container">
-                <button type="button" class="retro-select retro-multi-select-btn" id="btn-multi-fighters" style="min-width: 220px; font-size: 11px; height: 32px; text-align: left; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--color-border-dark); background: var(--color-bg-dark); color: #fff; padding: 0 10px; font-family: var(--font-stats); letter-spacing: 0.5px;">
-                  <span class="selected-text">ALL FIGHTERS</span>
-                  <span class="dropdown-caret" style="font-size: 9px; opacity: 0.7;">▼</span>
-                </button>
-                <div class="retro-multi-select-dropdown dropdown-hidden" id="dropdown-multi-fighters">
-                  <!-- Dynamic JS options -->
-                </div>
-              </div>
-            </div>
-
-            <div style="flex-grow: 1;"></div>
-
-            <!-- Reset / Clear Button -->
-            <button type="button" class="btn-arcade yellow" id="btn-clear-podium-search" style="font-size: 10px; padding: 4px 12px; height: 32px; min-width: 120px;">RESET SEARCH</button>
           </div>
         </div>
 
