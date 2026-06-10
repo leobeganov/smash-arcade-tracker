@@ -633,7 +633,8 @@ const apiService = {
           kd: parseFloat(stats.kdRatio),
           detailLabel: stats.mostUsedFighter ? stats.mostUsedFighter.name : "None",
           detailId: stats.mostUsedFighter ? stats.mostUsedFighter.id : null,
-          detailType: "fighter"
+          detailType: "fighter",
+          detailImg: stats.mostUsedFighter ? stats.mostUsedFighter.img : null
         });
       }
     } else {

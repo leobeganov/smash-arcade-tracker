@@ -419,6 +419,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const mainLink = rec.type === "player" ? `#player/${rec.id}` : `#fighter/${rec.id}`;
       const detailLink = rec.detailType === "player" ? `#player/${rec.detailId}` : `#fighter/${rec.detailId}`;
 
+      const detailContent = (rec.detailType === "fighter" && rec.detailImg)
+        ? `<div class="leaderboard-avatar-container">
+             <img src="${rec.detailImg}" class="leaderboard-avatar-img" alt="${rec.detailLabel}">
+             <span>${rec.detailLabel}</span>
+           </div>`
+        : rec.detailLabel;
+
       tr.innerHTML = `
         <td class="rank-cell">#${rec.rank}</td>
         <td class="name-cell text-glow-cyan" onclick="window.location.hash = '${mainLink}'">${rec.name}</td>
@@ -426,7 +433,9 @@ document.addEventListener("DOMContentLoaded", () => {
         <td class="numeric-cell">${rec.KOs}</td>
         <td class="numeric-cell">${rec.winRate}%</td>
         <td class="numeric-cell text-glow-magenta">${rec.kd}</td>
-        <td class="name-cell text-glow-yellow" onclick="window.location.hash = '${detailLink}'">${rec.detailLabel}</td>
+        <td class="name-cell text-glow-yellow" onclick="window.location.hash = '${detailLink}'">
+          ${detailContent}
+        </td>
       `;
 
       rowsBody.appendChild(tr);
