@@ -347,8 +347,16 @@ body {
   align-items: center;
   width: 100%;
   max-width: 1125px;
-  padding: 15px 0;
+  padding: 15px 10px;
+  margin-left: -10px;
   border-bottom: none;
+  position: sticky;
+  top: 0;
+  z-index: 150;
+  background: rgba(12, 13, 18, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-sizing: border-box;
 }
 
 .podium-title-group {
