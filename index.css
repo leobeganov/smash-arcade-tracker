@@ -2681,4 +2681,12 @@ body.theme-retro .btn-arcade {
   }
 }
 
+/* Sudden Death Player Row Styling in Victory Column */
+.winner-sidebar-row.sudden-death-row {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
 
+.winner-sidebar-row.sudden-death-row:hover {
+  opacity: 0.95 !important;
+  transform: translateX(3px);
+}
