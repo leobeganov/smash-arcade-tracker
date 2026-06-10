@@ -374,8 +374,9 @@ body {
 
 .podium-filters-group {
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 15px;
+  gap: 20px;
   flex-wrap: nowrap;
   width: 100%;
 }
@@ -390,7 +391,6 @@ body {
   display: flex;
   align-items: center;
   gap: 15px;
-  margin-left: auto;
 }
 
 .marquee-banner {
