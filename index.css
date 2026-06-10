@@ -422,7 +422,7 @@ body {
 .podium-column.tier-1 .podium-fighter-container::before {
   content: "👑";
   position: absolute;
-  top: 105px; /* Floats perfectly above their head since icons are 200px tall */
+  top: -38px; /* Floats perfectly above their head */
   left: 50%;
   font-size: 72px;
   z-index: 10;
@@ -437,7 +437,7 @@ body {
 }
 
 .podium-fighter-img {
-  height: 200px; /* Sized beautifully for square stylized icons */
+  height: 100%;
   max-width: 100%;
   object-fit: contain;
   object-position: bottom center;
