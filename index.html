@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Smashalytics - Super Smash Brothers Ultimate AI Screenshot Results Scanner & Retro Match Tracker">
   <title>SMASHALYTICS // ARCADE CABINET</title>
-  <link rel="stylesheet" href="index.css?v=9">
+  <link rel="stylesheet" href="index.css?v=11">
 </head>
 <body class="theme-storm">
 
@@ -28,7 +28,6 @@
         <a href="#home" class="nav-item active" id="nav-tab-home">[ HOME / PODIUM ]</a>
         <a href="#leaderboard" class="nav-item" id="nav-tab-leaderboard">[ LEADERBOARD ]</a>
         <a href="#scanner" class="nav-item" id="nav-tab-scanner">[ OCR SCANNER ]</a>
-        <a href="#history" class="nav-item" id="nav-tab-history">[ BATTLE LOG ]</a>
         <a href="#telemetry" class="nav-item" id="nav-tab-telemetry">[ TELEMETRY ]</a>
         <a href="#settings" class="nav-item" id="nav-tab-settings">[ SPEC CONFIG ]</a>
       </nav>
@@ -49,6 +48,83 @@
     <!-- ========================================== -->
     <main class="view-container active" id="home-view">
       <div class="home-view-layout">
+
+        <!-- Podium Header and Timeframe Filter -->
+        <div class="podium-header-row">
+          <div class="podium-title-group">
+            <h2 class="podium-title">CHAMPIONSHIP PODIUM</h2>
+            <p class="podium-subtitle">Top Players</p>
+          </div>
+          
+          <div class="podium-filters-group">
+            <!-- Style Filters -->
+            <div class="podium-style-wrapper">
+              <span class="mode-toggle-label">STYLE:</span>
+              <div class="toggle-switch-beveled" id="podium-style-filters">
+                <button class="toggle-btn active" data-style="1v1">1v1</button>
+                <button class="toggle-btn active" data-style="free-for-all">FFA</button>
+                <button class="toggle-btn active" data-style="teams">Teams</button>
+              </div>
+            </div>
+
+            <!-- Timeframe Filter -->
+            <div class="podium-filter-wrapper">
+              <span class="mode-toggle-label">TIMEFRAME:</span>
+              <div class="toggle-switch-beveled" id="podium-timeframe-filters">
+                <button class="toggle-btn" data-timeframe="today">Today</button>
+                <button class="toggle-btn active" data-timeframe="7days">7 Days</button>
+                <button class="toggle-btn" data-timeframe="30days">30 Days</button>
+              </div>
+            </div>
+
+            <!-- Search Toggle Button -->
+            <div class="podium-search-toggle-wrapper">
+              <button class="btn-arcade search-toggle-btn" id="btn-toggle-search" title="Search Players & Fighters" style="font-size: 14px; padding: 4px 12px; height: 32px; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <span>🔍</span>
+                <span class="search-badge" id="search-active-badge" style="display: none; background: var(--color-neon-yellow); color: #000; font-size: 9px; font-weight: bold; border-radius: 50%; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; margin-left: 2px;">0</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search Drawer (initially hidden) -->
+        <div class="podium-search-drawer panel-beveled neon-cyan" id="podium-search-drawer" style="display: none; width: 100%; max-width: 1125px; margin-top: 10px; padding: 15px; box-sizing: border-box; flex-direction: row; gap: 20px; align-items: center; justify-content: center; border-color: var(--color-neon-cyan);">
+          <div style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 25px; align-items: center; width: 100%;">
+            
+            <!-- Custom Multi-select Player Dropdown -->
+            <div class="filter-group" style="display: flex; flex-direction: row; align-items: center; gap: 10px; margin-bottom: 0; position: relative;">
+              <span class="mode-toggle-label" style="font-size: 11px; font-weight: bold; color: var(--color-neon-cyan); letter-spacing: 0.5px;">PLAYERS:</span>
+              <div class="retro-multi-select-container" id="multi-select-players-container">
+                <button type="button" class="retro-select retro-multi-select-btn" id="btn-multi-players" style="min-width: 220px; font-size: 11px; height: 32px; text-align: left; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--color-border-dark); background: var(--color-bg-dark); color: #fff; padding: 0 10px; font-family: var(--font-stats); letter-spacing: 0.5px;">
+                  <span class="selected-text">ALL PLAYERS</span>
+                  <span class="dropdown-caret" style="font-size: 9px; opacity: 0.7;">▼</span>
+                </button>
+                <div class="retro-multi-select-dropdown dropdown-hidden" id="dropdown-multi-players">
+                  <!-- Dynamic JS options -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Custom Multi-select Fighter Dropdown -->
+            <div class="filter-group" style="display: flex; flex-direction: row; align-items: center; gap: 10px; margin-bottom: 0; position: relative;">
+              <span class="mode-toggle-label" style="font-size: 11px; font-weight: bold; color: var(--color-neon-cyan); letter-spacing: 0.5px;">FIGHTERS:</span>
+              <div class="retro-multi-select-container" id="multi-select-fighters-container">
+                <button type="button" class="retro-select retro-multi-select-btn" id="btn-multi-fighters" style="min-width: 220px; font-size: 11px; height: 32px; text-align: left; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--color-border-dark); background: var(--color-bg-dark); color: #fff; padding: 0 10px; font-family: var(--font-stats); letter-spacing: 0.5px;">
+                  <span class="selected-text">ALL FIGHTERS</span>
+                  <span class="dropdown-caret" style="font-size: 9px; opacity: 0.7;">▼</span>
+                </button>
+                <div class="retro-multi-select-dropdown dropdown-hidden" id="dropdown-multi-fighters">
+                  <!-- Dynamic JS options -->
+                </div>
+              </div>
+            </div>
+
+            <div style="flex-grow: 1;"></div>
+
+            <!-- Reset / Clear Button -->
+            <button type="button" class="btn-arcade yellow" id="btn-clear-podium-search" style="font-size: 10px; padding: 4px 12px; height: 32px; min-width: 120px;">RESET SEARCH</button>
+          </div>
+        </div>
 
         <!-- 3D Olympic Podium -->
         <div class="podium-stage">
@@ -96,6 +172,17 @@
           </div>
 
         </div>
+
+        <!-- Merged Battle Log Section -->
+        <div class="panel-beveled neon-cyan history-control-panel" style="width: 100%; max-width: 1125px; margin-top: 30px; padding: 15px 20px;">
+          <h2 class="text-glow-cyan font-arcade" style="font-size: 18px; margin-bottom: 0; letter-spacing: 1px; text-align: center;">BATTLE LOG</h2>
+        </div>
+
+        <!-- Merged Match list container -->
+        <div class="history-list-container" id="history-matches-list" style="width: 100%; max-width: 1125px; margin-top: 20px; margin-bottom: 40px;">
+          <!-- Dynamic listing of match panels -->
+        </div>
+
       </div>
     </main>
 
@@ -237,11 +324,35 @@
         <div class="leaderboard-control-row">
           <h2 class="leaderboard-title" id="leaderboard-header-title">RANKINGS: PLAYER MODE</h2>
           
-          <div class="mode-toggle-wrapper">
-            <span class="mode-toggle-label">TOGGLE MODE:</span>
-            <div class="toggle-switch-beveled">
-              <button class="toggle-btn active" id="toggle-btn-players">Players</button>
-              <button class="toggle-btn" id="toggle-btn-fighters">Fighters</button>
+          <div class="leaderboard-filters-group">
+            <!-- Style Filters -->
+            <div class="style-filter-wrapper">
+              <span class="mode-toggle-label">STYLE:</span>
+              <div class="toggle-switch-beveled" id="leaderboard-style-filters">
+                <button class="toggle-btn active" data-style="1v1">1v1</button>
+                <button class="toggle-btn active" data-style="free-for-all">FFA</button>
+                <button class="toggle-btn active" data-style="teams">Teams</button>
+              </div>
+            </div>
+
+            <!-- Timeframe Filter -->
+            <div class="timeframe-filter-wrapper">
+              <span class="mode-toggle-label">TIMEFRAME:</span>
+              <div class="toggle-switch-beveled" id="leaderboard-timeframe-filters">
+                <button class="toggle-btn" data-timeframe="today">Today</button>
+                <button class="toggle-btn" data-timeframe="7days">7 Days</button>
+                <button class="toggle-btn" data-timeframe="30days">30 Days</button>
+                <button class="toggle-btn active" data-timeframe="alltime">All Time</button>
+              </div>
+            </div>
+
+            <!-- Mode Toggle -->
+            <div class="mode-toggle-wrapper">
+              <span class="mode-toggle-label">MODE:</span>
+              <div class="toggle-switch-beveled">
+                <button class="toggle-btn active" id="toggle-btn-players">Players</button>
+                <button class="toggle-btn" id="toggle-btn-fighters">Fighters</button>
+              </div>
             </div>
           </div>
         </div>
@@ -364,62 +475,7 @@
       </div>
     </main>
 
-    <!-- ========================================== -->
-    <!-- VIEW: BATTLE LOG (HISTORY) -->
-    <!-- ========================================== -->
-    <main class="view-container" id="history-view">
-      <div class="history-view-layout">
-        <div class="panel-beveled neon-cyan history-control-panel">
-          <h2 class="text-glow-cyan font-arcade">BATTLE LOG</h2>
-          <p class="cabinet-subtitle">HISTORICAL GAMEPLAY LOG LISTING</p>
 
-          <div class="filters-row panel-beveled">
-            <div class="filter-group">
-              <label>MODE</label>
-              <select id="filter-style" class="retro-select">
-                <option value="All">All modes</option>
-                <option value="1v1">1v1</option>
-                <option value="Free-for-All">Free-for-All</option>
-                <option value="Teams">Teams</option>
-              </select>
-            </div>
-            <div class="filter-group">
-              <label>PLAYER COUNT</label>
-              <select id="filter-mode" class="retro-select">
-                <option value="All">All player counts</option>
-                <option value="1v1">2 players</option>
-                <option value="3-Player">3 players</option>
-                <option value="4-Player">4 players</option>
-                <option value="5-Player">5 players</option>
-                <option value="6-Player">6 players</option>
-                <option value="7-Player">7 players</option>
-                <option value="8-Player">8 players</option>
-              </select>
-            </div>
-            <div class="filter-group">
-              <label>PLAYER</label>
-              <select id="filter-player" class="retro-select">
-                <option value="All">All players</option>
-              </select>
-            </div>
-            <div class="filter-group">
-              <label>FIGHTER</label>
-              <select id="filter-character" class="retro-select">
-                <option value="All">All fighters</option>
-              </select>
-            </div>
-            <div class="filter-group button-group" style="justify-content: flex-end;">
-              <button type="button" class="btn-arcade yellow" id="btn-clear-history-filters" style="font-size: 11px; padding: 6px 12px; height: 35px; width: 100%;">CLEAR FILTERS</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Match log entries -->
-        <div class="history-list-container" id="history-matches-list">
-          <!-- Dynamic listing of match panels -->
-        </div>
-      </div>
-    </main>
 
     <!-- ========================================== -->
     <!-- VIEW: TELEMETRY (CHARTS) -->
@@ -555,11 +611,11 @@
     <div class="vs-stripe-curtain-bottom"></div>
   </div>
   <!-- Load mock database and SPA modules -->
-  <script src="mockData.js?v=9"></script>
-  <script src="database.js?v=9"></script>
-  <script src="apiService.js?v=9"></script>
-  <script src="gemini.js?v=9"></script>
-  <script src="charts.js?v=9"></script>
-  <script src="app.js?v=9"></script>
+  <script src="mockData.js?v=11"></script>
+  <script src="database.js?v=11"></script>
+  <script src="apiService.js?v=11"></script>
+  <script src="gemini.js?v=11"></script>
+  <script src="charts.js?v=11"></script>
+  <script src="app.js?v=11"></script>
 </body>
 </html>

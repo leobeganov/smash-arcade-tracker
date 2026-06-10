@@ -28,9 +28,7 @@ function getPlayersList(matches) {
     "jack": "The Combo King",
     "polo": "The Technical Prodigy",
     "matt": "The Wall of Defense",
-    "sylv": "The Aggressive Rusher",
-    "bones": "The Arcade Legend",
-    "mojo": "The Speed Demon"
+    "sylv": "The Aggressive Rusher"
   };
 
   matches.forEach(m => {
@@ -108,76 +106,156 @@ function getFighterDetails(fighterNameOrId) {
 }
 
 const apiService = {
+  // Expose getFighterDetails globally
+  getFighterDetails,
+
   // 1. Get Top 3 Player-Fighter Combinations for the Olympic Podium
-  async getPodium() {
+  async getPodium(timeframe = '7days', activeStyles = ["1v1", "free-for-all", "teams"], selectedPlayers = [], selectedFighters = []) {
     await initRoster();
     await apiDelay(250);
 
     if (!window.Database) return [];
 
-    const matches = await window.Database.getMatchesAsync();
-    const playersList = getPlayersList(matches);
-    const comboStats = {};
+    const allMatches = await window.Database.getMatchesAsync();
+    
+    // Apply timeframe filtering
+    const now = Date.now();
+    let matches = allMatches;
+
+    if (timeframe === 'today') {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const todayStartMs = todayStart.getTime();
+      matches = allMatches.filter(m => m.timestamp >= todayStartMs);
+    } else if (timeframe === '7days') {
+      const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
+      matches = allMatches.filter(m => m.timestamp >= sevenDaysAgo);
+    } else if (timeframe === '30days') {
+      const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
+      matches = allMatches.filter(m => m.timestamp >= thirtyDaysAgo);
+    }
+
+    // Apply activeStyles filtering
+    const activeStylesLower = activeStyles.map(s => s.toLowerCase());
+    matches = matches.filter(m => {
+      const is1v1 = (m.gameMode && m.gameMode.toLowerCase() === '1v1') || 
+                    (m.gameStyle && m.gameStyle.toLowerCase() === '1v1') || 
+                    (m.players && m.players.length === 2);
+      if (is1v1) {
+        return activeStylesLower.includes('1v1');
+      }
+      const isTeams = m.gameStyle && m.gameStyle.toLowerCase() === 'teams';
+      if (isTeams) {
+        return activeStylesLower.includes('teams');
+      }
+      // Otherwise Free-for-all
+      return activeStylesLower.includes('free-for-all');
+    });
+
+    // Apply player selection filtering (if any specified)
+    if (selectedPlayers && selectedPlayers.length > 0) {
+      const lowerPlayers = selectedPlayers.map(p => p.toLowerCase().trim());
+      matches = matches.filter(m => m.players && m.players.some(p => lowerPlayers.includes(p.playerName.toLowerCase().trim())));
+    }
+
+    // Apply fighter selection filtering (if any specified)
+    if (selectedFighters && selectedFighters.length > 0) {
+      const lowerFighters = selectedFighters.map(f => f.toLowerCase().trim());
+      matches = matches.filter(m => m.players && m.players.some(p => {
+        const fighterObj = getFighterDetails(p.character);
+        return lowerFighters.includes(p.character.toLowerCase().trim()) || lowerFighters.includes(fighterObj.id.toLowerCase().trim());
+      }));
+    }
+
+    const playersList = getPlayersList(allMatches);
+    const playerStats = {};
 
     matches.forEach(match => {
       if (!match.players) return;
       match.players.forEach(p => {
+        // If a player filter is active, only aggregate for the searched players
+        if (selectedPlayers && selectedPlayers.length > 0) {
+          const isSelected = selectedPlayers.some(sp => sp.toLowerCase().trim() === p.playerName.toLowerCase().trim());
+          if (!isSelected) return;
+        }
+        // If a fighter filter is active, only aggregate for the searched fighters
+        if (selectedFighters && selectedFighters.length > 0) {
+          const fighterObj = getFighterDetails(p.character);
+          const isSelected = selectedFighters.some(sf => 
+            sf.toLowerCase().trim() === p.character.toLowerCase().trim() ||
+            sf.toLowerCase().trim() === fighterObj.id.toLowerCase().trim()
+          );
+          if (!isSelected) return;
+        }
+
         const playerName = p.playerName;
         const playerObj = playersList.find(pl => pl.name.toLowerCase() === playerName.toLowerCase());
         const playerId = playerObj ? playerObj.id : playerName.toLowerCase().replace(/\s+/g, '-');
         
-        const fighterObj = getFighterDetails(p.character);
-        const fighterId = fighterObj.id;
-
-        const comboKey = `${playerId}-${fighterId}`;
-        if (!comboStats[comboKey]) {
-          comboStats[comboKey] = {
+        if (!playerStats[playerId]) {
+          playerStats[playerId] = {
             playerId: playerId,
-            fighterId: fighterId,
             playerName: playerName,
-            fighterName: p.character,
             wins: 0,
-            total: 0
+            total: 0,
+            characters: {}
           };
         }
         
-        comboStats[comboKey].total += 1;
+        playerStats[playerId].total += 1;
         if (p.placement === 1) {
-          comboStats[comboKey].wins += 1;
+          playerStats[playerId].wins += 1;
         }
+        
+        if (!playerStats[playerId].characters[p.character]) {
+          playerStats[playerId].characters[p.character] = 0;
+        }
+        playerStats[playerId].characters[p.character] += 1;
       });
     });
 
-    // Compute Adjusted Wins score for each combo using the formula: wins^2.5 / total^1.5
-    const comboScores = Object.values(comboStats).map(combo => {
-      const adjustedWins = combo.total > 0 
-        ? Math.pow(combo.wins, 2.5) / Math.pow(combo.total, 1.5) 
+    // Compute Adjusted Wins score for each player using the formula: wins^2.5 / total^1.5
+    const playerScores = Object.values(playerStats).map(player => {
+      const adjustedWins = player.total > 0 
+        ? Math.pow(player.wins, 2.5) / Math.pow(player.total, 1.5) 
         : 0;
+      
+      // Determine their most used character in this match pool
+      let mostUsedFighterName = "Mario";
+      let maxCount = -1;
+      Object.entries(player.characters).forEach(([charName, count]) => {
+        if (count > maxCount) {
+          maxCount = count;
+          mostUsedFighterName = charName;
+        }
+      });
+
       return {
-        ...combo,
-        adjustedWins
+        ...player,
+        adjustedWins,
+        mostUsedFighterName
       };
     });
 
-    // Sort combos descending by Adjusted Wins rating
-    const sortedCombos = comboScores
+    // Sort players descending by Adjusted Wins rating
+    const sortedPlayers = playerScores
       .sort((a, b) => b.adjustedWins - a.adjustedWins)
       .slice(0, 3);
 
-    // Populate combo details with full player and fighter models
-    return sortedCombos.map((combo, index) => {
-      const player = playersList.find(p => p.id === combo.playerId) || { 
-        id: combo.playerId, 
-        name: combo.playerName, 
+    // Populate player details with full player and fighter models
+    return sortedPlayers.map((player, index) => {
+      const playerObj = playersList.find(p => p.id === player.playerId) || { 
+        id: player.playerId, 
+        name: player.playerName, 
         tagline: "The Challenger" 
       };
-      const fighter = getFighterDetails(combo.fighterId);
+      const fighter = getFighterDetails(player.mostUsedFighterName);
       return {
         rank: index + 1,
-        wins: combo.wins,
-        total: combo.total,
-        adjustedWins: parseFloat(combo.adjustedWins.toFixed(2)),
-        player,
+        wins: player.wins,
+        total: player.total,
+        adjustedWins: parseFloat(player.adjustedWins.toFixed(2)),
+        player: playerObj,
         fighter
       };
     });
@@ -252,13 +330,13 @@ const apiService = {
   },
 
   // 3. Get Player Profile Stats
-  async getPlayerProfile(playerId) {
+  async getPlayerProfile(playerId, customMatches = null) {
     await initRoster();
     await apiDelay(250);
 
     if (!window.Database) return null;
 
-    const matches = await window.Database.getMatchesAsync();
+    const matches = customMatches || await window.Database.getMatchesAsync();
     const playersList = getPlayersList(matches);
     const player = playersList.find(p => p.id === playerId || p.name.toLowerCase() === playerId.toLowerCase());
     if (!player) return null;
@@ -316,12 +394,16 @@ const apiService = {
     // Find rival's most used fighter (their Signature Fighter)
     let rivalMostUsedFighter = null;
     if (rival) {
-      const rivalMatches = MATCHES.filter(m => m.winnerId === rival.id || m.loserId === rival.id);
+      const rivalMatches = matches.filter(m => 
+        m.players && m.players.some(p => p.playerName.toLowerCase() === rival.name.toLowerCase())
+      );
       const rivalFighterCounts = {};
       rivalMatches.forEach(match => {
-        const isRivalWinner = match.winnerId === rival.id;
-        const fighterId = isRivalWinner ? match.winnerFighter : match.loserFighter;
-        rivalFighterCounts[fighterId] = (rivalFighterCounts[fighterId] || 0) + 1;
+        const pRec = match.players.find(p => p.playerName.toLowerCase() === rival.name.toLowerCase());
+        if (pRec) {
+          const fDetails = getFighterDetails(pRec.character);
+          rivalFighterCounts[fDetails.id] = (rivalFighterCounts[fDetails.id] || 0) + 1;
+        }
       });
       let rivalMostUsedFighterId = null;
       let rivalMaxCount = 0;
@@ -331,7 +413,7 @@ const apiService = {
           rivalMostUsedFighterId = fighterId;
         }
       });
-      rivalMostUsedFighter = FIGHTERS.find(f => f.id === rivalMostUsedFighterId);
+      rivalMostUsedFighter = rivalMostUsedFighterId ? getFighterDetails(rivalMostUsedFighterId) : null;
     }
 
     // Find most used fighter (our Signature Fighter)
@@ -376,7 +458,7 @@ const apiService = {
   },
 
   // 4. Get Fighter Profile Stats
-  async getFighterProfile(fighterId) {
+  async getFighterProfile(fighterId, customMatches = null) {
     await initRoster();
     await apiDelay(250);
 
@@ -385,7 +467,7 @@ const apiService = {
     const fighter = getFighterDetails(fighterId);
     if (!fighter) return null;
 
-    const matches = await window.Database.getMatchesAsync();
+    const matches = customMatches || await window.Database.getMatchesAsync();
     const playersList = getPlayersList(matches);
     
     // Find all player records in any match that played this fighter
@@ -481,20 +563,59 @@ const apiService = {
   },
 
   // 5. Get Combined Global Leaderboard Stats
-  async getLeaderboard(sortBy = "wins", isFighterMode = false) {
+  async getLeaderboard(sortBy = "wins", isFighterMode = false, activeStyles = ["1v1", "free-for-all", "teams"], timeframe = "alltime") {
     await initRoster();
     await apiDelay(250);
 
     let records = [];
+    const activeStylesLower = activeStyles.map(s => s.toLowerCase());
+
+    if (!window.Database) return [];
+    
+    const allMatches = await window.Database.getMatchesAsync();
+    
+    // Apply timeframe filtering
+    const now = Date.now();
+    let matches = allMatches;
+
+    if (timeframe === 'today') {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const todayStartMs = todayStart.getTime();
+      matches = allMatches.filter(m => m.timestamp >= todayStartMs);
+    } else if (timeframe === '7days') {
+      const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
+      matches = allMatches.filter(m => m.timestamp >= sevenDaysAgo);
+    } else if (timeframe === '30days') {
+      const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
+      matches = allMatches.filter(m => m.timestamp >= thirtyDaysAgo);
+    }
+
+    // Filter matches based on activeStyles
+    matches = matches.filter(m => {
+      const is1v1 = (m.gameMode && m.gameMode.toLowerCase() === '1v1') || 
+                    (m.gameStyle && m.gameStyle.toLowerCase() === '1v1') || 
+                    (m.players && m.players.length === 2);
+      if (is1v1) {
+        return activeStylesLower.includes('1v1');
+      }
+      const isTeams = m.gameStyle && m.gameStyle.toLowerCase() === 'teams';
+      if (isTeams) {
+        return activeStylesLower.includes('teams');
+      }
+      // Otherwise Free-for-all
+      return activeStylesLower.includes('free-for-all');
+    });
 
     if (!isFighterMode) {
       // Gather Player Stats
-      const matches = await window.Database.getMatchesAsync();
-      const playersList = getPlayersList(matches);
+      const playersList = getPlayersList(allMatches);
       for (const player of playersList) {
-        const stats = await this.getPlayerProfile(player.id);
+        const stats = await this.getPlayerProfile(player.id, matches);
         if (!stats) continue;
         const totalGames = stats.totalMatches;
+        if (totalGames === 0) continue; // Skip players with no matches under current filters
+        
         const adjustedWins = totalGames > 0
           ? Math.pow(stats.wins, 2.5) / Math.pow(totalGames, 1.5)
           : 0;
@@ -521,22 +642,21 @@ const apiService = {
       const baseSlugs = ["mario", "link", "samus", "fox", "pikachu", "donkey_kong"];
       const playedSlugs = new Set(baseSlugs);
       
-      if (window.Database) {
-        const matches = await window.Database.getMatchesAsync();
-        matches.forEach(m => {
-          if (m.players) {
-            m.players.forEach(p => {
-              const f = getFighterDetails(p.character);
-              playedSlugs.add(f.id);
-            });
-          }
-        });
-      }
+      matches.forEach(m => {
+        if (m.players) {
+          m.players.forEach(p => {
+            const f = getFighterDetails(p.character);
+            playedSlugs.add(f.id);
+          });
+        }
+      });
 
       for (const fId of playedSlugs) {
-        const stats = await this.getFighterProfile(fId);
+        const stats = await this.getFighterProfile(fId, matches);
         if (!stats) continue;
         const totalGames = stats.totalMatches;
+        if (totalGames === 0) continue; // Skip fighters with no matches under current filters
+        
         const adjustedWins = totalGames > 0
           ? Math.pow(stats.wins, 2.5) / Math.pow(totalGames, 1.5)
           : 0;

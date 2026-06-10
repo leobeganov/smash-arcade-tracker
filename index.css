@@ -11,6 +11,7 @@
   --bg-iron: #14161a;
   --bg-metal: #22252c;
   --bg-grid: #0d0f14;
+  --color-bg-dark: #0c0d12;
 
   --color-neon-cyan: #00f0ff;
   --color-neon-magenta: #ff007f;
@@ -324,7 +325,57 @@ header {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 40px;
+  gap: 20px;
+}
+
+.podium-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1125px;
+  padding: 15px 0;
+  border-bottom: 4px solid var(--color-border-dark);
+}
+
+.podium-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.podium-title {
+  font-family: var(--font-arcade);
+  font-size: 18px;
+  color: var(--color-neon-yellow);
+  text-shadow: 0 0 10px rgba(255, 230, 0, 0.4);
+}
+
+.podium-subtitle {
+  font-family: var(--font-stats);
+  font-size: 12px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.podium-filters-group {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: nowrap;
+}
+
+.podium-style-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.podium-filter-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
 .marquee-banner {
@@ -348,7 +399,7 @@ header {
   width: 100%;
   max-width: 1125px; /* Scaled from 900px */
   height: 625px;     /* Scaled from 500px */
-  margin-top: 50px;  /* Scaled from 40px */
+  margin-top: 10px;  /* Reduced from 50px */
   position: relative;
 }
 
@@ -892,6 +943,20 @@ header {
   border-bottom: 4px solid var(--color-border-dark);
 }
 
+.leaderboard-filters-group {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  flex-wrap: wrap;
+}
+
+.style-filter-wrapper,
+.timeframe-filter-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
 .mode-toggle-wrapper {
   display: flex;
   align-items: center;
@@ -921,12 +986,19 @@ header {
   border: none;
   cursor: pointer;
   text-transform: uppercase;
+  transition: all 0.2s ease-in-out;
 }
 
 .toggle-switch-beveled .toggle-btn.active {
   color: #000;
   background-color: var(--color-neon-yellow);
   box-shadow: 0 0 10px var(--color-neon-yellow);
+}
+
+.toggle-switch-beveled .toggle-btn:not(.active):hover {
+  color: var(--color-neon-yellow);
+  text-shadow: 0 0 5px var(--color-neon-yellow);
+  background-color: rgba(255, 230, 0, 0.1);
 }
 
 .leaderboard-title {
@@ -1654,6 +1726,15 @@ body.theme-retro .btn-arcade {
   width: 100%;
 }
 
+.home-filters-row {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  padding: 12px 20px !important;
+  background-color: var(--bg-metal);
+  margin-top: 15px;
+}
+
 .filters-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -1805,28 +1886,12 @@ body.theme-retro .btn-arcade {
   font-size: 11px;
   padding: 3px 4px;
   background-color: var(--bg-metal);
-  border: 1px solid var(--color-border-dark);
+  border: 1px solid #8a8d9a;
+  color: #c4c6d0;
   text-align: center;
   flex: 1;
   min-width: 0;
   white-space: nowrap;
-}
-
-.player-stat-badge.ko {
-  border-color: var(--color-neon-cyan);
-  color: var(--color-neon-cyan);
-}
-.player-stat-badge.fall {
-  border-color: var(--color-neon-magenta);
-  color: var(--color-neon-magenta);
-}
-.player-stat-badge.sd {
-  border-color: var(--color-neon-yellow);
-  color: var(--color-neon-yellow);
-}
-.player-stat-badge.out {
-  border-color: #8a8d9a;
-  color: #c4c6d0;
 }
 
 /* Match Game Style Badges (Teams vs FFA) */
@@ -2039,5 +2104,163 @@ body.theme-retro .btn-arcade {
 /* Helper details */
 .input-tip {
   letter-spacing: 0.5px;
+}
+
+
+/* --- RETRO SEARCH DRAWER & MULTI-SELECT --- */
+.podium-search-drawer {
+  display: flex;
+  animation: drawerSlideDown 0.25s steps(6) forwards;
+  position: relative;
+  z-index: 1001;
+}
+
+@keyframes drawerSlideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.search-toggle-btn.active {
+  background-color: var(--color-neon-cyan) !important;
+  color: #000 !important;
+  box-shadow: 0 0 12px var(--color-neon-cyan) !important;
+}
+
+.retro-multi-select-container {
+  position: relative;
+  display: inline-block;
+}
+
+.retro-multi-select-btn {
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+}
+
+.retro-multi-select-btn:hover,
+.retro-multi-select-btn.active-selection {
+  border-color: var(--color-neon-cyan) !important;
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.4);
+}
+
+.retro-multi-select-btn.active-selection {
+  background-color: rgba(0, 242, 254, 0.1) !important;
+}
+
+.retro-multi-select-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  min-width: 250px;
+  max-height: 280px;
+  overflow-y: auto;
+  z-index: 1000;
+  background: var(--color-bg-dark);
+  border: 2px solid var(--color-neon-cyan);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.95), 0 0 15px rgba(0, 242, 254, 0.35);
+  margin-top: 5px;
+  border-radius: 4px;
+}
+
+/* Hide scrollbars or style them retro */
+.retro-multi-select-dropdown::-webkit-scrollbar {
+  width: 8px;
+}
+.retro-multi-select-dropdown::-webkit-scrollbar-track {
+  background: var(--color-bg-dark);
+}
+.retro-multi-select-dropdown::-webkit-scrollbar-thumb {
+  background: var(--color-neon-cyan);
+  border: 2px solid var(--color-bg-dark);
+  border-radius: 4px;
+}
+
+.dropdown-hidden {
+  display: none !important;
+}
+
+.retro-multi-option-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  cursor: pointer;
+  user-select: none;
+  font-family: var(--font-stats);
+  font-size: 11px;
+  color: #bbb;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.1s ease, color 0.1s ease;
+  letter-spacing: 0.5px;
+}
+
+.retro-multi-option-row:hover {
+  background: rgba(0, 242, 254, 0.12);
+  color: #fff;
+}
+
+/* Custom Checkbox Design */
+.retro-checkbox-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-right: 12px;
+}
+
+.retro-checkbox-input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.retro-checkbox-box {
+  height: 14px;
+  width: 14px;
+  background-color: var(--color-bg-dark);
+  border: 2px solid var(--color-border-dark);
+  border-radius: 2px;
+  position: relative;
+  transition: all 0.15s ease;
+}
+
+.retro-multi-option-row:hover .retro-checkbox-box {
+  border-color: var(--color-neon-cyan);
+}
+
+.retro-checkbox-input:checked ~ .retro-checkbox-box {
+  background-color: var(--color-neon-cyan);
+  border-color: var(--color-neon-cyan);
+  box-shadow: 0 0 6px var(--color-neon-cyan);
+}
+
+.retro-checkbox-box::after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 3px;
+  top: 0px;
+  width: 4px;
+  height: 7px;
+  border: solid var(--color-bg-dark);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.retro-checkbox-input:checked ~ .retro-checkbox-box::after {
+  display: block;
+}
+
+.retro-multi-option-row.all-option {
+  border-bottom: 2px solid var(--color-border-dark);
+  font-weight: bold;
+  color: var(--color-neon-yellow);
+}
+
+.retro-multi-option-row.all-option .retro-checkbox-input:checked ~ .retro-checkbox-box {
+  background-color: var(--color-neon-yellow);
+  border-color: var(--color-neon-yellow);
+  box-shadow: 0 0 6px var(--color-neon-yellow);
 }
 
