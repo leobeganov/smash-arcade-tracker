@@ -744,44 +744,68 @@ document.addEventListener("DOMContentLoaded", () => {
       // Generate markers for the timeline with collision avoidance
       const percentageCounts = {};
       let markersHtml = "";
+      let winnersHtml = "";
+      let markerIdx = 0;
+
       if (m.players) {
-        m.players.forEach((p, idx) => {
+        m.players.forEach((p) => {
           const outAtSecs = parseOutAtToSeconds(p.outAt || (p.placement === 1 ? '---' : '5:00'));
           const isSurvived = (outAtSecs === null);
-          const secondsVal = isSurvived ? 0 : outAtSecs;
-          
-          const pct = isSurvived ? 100 : ((300 - secondsVal) / 300) * 100;
-          const safePct = Math.max(0, Math.min(100, pct));
-          
-          const pctKey = safePct.toFixed(1);
-          if (!percentageCounts[pctKey]) {
-            percentageCounts[pctKey] = 0;
-          }
-          const staggerIndex = percentageCounts[pctKey]++;
-          
-          const markerColor = isSurvived ? 'var(--color-neon-yellow)' : 'var(--color-neon-magenta)';
-          const textColor = isSurvived ? 'var(--color-neon-yellow)' : 'var(--color-neon-magenta)';
-          const isAbove = (idx % 2 === 0);
-          
-          const offsetSize = 15 + staggerIndex * 30;
           const fighterObj = api.getFighterDetails(p.character) || {};
           const iconUrl = fighterObj.icon || 'assets/mario.png';
-          
-          markersHtml += `
-            <div class="timeline-marker ${isSurvived ? 'survived' : ''}" style="position: absolute; left: ${safePct}%; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: ${isAbove ? 'column-reverse' : 'column'}; align-items: center; z-index: 10;">
-              <!-- Details -->
-              <div class="timeline-player-info panel-beveled" style="text-align: center; white-space: nowrap; background: var(--color-bg-dark); border: 1px solid ${markerColor}; padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); margin: ${isAbove ? `0 0 ${offsetSize}px 0` : `${offsetSize}px 0 0 0`}; box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px; pointer-events: none; user-select: none;">
-                <span style="font-weight: bold; color: #fff; text-shadow: 0 0 2px rgba(255,255,255,0.5);">${p.playerName}${isSurvived ? ' 🏆' : ''}</span>
-                <span class="hover-time" style="color: ${textColor}; font-weight: bold; text-shadow: 0 0 4px ${textColor};">(${isSurvived ? 'WINNER' : p.outAt || '5:00'})</span>
+
+          if (isSurvived) {
+            winnersHtml += `
+              <div class="winner-sidebar-row" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <!-- Dot marker (Character head-icon bubble in gold) -->
+                <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid var(--color-neon-yellow); box-shadow: 0 0 8px var(--color-neon-yellow); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+                  <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${p.character}" />
+                </div>
+                <!-- Name/Details in a panel-beveled gold border box -->
+                <div class="panel-beveled" style="white-space: nowrap; background: var(--color-bg-dark); border: 1px solid var(--color-neon-yellow); padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px;">
+                  <span style="font-weight: bold; color: #fff; text-shadow: 0 0 2px rgba(255,255,255,0.5);">${p.playerName} 🏆</span>
+                </div>
               </div>
-              <!-- Connector line -->
-              <div class="timeline-connector" style="width: 2px; height: ${offsetSize}px; background: ${markerColor}; opacity: 0.8; position: absolute; ${isAbove ? 'bottom: 15px' : 'top: 15px'};"></div>
-              <!-- Dot marker (Character head-icon bubble) -->
-              <div class="timeline-dot" style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid ${markerColor}; box-shadow: 0 0 8px ${markerColor}; z-index: 11; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${p.character}" />
+            `;
+          } else {
+            const pct = ((300 - outAtSecs) / 300) * 100;
+            const safePct = Math.max(0, Math.min(100, pct));
+            
+            const pctKey = safePct.toFixed(1);
+            if (!percentageCounts[pctKey]) {
+              percentageCounts[pctKey] = 0;
+            }
+            const staggerIndex = percentageCounts[pctKey]++;
+            
+            const markerColor = 'var(--color-neon-magenta)';
+            const textColor = 'var(--color-neon-magenta)';
+            const isAbove = (markerIdx % 2 === 0);
+            markerIdx++;
+            
+            const offsetSize = 15 + staggerIndex * 30;
+            
+            // Invert the countdown timer to get elapsed match time
+            const elapsedSecs = 300 - outAtSecs;
+            const elapsedMins = Math.floor(elapsedSecs / 60);
+            const elapsedRemSecs = elapsedSecs % 60;
+            const elapsedStr = `${elapsedMins}:${elapsedRemSecs < 10 ? '0' : ''}${elapsedRemSecs}`;
+
+            markersHtml += `
+              <div class="timeline-marker" style="position: absolute; left: ${safePct}%; top: 50%; transform: translate(-50%, -50%); width: 24px; height: 24px; z-index: 10;">
+                <!-- Dot marker (Character head-icon bubble centered on timeline) -->
+                <div class="timeline-dot" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid ${markerColor}; box-shadow: 0 0 8px ${markerColor}; z-index: 11; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                  <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${p.character}" />
+                </div>
+                <!-- Connector line coming out of the bubble -->
+                <div class="timeline-connector" style="position: absolute; left: 11px; ${isAbove ? `bottom: 24px` : `top: 24px`}; width: 2px; height: ${offsetSize}px; background: ${markerColor}; opacity: 0.8; z-index: 9;"></div>
+                <!-- Player details box -->
+                <div class="timeline-player-info panel-beveled" style="position: absolute; left: 12px; ${isAbove ? `bottom: ${24 + offsetSize}px` : `top: ${24 + offsetSize}px`}; transform: translateX(-50%); text-align: center; white-space: nowrap; background: var(--color-bg-dark); border: 1px solid ${markerColor}; padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px; pointer-events: none; user-select: none; z-index: 10;">
+                  <span style="font-weight: bold; color: #fff; text-shadow: 0 0 2px rgba(255,255,255,0.5);">${p.playerName}</span>
+                  <span class="hover-time" style="color: ${textColor}; font-weight: bold; text-shadow: 0 0 4px ${textColor};">(${elapsedStr})</span>
+                </div>
               </div>
-            </div>
-          `;
+            `;
+          }
         });
       }
 
@@ -815,22 +839,31 @@ document.addEventListener("DOMContentLoaded", () => {
                   <span class="player-stat-badge ko">Kills: ${p.kos !== undefined ? p.kos : 0}</span>
                   <span class="player-stat-badge fall">Falls: ${p.falls !== undefined ? Math.abs(p.falls) : 0}</span>
                   <span class="player-stat-badge sd">SDs: ${p.sds !== undefined ? Math.abs(p.sds) : 0}</span>
-                  <span class="player-stat-badge out">Out: ${p.outAt || (p.placement === 1 ? '---' : '5:00')}</span>
                 </div>
               </div>
             `;
           }).join('')}
         </div>
         <div class="match-card-actions" style="display: flex; gap: 10px; justify-content: flex-start; align-items: center; flex-wrap: wrap;">
-          <button class="btn-arcade cyan toggle-timeline-btn" data-id="${m.id}" style="font-size: 11px; padding: 4px 12px; height: 28px; line-height: 1;">VIEW TIMELINE</button>
           <button class="btn-arcade magenta delete-match-btn" data-id="${m.id}" style="font-size: 11px; padding: 4px 12px; height: 28px; line-height: 1;">DELETE RECORD</button>
         </div>
-        <div class="match-timeline-drawer" id="timeline-drawer-${m.id}" style="display: none; padding: 50px 15px 50px 15px; margin-top: 20px; border-top: 1px solid var(--color-border-dark); overflow: visible;">
-          <div class="timeline-track-container" style="position: relative; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; border: 1px solid rgba(255,255,255,0.2);">
-            <div style="position: absolute; left: 0; top: 0; height: 100%; width: 100%; background: var(--color-neon-cyan); opacity: 0.3; border-radius: 3px; box-shadow: 0 0 10px var(--color-neon-cyan);"></div>
-            <div style="position: absolute; left: 0; top: -25px; font-family: var(--font-arcade); font-size: 9px; color: var(--color-neon-cyan); text-shadow: 0 0 4px var(--color-neon-cyan); font-weight: bold; letter-spacing: 0.5px;">5:00 (START)</div>
-            <div style="position: absolute; right: 0; top: -25px; font-family: var(--font-arcade); font-size: 9px; color: var(--color-neon-cyan); text-shadow: 0 0 4px var(--color-neon-cyan); font-weight: bold; letter-spacing: 0.5px;">END</div>
-            ${markersHtml}
+        <div class="match-timeline-drawer" id="timeline-drawer-${m.id}">
+          <!-- Timeline Track Column -->
+          <div class="timeline-track-column">
+            <div class="timeline-track-container">
+              <div class="timeline-track-glow"></div>
+              <div class="timeline-label start">5:00 (START)</div>
+              <div class="timeline-label end">END</div>
+              ${markersHtml}
+            </div>
+          </div>
+          
+          <!-- Victory Sidebar Column -->
+          <div class="timeline-victory-column">
+            <div class="timeline-victory-title">🏆 VICTORY</div>
+            <div class="timeline-victory-list">
+              ${winnersHtml || `<div style="font-family: var(--font-stats); font-size: 11px; color: #666;">NO SURVIVORS</div>`}
+            </div>
           </div>
         </div>
       `;
