@@ -5,7 +5,10 @@
         ],
         "name": "Mario",
         "slug": "mario",
-        "series": "Mario",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/Mario.svg",
+            "name": "Mario"
+        },
         "availability": "Starter",
         "also_appears_in": [
             "64",
@@ -19,7 +22,7 @@
             {
                 "slot": 1,
                 "variant": "Mario",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/mario/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Mario_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -189,7 +192,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-MarioHeadSSBU.webp"
     },
     {
         "ids": [
@@ -197,7 +201,10 @@
         ],
         "name": "Donkey Kong",
         "slug": "donkey-kong",
-        "series": "Donkey Kong",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/DKSymbol.svg",
+            "name": "Donkey Kong"
+        },
         "availability": "Starter",
         "also_appears_in": [
             "64",
@@ -211,7 +218,7 @@
             {
                 "slot": 1,
                 "variant": "Donkey Kong",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/donkey-kong/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Donkey_Kong_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -341,7 +348,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-DonkeyKongHeadSSBU.webp"
     },
     {
         "ids": [
@@ -349,7 +357,10 @@
         ],
         "name": "Link",
         "slug": "link",
-        "series": "The Legend of Zelda",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/ZeldaSymbol.svg",
+            "name": "The Legend of Zelda"
+        },
         "availability": "Starter",
         "also_appears_in": [
             "64",
@@ -363,7 +374,7 @@
             {
                 "slot": 1,
                 "variant": "Link",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/link/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Link_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -498,7 +509,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-LinkHeadSSBU.webp"
     },
     {
         "ids": [
@@ -506,7 +518,10 @@
         ],
         "name": "Samus",
         "slug": "samus",
-        "series": "Metroid",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/MetroidSymbol.svg",
+            "name": "Metroid"
+        },
         "availability": "Starter",
         "also_appears_in": [
             "64",
@@ -520,7 +535,7 @@
             {
                 "slot": 1,
                 "variant": "Samus",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/samus/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Samus_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -640,7 +655,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-SamusHeadSSBU.webp"
     },
     {
         "ids": [
@@ -648,7 +664,10 @@
         ],
         "name": "Dark Samus",
         "slug": "dark-samus",
-        "series": "Metroid",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/MetroidSymbol.svg",
+            "name": "Metroid"
+        },
         "availability": "Unlockable",
         "also_appears_in": [],
         "order": 5,
@@ -656,7 +675,7 @@
             {
                 "slot": 1,
                 "variant": "Dark Samus",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/dark-samus/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Dark_Samus_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -745,7 +764,8 @@
                 "slug": "dark-samus",
                 "also_appears_in": []
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-DarkSamusHeadSSBU.webp"
     },
     {
         "ids": [
@@ -753,7 +773,10 @@
         ],
         "name": "Yoshi",
         "slug": "yoshi",
-        "series": "Yoshi",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/YoshiSymbol.svg",
+            "name": "Yoshi"
+        },
         "availability": "Starter",
         "also_appears_in": [
             "64",
@@ -767,7 +790,7 @@
             {
                 "slot": 1,
                 "variant": "Yoshi",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/yoshi/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Yoshi_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -922,7 +945,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-YoshiHeadSSBU.webp"
     },
     {
         "ids": [
@@ -930,7 +954,10 @@
         ],
         "name": "Kirby",
         "slug": "kirby",
-        "series": "Kirby",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/KirbySymbol.svg",
+            "name": "Kirby"
+        },
         "availability": "Starter",
         "also_appears_in": [
             "64",
@@ -944,7 +971,7 @@
             {
                 "slot": 1,
                 "variant": "Kirby",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/kirby/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Kirby_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -1124,7 +1151,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-KirbyHeadSSBU.webp"
     },
     {
         "ids": [
@@ -1132,7 +1160,10 @@
         ],
         "name": "Fox",
         "slug": "fox",
-        "series": "Star Fox",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/StarFoxSymbol.svg",
+            "name": "Star Fox"
+        },
         "availability": "Starter",
         "also_appears_in": [
             "64",
@@ -1146,7 +1177,7 @@
             {
                 "slot": 1,
                 "variant": "Fox",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/fox/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Fox_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -1261,7 +1292,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-FoxHeadSSBU.webp"
     },
     {
         "ids": [
@@ -1269,7 +1301,10 @@
         ],
         "name": "Pikachu",
         "slug": "pikachu",
-        "series": "Pokémon",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/PokemonSymbol.svg",
+            "name": "Pokémon"
+        },
         "availability": "Starter",
         "also_appears_in": [
             "64",
@@ -1283,7 +1318,7 @@
             {
                 "slot": 1,
                 "variant": "Pikachu",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/pikachu/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Pikachu_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -1418,7 +1453,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-PikachuHeadSSBU.webp"
     },
     {
         "ids": [
@@ -1426,7 +1462,10 @@
         ],
         "name": "Luigi",
         "slug": "luigi",
-        "series": "Mario",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/Mario.svg",
+            "name": "Mario"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "64",
@@ -1440,7 +1479,7 @@
             {
                 "slot": 1,
                 "variant": "Luigi",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/luigi/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Luigi_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -1575,7 +1614,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-LuigiHeadSSBU.webp"
     },
     {
         "ids": [
@@ -1583,7 +1623,10 @@
         ],
         "name": "Ness",
         "slug": "ness",
-        "series": "EarthBound",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/EarthboundSymbol.svg",
+            "name": "EarthBound"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "64",
@@ -1597,7 +1640,7 @@
             {
                 "slot": 1,
                 "variant": "Ness",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/ness/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Ness_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -1762,7 +1805,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-NessHeadSSBU.webp"
     },
     {
         "ids": [
@@ -1770,7 +1814,10 @@
         ],
         "name": "Captain Falcon",
         "slug": "captain-falcon",
-        "series": "F-Zero",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/FZeroSymbol.svg",
+            "name": "F-Zero"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "64",
@@ -1784,7 +1831,7 @@
             {
                 "slot": 1,
                 "variant": "Captain Falcon",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/captain-falcon/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Captain_Falcon_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -1914,7 +1961,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-CaptainFalconHeadSSBU.webp"
     },
     {
         "ids": [
@@ -1922,7 +1970,10 @@
         ],
         "name": "Jigglypuff",
         "slug": "jigglypuff",
-        "series": "Pokémon",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/PokemonSymbol.svg",
+            "name": "Pokémon"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "64",
@@ -1936,7 +1987,7 @@
             {
                 "slot": 1,
                 "variant": "Jigglypuff",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/jigglypuff/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Jigglypuff_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -2076,7 +2127,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-JigglypuffHeadSSBU.webp"
     },
     {
         "ids": [
@@ -2084,7 +2136,10 @@
         ],
         "name": "Peach",
         "slug": "peach",
-        "series": "Mario",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/Mario.svg",
+            "name": "Mario"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Melee",
@@ -2097,7 +2152,7 @@
             {
                 "slot": 1,
                 "variant": "Peach",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/peach/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Peach_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -2231,7 +2286,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-PeachHeadSSBU.webp"
     },
     {
         "ids": [
@@ -2239,7 +2295,10 @@
         ],
         "name": "Daisy",
         "slug": "daisy",
-        "series": "Mario",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/Mario.svg",
+            "name": "Mario"
+        },
         "availability": "Unlockable",
         "also_appears_in": [],
         "order": 15,
@@ -2247,7 +2306,7 @@
             {
                 "slot": 1,
                 "variant": "Daisy",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/daisy/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Daisy_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -2336,7 +2395,8 @@
                 "slug": "daisy",
                 "also_appears_in": []
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-DaisyHeadSSBU.webp"
     },
     {
         "ids": [
@@ -2344,7 +2404,10 @@
         ],
         "name": "Bowser",
         "slug": "bowser",
-        "series": "Mario",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/Mario.svg",
+            "name": "Mario"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Melee",
@@ -2357,7 +2420,7 @@
             {
                 "slot": 1,
                 "variant": "Bowser",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/bowser/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Bowser_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -2501,7 +2564,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-BowserHeadSSBU.webp"
     },
     {
         "ids": [
@@ -2509,7 +2573,10 @@
         ],
         "name": "Ice Climbers",
         "slug": "ice-climbers",
-        "series": "Ice Climber",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/IceClimberSymbol.svg",
+            "name": "Ice Climber"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Melee",
@@ -2522,7 +2589,7 @@
             {
                 "slot": 1,
                 "variant": "Ice Climbers",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/ice-climbers/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Ice_Climbers_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -2656,7 +2723,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-IceClimbersHeadSSBU.webp"
     },
     {
         "ids": [
@@ -2664,7 +2732,10 @@
         ],
         "name": "Sheik",
         "slug": "sheik",
-        "series": "The Legend of Zelda",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/ZeldaSymbol.svg",
+            "name": "The Legend of Zelda"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Melee",
@@ -2677,7 +2748,7 @@
             {
                 "slot": 1,
                 "variant": "Sheik",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/sheik/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Sheik_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -2796,7 +2867,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-SheikHeadSSBU.webp"
     },
     {
         "ids": [
@@ -2804,7 +2876,10 @@
         ],
         "name": "Zelda",
         "slug": "zelda",
-        "series": "The Legend of Zelda",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/ZeldaSymbol.svg",
+            "name": "The Legend of Zelda"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Melee",
@@ -2817,7 +2892,7 @@
             {
                 "slot": 1,
                 "variant": "Zelda",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/zelda/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Zelda_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -2956,7 +3031,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-ZeldaHeadSSBU.webp"
     },
     {
         "ids": [
@@ -2964,7 +3040,10 @@
         ],
         "name": "Dr. Mario",
         "slug": "dr-mario",
-        "series": "Mario",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/Mario.svg",
+            "name": "Mario"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Melee",
@@ -2976,7 +3055,7 @@
             {
                 "slot": 1,
                 "variant": "Dr. Mario",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/dr-mario/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Dr.webp"
             },
             {
                 "slot": 2,
@@ -3099,7 +3178,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-DrMarioHeadSSBU.webp"
     },
     {
         "ids": [
@@ -3107,7 +3187,10 @@
         ],
         "name": "Pichu",
         "slug": "pichu",
-        "series": "Pokémon",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/PokemonSymbol.svg",
+            "name": "Pokémon"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Melee"
@@ -3117,7 +3200,7 @@
             {
                 "slot": 1,
                 "variant": "Pichu",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/pichu/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Pichu_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -3218,7 +3301,8 @@
                     "Melee"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-PichuHeadSSBU.webp"
     },
     {
         "ids": [
@@ -3226,7 +3310,10 @@
         ],
         "name": "Falco",
         "slug": "falco",
-        "series": "Star Fox",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/StarFoxSymbol.svg",
+            "name": "Star Fox"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Melee",
@@ -3239,7 +3326,7 @@
             {
                 "slot": 1,
                 "variant": "Falco",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/falco/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Falco_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -3363,7 +3450,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-FalcoHeadSSBU.webp"
     },
     {
         "ids": [
@@ -3371,7 +3459,10 @@
         ],
         "name": "Marth",
         "slug": "marth",
-        "series": "Fire Emblem",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/FireEmblemSymbol.svg",
+            "name": "Fire Emblem"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Melee",
@@ -3384,7 +3475,7 @@
             {
                 "slot": 1,
                 "variant": "Marth",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/marth/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Marth_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -3533,7 +3624,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-MarthHeadSSBU.webp"
     },
     {
         "ids": [
@@ -3541,7 +3633,10 @@
         ],
         "name": "Lucina",
         "slug": "lucina",
-        "series": "Fire Emblem",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/FireEmblemSymbol.svg",
+            "name": "Fire Emblem"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "3DS",
@@ -3552,7 +3647,7 @@
             {
                 "slot": 1,
                 "variant": "Lucina",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/lucina/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Lucina_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -3634,7 +3729,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-LucinaHeadSSBU.webp"
     },
     {
         "ids": [
@@ -3642,7 +3738,10 @@
         ],
         "name": "Young Link",
         "slug": "young-link",
-        "series": "The Legend of Zelda",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/ZeldaSymbol.svg",
+            "name": "The Legend of Zelda"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Melee"
@@ -3652,7 +3751,7 @@
             {
                 "slot": 1,
                 "variant": "Young Link",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/young-link/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Young_Link_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -3763,7 +3862,8 @@
                     "Melee"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-YoungLinkHeadSSBU.webp"
     },
     {
         "ids": [
@@ -3771,7 +3871,10 @@
         ],
         "name": "Ganondorf",
         "slug": "ganondorf",
-        "series": "The Legend of Zelda",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/ZeldaSymbol.svg",
+            "name": "The Legend of Zelda"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Melee",
@@ -3784,7 +3887,7 @@
             {
                 "slot": 1,
                 "variant": "Ganondorf",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/ganondorf/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Ganondorf_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -3908,7 +4011,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-GanondorfHeadSSBU.webp"
     },
     {
         "ids": [
@@ -3916,7 +4020,10 @@
         ],
         "name": "Mewtwo",
         "slug": "mewtwo",
-        "series": "Pokémon",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/PokemonSymbol.svg",
+            "name": "Pokémon"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Melee",
@@ -3928,7 +4035,7 @@
             {
                 "slot": 1,
                 "variant": "Mewtwo",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/mewtwo/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Mewtwo_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -4101,7 +4208,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-MewtwoHeadSSBU.webp"
     },
     {
         "ids": [
@@ -4109,7 +4217,10 @@
         ],
         "name": "Roy",
         "slug": "roy",
-        "series": "Fire Emblem",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/FireEmblemSymbol.svg",
+            "name": "Fire Emblem"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Melee",
@@ -4121,7 +4232,7 @@
             {
                 "slot": 1,
                 "variant": "Roy",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/roy/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Roy_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -4284,7 +4395,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-RoyHeadSSBU.webp"
     },
     {
         "ids": [
@@ -4292,7 +4404,10 @@
         ],
         "name": "Chrom",
         "slug": "chrom",
-        "series": "Fire Emblem",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/FireEmblemSymbol.svg",
+            "name": "Fire Emblem"
+        },
         "availability": "Unlockable",
         "also_appears_in": [],
         "order": 29,
@@ -4300,7 +4415,7 @@
             {
                 "slot": 1,
                 "variant": "Chrom",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/chrom/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Chrom_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -4389,7 +4504,8 @@
                 "slug": "chrom",
                 "also_appears_in": []
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-ChromHeadSSBU.webp"
     },
     {
         "ids": [
@@ -4397,7 +4513,10 @@
         ],
         "name": "Mr. Game & Watch",
         "slug": "mr-game-and-watch",
-        "series": "Game & Watch",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/Game%26WatchSymbol.svg",
+            "name": "Game & Watch"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Melee",
@@ -4410,7 +4529,7 @@
             {
                 "slot": 1,
                 "variant": "Mr. Game & Watch",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/mr-game-and-watch/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Mr.webp"
             },
             {
                 "slot": 2,
@@ -4564,7 +4683,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-MrGame%26WatchHeadSSBU.webp"
     },
     {
         "ids": [
@@ -4572,7 +4692,10 @@
         ],
         "name": "Meta Knight",
         "slug": "meta-knight",
-        "series": "Kirby",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/KirbySymbol.svg",
+            "name": "Kirby"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Brawl",
@@ -4584,7 +4707,7 @@
             {
                 "slot": 1,
                 "variant": "Meta Knight",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/meta-knight/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Meta_Knight_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -4737,7 +4860,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-MetaKnightHeadSSBU.webp"
     },
     {
         "ids": [
@@ -4745,7 +4869,10 @@
         ],
         "name": "Pit",
         "slug": "pit",
-        "series": "Kid Icarus",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/KidIcarusSymbol.svg",
+            "name": "Kid Icarus"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Brawl",
@@ -4757,7 +4884,7 @@
             {
                 "slot": 1,
                 "variant": "Pit",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/pit/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Pit_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -4900,7 +5027,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-PitHeadSSBU.webp"
     },
     {
         "ids": [
@@ -4908,7 +5036,10 @@
         ],
         "name": "Dark Pit",
         "slug": "dark-pit",
-        "series": "Kid Icarus",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/KidIcarusSymbol.svg",
+            "name": "Kid Icarus"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "3DS",
@@ -4919,7 +5050,7 @@
             {
                 "slot": 1,
                 "variant": "Dark Pit",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/dark-pit/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Dark_Pit_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -5011,7 +5142,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-DarkPitHeadSSBU.webp"
     },
     {
         "ids": [
@@ -5019,7 +5151,10 @@
         ],
         "name": "Zero Suit Samus",
         "slug": "zero-suit-samus",
-        "series": "Metroid",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/MetroidSymbol.svg",
+            "name": "Metroid"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Brawl",
@@ -5031,7 +5166,7 @@
             {
                 "slot": 1,
                 "variant": "Zero Suit Samus",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/zero-suit-samus/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Zero_Suit_Samus_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -5159,7 +5294,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-ZeroSuitSamusHeadSSBU.webp"
     },
     {
         "ids": [
@@ -5167,7 +5303,10 @@
         ],
         "name": "Wario",
         "slug": "wario",
-        "series": "Wario",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/WarioSymbol.svg",
+            "name": "Wario"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Brawl",
@@ -5179,7 +5318,7 @@
             {
                 "slot": 1,
                 "variant": "Wario",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/wario/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Wario_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -5312,7 +5451,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-WarioHeadSSBU.webp"
     },
     {
         "ids": [
@@ -5320,7 +5460,10 @@
         ],
         "name": "Snake",
         "slug": "snake",
-        "series": "Metal Gear",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/MetalGearSymbol.svg",
+            "name": "Metal Gear"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Brawl"
@@ -5330,7 +5473,7 @@
             {
                 "slot": 1,
                 "variant": "Snake",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/snake/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Snake_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -5456,7 +5599,8 @@
                     "Brawl"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-SnakeHeadSSBU.webp"
     },
     {
         "ids": [
@@ -5464,7 +5608,10 @@
         ],
         "name": "Ike",
         "slug": "ike",
-        "series": "Fire Emblem",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/FireEmblemSymbol.svg",
+            "name": "Fire Emblem"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Brawl",
@@ -5476,7 +5623,7 @@
             {
                 "slot": 1,
                 "variant": "Ike",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/ike/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Ike_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -5614,7 +5761,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-IkeHeadSSBU.webp"
     },
     {
         "ids": [
@@ -5624,7 +5772,10 @@
         ],
         "name": "Pokémon Trainer",
         "slug": "pokemon-trainer",
-        "series": "Pokémon",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/PokemonSymbol.svg",
+            "name": "Pokémon"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Brawl"
@@ -5634,7 +5785,7 @@
             {
                 "slot": 1,
                 "variant": "Male",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/pokemon-trainer/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Poke%CC%81mon_Trainer_(solo)_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -5873,7 +6024,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-Poke%CC%81monTrainerHeadSSBU.webp"
     },
     {
         "ids": [
@@ -5881,7 +6033,10 @@
         ],
         "name": "Diddy Kong",
         "slug": "diddy-kong",
-        "series": "Donkey Kong",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/DKSymbol.svg",
+            "name": "Donkey Kong"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Brawl",
@@ -5893,7 +6048,7 @@
             {
                 "slot": 1,
                 "variant": "Diddy Kong",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/diddy-kong/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Diddy_Kong_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -6056,7 +6211,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-DiddyKongHeadSSBU.webp"
     },
     {
         "ids": [
@@ -6064,7 +6220,10 @@
         ],
         "name": "Lucas",
         "slug": "lucas",
-        "series": "EarthBound",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/EarthboundSymbol.svg",
+            "name": "EarthBound"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Brawl",
@@ -6076,7 +6235,7 @@
             {
                 "slot": 1,
                 "variant": "Lucas",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/lucas/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Lucas_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -6219,7 +6378,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-LucasHeadSSBU.webp"
     },
     {
         "ids": [
@@ -6227,7 +6387,10 @@
         ],
         "name": "Sonic",
         "slug": "sonic",
-        "series": "Sonic the Hedgehog",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/SonicSymbol.svg",
+            "name": "Sonic"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Brawl",
@@ -6239,7 +6402,7 @@
             {
                 "slot": 1,
                 "variant": "Sonic",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/sonic/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/254px-Sonic_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -6357,7 +6520,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-SonicHeadSSBU.webp"
     },
     {
         "ids": [
@@ -6365,7 +6529,10 @@
         ],
         "name": "King Dedede",
         "slug": "king-dedede",
-        "series": "Kirby",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/KirbySymbol.svg",
+            "name": "Kirby"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Brawl",
@@ -6377,7 +6544,7 @@
             {
                 "slot": 1,
                 "variant": "King Dedede",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/king-dedede/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-King_Dedede_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -6520,7 +6687,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-KingDededeHeadSSBU.webp"
     },
     {
         "ids": [
@@ -6528,7 +6696,10 @@
         ],
         "name": "Olimar",
         "slug": "olimar",
-        "series": "Pikmin",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/PikminSymbol.svg",
+            "name": "Pikmin"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Brawl",
@@ -6540,7 +6711,7 @@
             {
                 "slot": 1,
                 "variant": "Olimar",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/olimar/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Olimar_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -6733,7 +6904,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-OlimarHeadSSBU.webp"
     },
     {
         "ids": [
@@ -6741,7 +6913,10 @@
         ],
         "name": "Lucario",
         "slug": "lucario",
-        "series": "Pokémon",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/PokemonSymbol.svg",
+            "name": "Pokémon"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Brawl",
@@ -6753,7 +6928,7 @@
             {
                 "slot": 1,
                 "variant": "Lucario",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/lucario/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Lucario_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -6866,7 +7041,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-LucarioHeadSSBU.webp"
     },
     {
         "ids": [
@@ -6874,7 +7050,10 @@
         ],
         "name": "R.O.B.",
         "slug": "rob",
-        "series": "R.O.B.",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/ROBSymbol.svg",
+            "name": "R.O.B."
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Brawl",
@@ -6886,7 +7065,7 @@
             {
                 "slot": 1,
                 "variant": "R.O.B.",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/rob/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-R.webp"
             },
             {
                 "slot": 2,
@@ -7029,7 +7208,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-ROBHeadGreySSBU.webp"
     },
     {
         "ids": [
@@ -7037,7 +7217,10 @@
         ],
         "name": "Toon Link",
         "slug": "toon-link",
-        "series": "The Legend of Zelda",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/ZeldaSymbol.svg",
+            "name": "The Legend of Zelda"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Brawl",
@@ -7049,7 +7232,7 @@
             {
                 "slot": 1,
                 "variant": "Toon Link",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/toon-link/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/237px-Toon_Link_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -7172,7 +7355,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-ToonLinkHeadSSBU.webp"
     },
     {
         "ids": [
@@ -7180,7 +7364,10 @@
         ],
         "name": "Wolf",
         "slug": "wolf",
-        "series": "Star Fox",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/StarFoxSymbol.svg",
+            "name": "Star Fox"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "Brawl"
@@ -7190,7 +7377,7 @@
             {
                 "slot": 1,
                 "variant": "Wolf",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/wolf/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Wolf_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -7281,7 +7468,8 @@
                     "Brawl"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-WolfHeadSSBU.webp"
     },
     {
         "ids": [
@@ -7289,7 +7477,10 @@
         ],
         "name": "Villager",
         "slug": "villager",
-        "series": "Animal Crossing",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/AnimalCrossingSymbol.svg",
+            "name": "Animal Crossing"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "3DS",
@@ -7300,7 +7491,7 @@
             {
                 "slot": 1,
                 "variant": "Male",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/villager/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/240px-Villager_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -7442,7 +7633,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-VillagerHeadSSBU.webp"
     },
     {
         "ids": [
@@ -7450,7 +7642,10 @@
         ],
         "name": "Mega Man",
         "slug": "mega-man",
-        "series": "Mega Man",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/MegaManSymbol.svg",
+            "name": "Mega Man"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "3DS",
@@ -7461,7 +7656,7 @@
             {
                 "slot": 1,
                 "variant": "Mega Man",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/mega-man/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Mega_Man_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -7673,7 +7868,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-MegaManHeadSSBU.webp"
     },
     {
         "ids": [
@@ -7681,7 +7877,10 @@
         ],
         "name": "Wii Fit Trainer",
         "slug": "wii-fit-trainer",
-        "series": "Wii Fit",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/WiiFitSymbol.svg",
+            "name": "Wii Fit"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "3DS",
@@ -7692,7 +7891,7 @@
             {
                 "slot": 1,
                 "variant": "Female",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/wii-fit-trainer/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Wii_Fit_Trainer_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -7824,7 +8023,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-WiiFitTrainerHeadSSBU.webp"
     },
     {
         "ids": [
@@ -7832,7 +8032,10 @@
         ],
         "name": "Rosalina & Luma",
         "slug": "rosalina-and-luma",
-        "series": "Mario",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/Mario.svg",
+            "name": "Mario"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "3DS",
@@ -7843,7 +8046,7 @@
             {
                 "slot": 1,
                 "variant": "Rosalina & Luma",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/rosalina-and-luma/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Rosalina_%26_Luma_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -7985,7 +8188,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-RosalinaHeadSSBU.webp"
     },
     {
         "ids": [
@@ -7993,7 +8197,10 @@
         ],
         "name": "Little Mac",
         "slug": "little-mac",
-        "series": "Punch-Out!!",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/PunchOutSymbol.svg",
+            "name": "Punch-Out!!"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "3DS",
@@ -8004,7 +8211,7 @@
             {
                 "slot": 1,
                 "variant": "Little Mac",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/little-mac/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Little_Mac_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -8141,7 +8348,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-LittleMacHeadSSBU.webp"
     },
     {
         "ids": [
@@ -8149,7 +8357,10 @@
         ],
         "name": "Greninja",
         "slug": "greninja",
-        "series": "Pokémon",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/PokemonSymbol.svg",
+            "name": "Pokémon"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "3DS",
@@ -8160,7 +8371,7 @@
             {
                 "slot": 1,
                 "variant": "Greninja",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/greninja/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Greninja_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -8267,7 +8478,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-GreninjaHeadSSBU.webp"
     },
     {
         "ids": [
@@ -8275,7 +8487,10 @@
         ],
         "name": "Mii Brawler",
         "slug": "mii-brawler",
-        "series": "Super Smash Bros.",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/SmashBrosSymbol.svg",
+            "name": "Super Smash Bros."
+        },
         "availability": "Custom",
         "also_appears_in": [
             "3DS",
@@ -8286,7 +8501,7 @@
             {
                 "slot": 1,
                 "variant": "Mii Brawler",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/mii-brawler/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Mii_Brawler_SSBU.webp"
             }
         ],
         "variants": [
@@ -8388,7 +8603,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-MiiBrawlerHeadSSBU.webp"
     },
     {
         "ids": [
@@ -8396,7 +8612,10 @@
         ],
         "name": "Mii Swordfighter",
         "slug": "mii-swordfighter",
-        "series": "Super Smash Bros.",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/SmashBrosSymbol.svg",
+            "name": "Super Smash Bros."
+        },
         "availability": "Custom",
         "also_appears_in": [
             "3DS",
@@ -8407,7 +8626,7 @@
             {
                 "slot": 1,
                 "variant": "Mii Swordfighter",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/mii-swordfighter/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Mii_Swordfighter_SSBU.webp"
             }
         ],
         "variants": [
@@ -8529,7 +8748,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-MiiSwordfighterHeadSSBU.webp"
     },
     {
         "ids": [
@@ -8537,7 +8757,10 @@
         ],
         "name": "Mii Gunner",
         "slug": "mii-gunner",
-        "series": "Super Smash Bros.",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/SmashBrosSymbol.svg",
+            "name": "Super Smash Bros."
+        },
         "availability": "Custom",
         "also_appears_in": [
             "3DS",
@@ -8548,7 +8771,7 @@
             {
                 "slot": 1,
                 "variant": "Mii Gunner",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/mii-gunner/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Mii_Gunner_SSBU.webp"
             }
         ],
         "variants": [
@@ -8640,7 +8863,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-MiiGunnerHeadSSBU.webp"
     },
     {
         "ids": [
@@ -8648,7 +8872,10 @@
         ],
         "name": "Palutena",
         "slug": "palutena",
-        "series": "Kid Icarus",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/KidIcarusSymbol.svg",
+            "name": "Kid Icarus"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "3DS",
@@ -8659,7 +8886,7 @@
             {
                 "slot": 1,
                 "variant": "Palutena",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/palutena/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Palutena_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -8761,7 +8988,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-PalutenaHeadSSBU.webp"
     },
     {
         "ids": [
@@ -8769,7 +8997,10 @@
         ],
         "name": "Pac-Man",
         "slug": "pac-man",
-        "series": "Pac-Man",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/PacManSymbol.svg",
+            "name": "Pac-Man"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "3DS",
@@ -8780,7 +9011,7 @@
             {
                 "slot": 1,
                 "variant": "Pac-Man",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/pac-man/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Pac-Man_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -8952,7 +9183,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-Pac-ManHeadSSBU.webp"
     },
     {
         "ids": [
@@ -8960,7 +9192,10 @@
         ],
         "name": "Robin",
         "slug": "robin",
-        "series": "Fire Emblem",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/FireEmblemSymbol.svg",
+            "name": "Fire Emblem"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "3DS",
@@ -8971,7 +9206,7 @@
             {
                 "slot": 1,
                 "variant": "Male",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/robin/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Robin_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -9163,7 +9398,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-RobinHeadSSBU.webp"
     },
     {
         "ids": [
@@ -9171,7 +9407,10 @@
         ],
         "name": "Shulk",
         "slug": "shulk",
-        "series": "Xenoblade Chronicles",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/XenobladeSymbol.svg",
+            "name": "Xenoblade Chronicles"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "3DS",
@@ -9182,7 +9421,7 @@
             {
                 "slot": 1,
                 "variant": "Shulk",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/shulk/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Shulk_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -9354,7 +9593,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-ShulkHeadSSBU.webp"
     },
     {
         "ids": [
@@ -9362,7 +9602,10 @@
         ],
         "name": "Bowser Jr.",
         "slug": "bowser-jr",
-        "series": "Mario",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/Mario.svg",
+            "name": "Mario"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "3DS",
@@ -9373,7 +9616,7 @@
             {
                 "slot": 1,
                 "variant": "Bowser Jr.",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/bowser-jr/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/270px-Bowser_Jr.webp"
             },
             {
                 "slot": 2,
@@ -9560,7 +9803,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-BowserJrHeadSSBU.webp"
     },
     {
         "ids": [
@@ -9568,7 +9812,10 @@
         ],
         "name": "Duck Hunt",
         "slug": "duck-hunt",
-        "series": "Duck Hunt",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/DuckHuntSymbol.svg",
+            "name": "Duck Hunt"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "3DS",
@@ -9579,7 +9826,7 @@
             {
                 "slot": 1,
                 "variant": "Duck Hunt",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/duck-hunt/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Duck_Hunt_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -9731,7 +9978,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-DuckHuntHeadSSBU.webp"
     },
     {
         "ids": [
@@ -9739,7 +9987,10 @@
         ],
         "name": "Ryu",
         "slug": "ryu",
-        "series": "Street Fighter",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/StreetFighterSymbol.svg",
+            "name": "Street Fighter"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "3DS",
@@ -9750,7 +10001,7 @@
             {
                 "slot": 1,
                 "variant": "Ryu",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/ryu/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Ryu_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -9947,7 +10198,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-RyuHeadSSBU.webp"
     },
     {
         "ids": [
@@ -9955,7 +10207,10 @@
         ],
         "name": "Ken",
         "slug": "ken",
-        "series": "Street Fighter",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/StreetFighterSymbol.svg",
+            "name": "Street Fighter"
+        },
         "availability": "Unlockable",
         "also_appears_in": [],
         "order": 64,
@@ -9963,7 +10218,7 @@
             {
                 "slot": 1,
                 "variant": "Ken",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/ken/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Ken_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -10082,7 +10337,8 @@
                 "slug": "ken",
                 "also_appears_in": []
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-KenHeadSSBU.webp"
     },
     {
         "ids": [
@@ -10090,7 +10346,10 @@
         ],
         "name": "Cloud",
         "slug": "cloud",
-        "series": "Final Fantasy",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/FinalFantasySymbol.svg",
+            "name": "Final Fantasy"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "3DS",
@@ -10101,7 +10360,7 @@
             {
                 "slot": 1,
                 "variant": "Final Fantasy VII",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/cloud/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Cloud_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -10258,7 +10517,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-CloudHeadSSBU.webp"
     },
     {
         "ids": [
@@ -10266,7 +10526,10 @@
         ],
         "name": "Corrin",
         "slug": "corrin",
-        "series": "Fire Emblem",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/FireEmblemSymbol.svg",
+            "name": "Fire Emblem"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "3DS",
@@ -10277,7 +10540,7 @@
             {
                 "slot": 1,
                 "variant": "Male",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/corrin/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Corrin_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -10444,7 +10707,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-CorrinHeadSSBU.webp"
     },
     {
         "ids": [
@@ -10452,7 +10716,10 @@
         ],
         "name": "Bayonetta",
         "slug": "bayonetta",
-        "series": "Bayonetta",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/Bayonetta.svg",
+            "name": "Bayonetta"
+        },
         "availability": "Unlockable",
         "also_appears_in": [
             "3DS",
@@ -10463,7 +10730,7 @@
             {
                 "slot": 1,
                 "variant": "Bayonetta 1",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/bayonetta/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/240px-Bayonetta_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -10650,7 +10917,8 @@
                     "Wii U"
                 ]
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-BayonettaHeadSSBU.webp"
     },
     {
         "ids": [
@@ -10658,7 +10926,10 @@
         ],
         "name": "Inkling",
         "slug": "inkling",
-        "series": "Splatoon",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/SplatoonSymbol.svg",
+            "name": "Splatoon"
+        },
         "availability": "Unlockable",
         "also_appears_in": [],
         "order": 68,
@@ -10666,7 +10937,7 @@
             {
                 "slot": 1,
                 "variant": "Female",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/inkling/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/242px-Inkling_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -10790,7 +11061,8 @@
                 "slug": "inkling",
                 "also_appears_in": []
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-InklingHeadSSBU.webp"
     },
     {
         "ids": [
@@ -10798,7 +11070,10 @@
         ],
         "name": "Ridley",
         "slug": "ridley",
-        "series": "Metroid",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/MetroidSymbol.svg",
+            "name": "Metroid"
+        },
         "availability": "Unlockable",
         "also_appears_in": [],
         "order": 69,
@@ -10806,7 +11081,7 @@
             {
                 "slot": 1,
                 "variant": "Ridley",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/ridley/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Ridley_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -10905,7 +11180,8 @@
                 "slug": "ridley",
                 "also_appears_in": []
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-RidleyHeadSSBU.webp"
     },
     {
         "ids": [
@@ -10913,7 +11189,10 @@
         ],
         "name": "Simon",
         "slug": "simon",
-        "series": "Castlevania",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/CastlevaniaSymbol.svg",
+            "name": "Castlevania"
+        },
         "availability": "Unlockable",
         "also_appears_in": [],
         "order": 70,
@@ -10921,7 +11200,7 @@
             {
                 "slot": 1,
                 "variant": "Simon",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/simon/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Simon_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -11020,7 +11299,8 @@
                 "slug": "simon",
                 "also_appears_in": []
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-SimonHeadSSBU.webp"
     },
     {
         "ids": [
@@ -11028,7 +11308,10 @@
         ],
         "name": "Richter",
         "slug": "richter",
-        "series": "Castlevania",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/CastlevaniaSymbol.svg",
+            "name": "Castlevania"
+        },
         "availability": "Unlockable",
         "also_appears_in": [],
         "order": 71,
@@ -11036,7 +11319,7 @@
             {
                 "slot": 1,
                 "variant": "Richter",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/richter/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Richter_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -11125,7 +11408,8 @@
                 "slug": "richter",
                 "also_appears_in": []
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-RichterHeadSSBU.webp"
     },
     {
         "ids": [
@@ -11133,7 +11417,10 @@
         ],
         "name": "King K. Rool",
         "slug": "king-k-rool",
-        "series": "Donkey Kong",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/DKSymbol.svg",
+            "name": "Donkey Kong"
+        },
         "availability": "Unlockable",
         "also_appears_in": [],
         "order": 72,
@@ -11141,7 +11428,7 @@
             {
                 "slot": 1,
                 "variant": "King K. Rool",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/king-k-rool/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-King_K.webp"
             },
             {
                 "slot": 2,
@@ -11265,7 +11552,8 @@
                 "slug": "king-k-rool",
                 "also_appears_in": []
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-KingKRoolHeadSSBU.webp"
     },
     {
         "ids": [
@@ -11273,7 +11561,10 @@
         ],
         "name": "Isabelle",
         "slug": "isabelle",
-        "series": "Animal Crossing",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/AnimalCrossingSymbol.svg",
+            "name": "Animal Crossing"
+        },
         "availability": "Unlockable",
         "also_appears_in": [],
         "order": 73,
@@ -11281,7 +11572,7 @@
             {
                 "slot": 1,
                 "variant": "Isabelle",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/isabelle/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/240px-Isabelle_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -11375,7 +11666,8 @@
                 "slug": "isabelle",
                 "also_appears_in": []
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-IsabelleHeadSSBU.webp"
     },
     {
         "ids": [
@@ -11383,7 +11675,10 @@
         ],
         "name": "Incineroar",
         "slug": "incineroar",
-        "series": "Pokémon",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/PokemonSymbol.svg",
+            "name": "Pokémon"
+        },
         "availability": "Unlockable",
         "also_appears_in": [],
         "order": 74,
@@ -11391,7 +11686,7 @@
             {
                 "slot": 1,
                 "variant": "Incineroar",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/incineroar/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Incineroar_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -11495,7 +11790,8 @@
                 "slug": "incineroar",
                 "also_appears_in": []
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-IncineroarHeadSSBU.webp"
     },
     {
         "ids": [
@@ -11503,7 +11799,10 @@
         ],
         "name": "Piranha Plant",
         "slug": "piranha-plant",
-        "series": "Mario",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/Mario.svg",
+            "name": "Mario"
+        },
         "availability": "Paid DLC",
         "also_appears_in": [],
         "order": 75,
@@ -11511,7 +11810,7 @@
             {
                 "slot": 1,
                 "variant": "Piranha Plant",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/piranha-plant/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Piranha_Plant_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -11690,7 +11989,8 @@
                 "slug": "piranha-plant",
                 "also_appears_in": []
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-PiranhaPlantHeadSSBU.webp"
     },
     {
         "ids": [
@@ -11698,7 +11998,10 @@
         ],
         "name": "Joker",
         "slug": "joker",
-        "series": "Persona",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/PersonaSymbol.svg",
+            "name": "Persona"
+        },
         "availability": "Paid DLC",
         "also_appears_in": [],
         "order": 76,
@@ -11706,7 +12009,7 @@
             {
                 "slot": 1,
                 "variant": "Phantom Thief",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/joker/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Joker_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -11885,7 +12188,8 @@
                 "slug": "joker",
                 "also_appears_in": []
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-JokerHeadSSBU.webp"
     },
     {
         "ids": [
@@ -11893,7 +12197,10 @@
         ],
         "name": "Hero",
         "slug": "hero",
-        "series": "Dragon Quest",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/DragonQuestSymbol.svg",
+            "name": "Dragon Quest"
+        },
         "availability": "Paid DLC",
         "also_appears_in": [],
         "order": 77,
@@ -11901,7 +12208,7 @@
             {
                 "slot": 1,
                 "variant": "Dragon Quest XI",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/hero/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Hero_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -12135,7 +12442,8 @@
                 "slug": "hero",
                 "also_appears_in": []
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-HeroHeadSSBU.webp"
     },
     {
         "ids": [
@@ -12143,7 +12451,10 @@
         ],
         "name": "Banjo & Kazooie",
         "slug": "banjo-and-kazooie",
-        "series": "Banjo-Kazooie",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/BanjoKazooie.svg",
+            "name": "Banjo-Kazooie"
+        },
         "availability": "Paid DLC",
         "also_appears_in": [],
         "order": 78,
@@ -12151,7 +12462,7 @@
             {
                 "slot": 1,
                 "variant": "Banjo & Kazooie",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/banjo-and-kazooie/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Banjo_%26_Kazooie_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -12320,7 +12631,8 @@
                 "slug": "banjo-kazooie",
                 "also_appears_in": []
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-Banjo%26KazooieHeadSSBU.webp"
     },
     {
         "ids": [
@@ -12328,7 +12640,10 @@
         ],
         "name": "Terry",
         "slug": "terry",
-        "series": "Fatal Fury",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/FatalFurySymbol.svg",
+            "name": "Fatal Fury"
+        },
         "availability": "Paid DLC",
         "also_appears_in": [],
         "order": 79,
@@ -12336,7 +12651,7 @@
             {
                 "slot": 1,
                 "variant": "Terry",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/terry/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Terry_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -12550,7 +12865,8 @@
                 "slug": "terry",
                 "also_appears_in": []
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-TerryHeadSSBU.webp"
     },
     {
         "ids": [
@@ -12558,7 +12874,10 @@
         ],
         "name": "Byleth",
         "slug": "byleth",
-        "series": "Fire Emblem",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/FireEmblemSymbol.svg",
+            "name": "Fire Emblem"
+        },
         "availability": "Paid DLC",
         "also_appears_in": [],
         "order": 80,
@@ -12566,7 +12885,7 @@
             {
                 "slot": 1,
                 "variant": "Male",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/byleth/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Byleth_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -12745,7 +13064,8 @@
                 "slug": "byleth",
                 "also_appears_in": []
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-BylethHeadSSBU.webp"
     },
     {
         "ids": [
@@ -12753,7 +13073,10 @@
         ],
         "name": "Min Min",
         "slug": "min-min",
-        "series": "ARMS",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/ARMSSymbol.svg",
+            "name": "ARMS"
+        },
         "availability": "Paid DLC",
         "also_appears_in": [],
         "order": 81,
@@ -12761,7 +13084,7 @@
             {
                 "slot": 1,
                 "variant": "Min Min",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/min-min/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Min_Min_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -12925,7 +13248,8 @@
                 "slug": "min-min",
                 "also_appears_in": []
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-MinMinHeadSSBU.webp"
     },
     {
         "ids": [
@@ -12933,7 +13257,10 @@
         ],
         "name": "Steve",
         "slug": "steve",
-        "series": "Minecraft",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/MinecraftSymbol.svg",
+            "name": "Minecraft"
+        },
         "availability": "Paid DLC",
         "also_appears_in": [],
         "order": 82,
@@ -12941,7 +13268,7 @@
             {
                 "slot": 1,
                 "variant": "Steve",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/steve/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Steve_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -13310,7 +13637,8 @@
                 "slug": "steve",
                 "also_appears_in": []
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-SteveHeadSSBU.webp"
     },
     {
         "ids": [
@@ -13318,7 +13646,10 @@
         ],
         "name": "Sephiroth",
         "slug": "sephiroth",
-        "series": "Final Fantasy",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/FinalFantasySymbol.svg",
+            "name": "Final Fantasy"
+        },
         "availability": "Paid DLC",
         "also_appears_in": [],
         "order": 83,
@@ -13326,7 +13657,7 @@
             {
                 "slot": 1,
                 "variant": "Sephiroth",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/sephiroth/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Sephiroth_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -13510,7 +13841,8 @@
                 "slug": "sephiroth",
                 "also_appears_in": []
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-SephirothHeadSSBU.webp"
     },
     {
         "ids": [
@@ -13519,7 +13851,10 @@
         ],
         "name": "Pyra/Mythra",
         "slug": "pyra-mythra",
-        "series": "Xenoblade Chronicles",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/XenobladeSymbol.svg",
+            "name": "Xenoblade Chronicles"
+        },
         "availability": "Paid DLC",
         "also_appears_in": [],
         "order": 84,
@@ -13527,7 +13862,7 @@
             {
                 "slot": 1,
                 "variant": "Pyra/Mythra",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/pyra-mythra/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Pyra_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -13742,7 +14077,8 @@
                 "slug": "mythra",
                 "also_appears_in": []
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-PyraHeadSSBU.webp"
     },
     {
         "ids": [
@@ -13750,7 +14086,10 @@
         ],
         "name": "Kazuya",
         "slug": "kazuya",
-        "series": "Tekken",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/TekkenSymbol.svg",
+            "name": "Tekken"
+        },
         "availability": "Paid DLC",
         "also_appears_in": [],
         "order": 85,
@@ -13758,7 +14097,7 @@
             {
                 "slot": 1,
                 "variant": "Kazuya",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/kazuya/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Kazuya_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -14077,7 +14416,8 @@
                 "slug": "kazuya",
                 "also_appears_in": []
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-KazuyaHeadSSBU.webp"
     },
     {
         "ids": [
@@ -14085,7 +14425,10 @@
         ],
         "name": "Sora",
         "slug": "sora",
-        "series": "Kingdom Hearts",
+        "series": {
+            "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/universes/KingdomHeartsSymbol.svg",
+            "name": "Kingdom Hearts"
+        },
         "availability": "Paid DLC",
         "also_appears_in": [],
         "order": 86,
@@ -14093,7 +14436,7 @@
             {
                 "slot": 1,
                 "variant": "Sora",
-                "image": "https://pub-2e66ebfa40554bb697519d28926cd04c.r2.dev/roster-slots/sora/main.png"
+                "image": "https://images.smashbrosapi.com/file/smashbrosapi-images/characters/250px-Sora_SSBU.webp"
             },
             {
                 "slot": 2,
@@ -14287,6 +14630,7 @@
                 "slug": "sora",
                 "also_appears_in": []
             }
-        ]
+        ],
+        "icon": "https://images.smashbrosapi.com/file/smashbrosapi-images/head-icons/24px-SoraHeadSSBU.webp"
     }
 ]

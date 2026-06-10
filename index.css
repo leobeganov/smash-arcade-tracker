@@ -806,10 +806,33 @@ body {
 }
 
 
-/* ==========================================================
-   THEME: Fighter Profile (Neon Cyan Cyber Tech Spec Theme)
-   ========================================================== */
+#fighter-profile-view {
+  position: relative;
+  overflow: hidden;
+}
+
+.fighter-series-backdrop {
+  position: absolute;
+  top: 50%;
+  left: 55%;
+  transform: translate(-50%, -50%);
+  width: 50vw;
+  height: 50vw;
+  max-width: 550px;
+  max-height: 550px;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+  transition: background-image 0.4s ease-in-out;
+  filter: grayscale(0.5) contrast(1.2);
+}
+
 #fighter-profile-view .fighter-view-layout {
+  position: relative;
+  z-index: 2;
   display: grid;
   grid-template-columns: 1.2fr 2fr;
   gap: 40px;
@@ -2473,5 +2496,88 @@ body.theme-retro .btn-arcade {
   background-color: var(--color-neon-yellow);
   border-color: var(--color-neon-yellow);
   box-shadow: 0 0 6px var(--color-neon-yellow);
+}
+
+
+/* --- Retro Loading Indicator --- */
+.retro-loader {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px;
+  background-color: rgba(0, 240, 255, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+  border-radius: 4px;
+  font-family: var(--font-stats);
+  color: var(--color-neon-cyan);
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  animation: retro-pulse 1.5s infinite ease-in-out;
+  height: 28px;
+  box-sizing: border-box;
+}
+
+.loader-led {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-neon-cyan);
+  box-shadow: 0 0 8px var(--color-neon-cyan), 0 0 15px var(--color-neon-cyan);
+  animation: led-blink 0.5s infinite steps(2, start);
+}
+
+@keyframes led-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+@keyframes retro-pulse {
+  0%, 100% {
+    opacity: 0.8;
+    box-shadow: 0 0 8px rgba(0, 240, 255, 0.1);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 14px rgba(0, 240, 255, 0.3);
+  }
+}
+
+/* --- Interactive Retro Match Timeline Drawer --- */
+.timeline-marker {
+  cursor: pointer;
+}
+
+.timeline-marker .hover-time {
+  display: inline-block;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: max-width 0.25s ease-out, opacity 0.2s ease-out, margin-left 0.25s ease-out;
+  vertical-align: bottom;
+  margin-left: 0;
+}
+
+.timeline-marker:hover .hover-time {
+  max-width: 90px;
+  opacity: 1;
+  margin-left: 6px;
+}
+
+.timeline-dot {
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease-in-out;
+}
+
+.timeline-marker:hover .timeline-dot {
+  transform: scale(1.25);
+  box-shadow: 0 0 14px var(--color-neon-magenta) !important;
+}
+
+.timeline-marker.survived:hover .timeline-dot {
+  box-shadow: 0 0 14px var(--color-neon-yellow) !important;
 }
 

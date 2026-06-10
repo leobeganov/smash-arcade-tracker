@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Smashalytics - Super Smash Brothers Ultimate AI Screenshot Results Scanner & Retro Match Tracker">
   <title>SMASHALYTICS // ARCADE CABINET</title>
-  <link rel="stylesheet" href="index.css?v=11">
+  <link rel="stylesheet" href="index.css?v=12">
 </head>
 <body class="theme-storm">
 
@@ -50,8 +50,12 @@
       <div class="home-view-layout">
 
         <!-- Centered Champions Title -->
-        <div class="podium-champions-title-container">
+        <div class="podium-champions-title-container" style="position: relative;">
           <h2 class="podium-champions-title">CHAMPIONS</h2>
+          <div class="retro-loader" id="podium-loader" style="display: none; position: absolute; right: 0; top: 50%; transform: translateY(-50%);">
+            <span class="loader-led"></span>
+            <span class="loader-text">RECALCULATING...</span>
+          </div>
         </div>
 
         <!-- Podium Header and Timeframe Filter -->
@@ -227,6 +231,7 @@
     <!-- VIEW: FIGHTER PROFILE -->
     <!-- ========================================== -->
     <main class="view-container" id="fighter-profile-view">
+      <div class="fighter-series-backdrop" id="fighter-profile-backdrop"></div>
       <div class="fighter-view-layout">
         
         <div class="profile-sidebar">
@@ -293,7 +298,13 @@
       <div class="leaderboard-view-layout">
         
         <div class="leaderboard-control-row">
-          <h2 class="leaderboard-title" id="leaderboard-header-title">RANKINGS: PLAYER MODE</h2>
+          <div style="display: flex; align-items: center; gap: 20px;">
+            <h2 class="leaderboard-title" id="leaderboard-header-title">RANKINGS: PLAYER MODE</h2>
+            <div class="retro-loader" id="leaderboard-loader" style="display: none;">
+              <span class="loader-led"></span>
+              <span class="loader-text">FETCHING DATA...</span>
+            </div>
+          </div>
           
           <div class="leaderboard-filters-group">
             <!-- Style Filters -->
@@ -589,11 +600,11 @@
     <div class="vs-stripe-curtain-bottom"></div>
   </div>
   <!-- Load mock database and SPA modules -->
-  <script src="mockData.js?v=11"></script>
-  <script src="database.js?v=11"></script>
-  <script src="apiService.js?v=11"></script>
-  <script src="gemini.js?v=11"></script>
-  <script src="charts.js?v=11"></script>
-  <script src="app.js?v=11"></script>
+  <script src="mockData.js?v=12"></script>
+  <script src="database.js?v=12"></script>
+  <script src="apiService.js?v=12"></script>
+  <script src="gemini.js?v=12"></script>
+  <script src="charts.js?v=12"></script>
+  <script src="app.js?v=12"></script>
 </body>
 </html>
