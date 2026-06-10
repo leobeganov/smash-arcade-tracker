@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let selectedSearchWinnerPlayer = null;
   let selectedSearchWinnerFighter = null;
   let isSearchDropdownsInitialized = false;
+  let shouldScrollToMatchList = false;
 
   // --- DOM Elements ---
   const views = {
@@ -255,8 +256,30 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    // Sync timeframe filter toggle buttons
+    const timeframeFilters = document.getElementById("podium-timeframe-filters");
+    if (timeframeFilters) {
+      timeframeFilters.querySelectorAll(".toggle-btn").forEach(btn => {
+        if (btn.getAttribute("data-timeframe") === currentPodiumTimeframe) {
+          btn.classList.add("active");
+        } else {
+          btn.classList.remove("active");
+        }
+      });
+    }
+
     updateSearchBadge();
     await renderHomeMatchesList();
+
+    if (shouldScrollToMatchList) {
+      shouldScrollToMatchList = false;
+      setTimeout(() => {
+        const matchesList = document.getElementById("history-matches-list");
+        if (matchesList) {
+          matchesList.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 400);
+    }
 
     // Enforce smooth minimum display delay of 250ms
     const elapsed = Date.now() - startTime;
@@ -345,6 +368,8 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedSearchFighters = [];
         selectedSearchWinnerPlayer = null;
         selectedSearchWinnerFighter = null;
+        currentPodiumTimeframe = "30days";
+        shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
         window.location.hash = "#home";
       };
@@ -358,6 +383,8 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedSearchFighters = [];
         selectedSearchWinnerPlayer = stats.player.name;
         selectedSearchWinnerFighter = null;
+        currentPodiumTimeframe = "30days";
+        shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
         window.location.hash = "#home";
       };
@@ -451,6 +478,8 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedSearchPlayers = [];
         selectedSearchWinnerPlayer = null;
         selectedSearchWinnerFighter = null;
+        currentPodiumTimeframe = "30days";
+        shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
         window.location.hash = "#home";
       };
@@ -464,6 +493,8 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedSearchPlayers = [];
         selectedSearchWinnerPlayer = null;
         selectedSearchWinnerFighter = stats.fighter.name;
+        currentPodiumTimeframe = "30days";
+        shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
         window.location.hash = "#home";
       };
