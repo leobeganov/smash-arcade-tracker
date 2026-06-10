@@ -829,7 +829,10 @@ document.addEventListener("DOMContentLoaded", () => {
             </span>
             <span class="match-card-mode-text">${playerCountText.toUpperCase()}</span>
           </div>
-          <div class="match-card-meta">${new Date(m.timestamp).toLocaleDateString()} ${new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+          <div style="display: flex; align-items: center; gap: 15px;">
+            <div class="match-card-meta">${new Date(m.timestamp).toLocaleDateString()} ${new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+            <button class="delete-match-btn" data-id="${m.id}" style="background: none; border: none; color: var(--color-neon-magenta); font-family: var(--font-arcade); font-size: 16px; line-height: 1; cursor: pointer; padding: 0; margin: 0; transition: transform 0.2s ease, color 0.2s ease; text-shadow: 0 0 6px var(--color-neon-magenta);" onmouseover="this.style.transform='scale(1.25)'; this.style.color='#fff';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--color-neon-magenta)';">&times;</button>
+          </div>
         </div>
         <div class="match-card-players-grid ${m.players && m.players.length > 4 ? 'large-lobby' : ''}">
           ${m.players.map(p => {
@@ -855,9 +858,6 @@ document.addEventListener("DOMContentLoaded", () => {
               </div>
             `;
           }).join('')}
-        </div>
-        <div class="match-card-actions" style="display: flex; gap: 10px; justify-content: flex-start; align-items: center; flex-wrap: wrap;">
-          <button class="btn-arcade magenta delete-match-btn" data-id="${m.id}" style="font-size: 11px; padding: 4px 12px; height: 28px; line-height: 1;">DELETE RECORD</button>
         </div>
         <div class="match-timeline-drawer" id="timeline-drawer-${m.id}">
           <!-- Timeline Track Column -->
