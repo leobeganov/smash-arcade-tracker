@@ -11,6 +11,11 @@ document.addEventListener("DOMContentLoaded", () => {
   let activeSearchHighlightIndex = -1;
   let searchResults = [];
   let lastScannedMatch = null;
+  let currentPodiumTimeframe = "7days";
+  let currentLeaderboardTimeframe = "alltime";
+  let selectedSearchPlayers = [];
+  let selectedSearchFighters = [];
+  let isSearchDropdownsInitialized = false;
 
   // --- DOM Elements ---
   const views = {
@@ -19,7 +24,6 @@ document.addEventListener("DOMContentLoaded", () => {
     fighter: document.getElementById("fighter-profile-view"),
     leaderboard: document.getElementById("leaderboard-view"),
     scanner: document.getElementById("scanner-view"),
-    history: document.getElementById("history-view"),
     telemetry: document.getElementById("telemetry-view"),
     settings: document.getElementById("settings-view")
   };
@@ -57,12 +61,11 @@ document.addEventListener("DOMContentLoaded", () => {
     else if (route === "fighter" && id) target = "fighter";
     else if (route === "leaderboard") target = "leaderboard";
     else if (route === "scanner") target = "scanner";
-    else if (route === "history") target = "history";
     else if (route === "telemetry") target = "telemetry";
     else if (route === "settings") target = "settings";
 
     // Update active state in nav tabs
-    const navTabs = ["home", "leaderboard", "scanner", "history", "telemetry", "settings"];
+    const navTabs = ["home", "leaderboard", "scanner", "telemetry", "settings"];
     navTabs.forEach(tab => {
       const el = document.getElementById(`nav-tab-${tab}`);
       if (el) {
@@ -88,6 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Render corresponding view data
     if (target === "home") {
+      isSearchDropdownsInitialized = false;
       await renderHome();
     } else if (target === "player") {
       await renderPlayerProfile(id);
@@ -97,8 +101,6 @@ document.addEventListener("DOMContentLoaded", () => {
       await renderLeaderboard();
     } else if (target === "scanner") {
       await renderScanner();
-    } else if (target === "history") {
-      await renderHistory();
     } else if (target === "telemetry") {
       await renderTelemetry();
     } else if (target === "settings") {
@@ -117,40 +119,81 @@ document.addEventListener("DOMContentLoaded", () => {
   // 3. Render Home (The Main Stage)
   // ==========================================
   async function renderHome() {
-    const podiumData = await api.getPodium();
+    // Gather selected styles
+    const activeStyles = [];
+    const activeStyleBtns = document.querySelectorAll("#podium-style-filters .toggle-btn.active");
+    activeStyleBtns.forEach(btn => {
+      activeStyles.push(btn.getAttribute("data-style"));
+    });
+
+    const podiumData = await api.getPodium(currentPodiumTimeframe, activeStyles, selectedSearchPlayers, selectedSearchFighters);
 
     // Populate Gold (1st)
     const gold = podiumData.find(p => p.rank === 1);
+    const goldImg = document.getElementById("podium-gold-img");
+    const goldName = document.getElementById("podium-gold-name");
+    const goldStat = document.getElementById("podium-gold-stat");
+    const goldPlaque = document.getElementById("podium-gold-plaque");
     if (gold) {
-      document.getElementById("podium-gold-img").src = gold.fighter.img;
-      document.getElementById("podium-gold-name").textContent = gold.player.name;
-      document.getElementById("podium-gold-stat").textContent = `${gold.wins}/${gold.total} WINS (${gold.fighter.name})`;
-      
-      const goldPlaque = document.getElementById("podium-gold-plaque");
+      goldImg.src = gold.fighter.img;
+      goldImg.style.opacity = "1";
+      goldName.textContent = gold.player.name;
+      goldStat.textContent = `${gold.wins}/${gold.total} WINS (${gold.fighter.name})`;
       goldPlaque.onclick = () => window.location.hash = `#player/${gold.player.id}`;
+      goldPlaque.style.cursor = "pointer";
+    } else {
+      goldImg.src = "assets/mario.png?v=5";
+      goldImg.style.opacity = "0.1";
+      goldName.textContent = "VACANT";
+      goldStat.textContent = "0 WINS";
+      goldPlaque.onclick = null;
+      goldPlaque.style.cursor = "default";
     }
 
     // Populate Silver (2nd)
     const silver = podiumData.find(p => p.rank === 2);
+    const silverImg = document.getElementById("podium-silver-img");
+    const silverName = document.getElementById("podium-silver-name");
+    const silverStat = document.getElementById("podium-silver-stat");
+    const silverPlaque = document.getElementById("podium-silver-plaque");
     if (silver) {
-      document.getElementById("podium-silver-img").src = silver.fighter.img;
-      document.getElementById("podium-silver-name").textContent = silver.player.name;
-      document.getElementById("podium-silver-stat").textContent = `${silver.wins}/${silver.total} WINS (${silver.fighter.name})`;
-      
-      const silverPlaque = document.getElementById("podium-silver-plaque");
+      silverImg.src = silver.fighter.img;
+      silverImg.style.opacity = "1";
+      silverName.textContent = silver.player.name;
+      silverStat.textContent = `${silver.wins}/${silver.total} WINS (${silver.fighter.name})`;
       silverPlaque.onclick = () => window.location.hash = `#player/${silver.player.id}`;
+      silverPlaque.style.cursor = "pointer";
+    } else {
+      silverImg.src = "assets/mario.png?v=5";
+      silverImg.style.opacity = "0.1";
+      silverName.textContent = "VACANT";
+      silverStat.textContent = "0 WINS";
+      silverPlaque.onclick = null;
+      silverPlaque.style.cursor = "default";
     }
 
     // Populate Bronze (3rd)
     const bronze = podiumData.find(p => p.rank === 3);
+    const bronzeImg = document.getElementById("podium-bronze-img");
+    const bronzeName = document.getElementById("podium-bronze-name");
+    const bronzeStat = document.getElementById("podium-bronze-stat");
+    const bronzePlaque = document.getElementById("podium-bronze-plaque");
     if (bronze) {
-      document.getElementById("podium-bronze-img").src = bronze.fighter.img;
-      document.getElementById("podium-bronze-name").textContent = bronze.player.name;
-      document.getElementById("podium-bronze-stat").textContent = `${bronze.wins}/${bronze.total} WINS (${bronze.fighter.name})`;
-      
-      const bronzePlaque = document.getElementById("podium-bronze-plaque");
+      bronzeImg.src = bronze.fighter.img;
+      bronzeImg.style.opacity = "1";
+      bronzeName.textContent = bronze.player.name;
+      bronzeStat.textContent = `${bronze.wins}/${bronze.total} WINS (${bronze.fighter.name})`;
       bronzePlaque.onclick = () => window.location.hash = `#player/${bronze.player.id}`;
+      bronzePlaque.style.cursor = "pointer";
+    } else {
+      bronzeImg.src = "assets/mario.png?v=5";
+      bronzeImg.style.opacity = "0.1";
+      bronzeName.textContent = "VACANT";
+      bronzeStat.textContent = "0 WINS";
+      bronzePlaque.onclick = null;
+      bronzePlaque.style.cursor = "default";
     }
+    await renderHomeMatchesList();
   }
 
 
@@ -331,8 +374,15 @@ document.addEventListener("DOMContentLoaded", () => {
       headersRow.appendChild(th);
     });
 
+    // Gather selected styles
+    const activeStyles = [];
+    const activeStyleBtns = document.querySelectorAll("#leaderboard-style-filters .toggle-btn.active");
+    activeStyleBtns.forEach(btn => {
+      activeStyles.push(btn.getAttribute("data-style"));
+    });
+
     // Fetch and Sort Data
-    const records = await api.getLeaderboard(currentSortBy, isFighterMode);
+    const records = await api.getLeaderboard(currentSortBy, isFighterMode, activeStyles, currentLeaderboardTimeframe);
 
     // Populate rows
     const rowsBody = document.getElementById("leaderboard-rows");
@@ -511,62 +561,75 @@ document.addEventListener("DOMContentLoaded", () => {
   // ==========================================
   // Battle Log (History) View Controllers
   // ==========================================
-  async function renderHistory() {
-    // Populate dropdown lists if empty
-    const filterChar = document.getElementById("filter-character");
-    const filterPlayer = document.getElementById("filter-player");
-
-    if (filterChar.children.length <= 1) {
-      const fighters = await api.getAllFighters();
-      fighters.forEach(f => {
-        const opt = document.createElement("option");
-        opt.value = f;
-        opt.textContent = f;
-        filterChar.appendChild(opt);
-      });
+  async function renderHomeMatchesList() {
+    if (!isSearchDropdownsInitialized) {
+      await initSearchDropdowns();
+      isSearchDropdownsInitialized = true;
     }
-
-    // Always refresh players list as new players might have been scanned
-    const currentVal = filterPlayer.value || "All";
-    filterPlayer.innerHTML = '<option value="All">All players</option>';
-    const stats = await window.Database.getStatsAsync();
-    stats.players.forEach(p => {
-      const opt = document.createElement("option");
-      opt.value = p.name;
-      opt.textContent = p.name;
-      filterPlayer.appendChild(opt);
-    });
-    filterPlayer.value = currentVal;
-
     await renderHistoryList();
   }
 
   async function renderHistoryList() {
-    const style = document.getElementById("filter-style").value;
-    const mode = document.getElementById("filter-mode").value;
-    const player = document.getElementById("filter-player").value;
-    const character = document.getElementById("filter-character").value;
+    const parseOutAtToSeconds = (outAtStr) => {
+      if (!outAtStr || outAtStr.trim() === '---') return null;
+      const parts = outAtStr.trim().split(':');
+      if (parts.length !== 2) return null;
+      const mins = parseInt(parts[0], 10);
+      const secs = parseInt(parts[1], 10);
+      if (isNaN(mins) || isNaN(secs)) return null;
+      return mins * 60 + secs;
+    };
 
     let matches = await window.Database.getMatchesAsync();
 
-    if (style && style !== "All") {
-      const lowerStyle = style.toLowerCase();
-      if (lowerStyle === "1v1") {
-        matches = matches.filter(m => (m.gameMode && m.gameMode.toLowerCase() === "1v1") || (m.gameStyle && m.gameStyle.toLowerCase() === "1v1"));
-      } else if (lowerStyle === "free-for-all") {
-        matches = matches.filter(m => m.gameStyle && m.gameStyle.toLowerCase() === "free-for-all" && m.gameMode && m.gameMode.toLowerCase() !== "1v1");
-      } else if (lowerStyle === "teams") {
-        matches = matches.filter(m => m.gameStyle && m.gameStyle.toLowerCase() === "teams");
+    // 1. Timeframe Filter
+    const now = Date.now();
+    if (currentPodiumTimeframe === 'today') {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const todayStartMs = todayStart.getTime();
+      matches = matches.filter(m => m.timestamp >= todayStartMs);
+    } else if (currentPodiumTimeframe === '7days') {
+      const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
+      matches = matches.filter(m => m.timestamp >= sevenDaysAgo);
+    } else if (currentPodiumTimeframe === '30days') {
+      const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
+      matches = matches.filter(m => m.timestamp >= thirtyDaysAgo);
+    }
+
+    // 2. Style Filter (Multiple Select)
+    const activeStyles = [];
+    const activeStyleBtns = document.querySelectorAll("#podium-style-filters .toggle-btn.active");
+    activeStyleBtns.forEach(btn => {
+      activeStyles.push(btn.getAttribute("data-style").toLowerCase());
+    });
+
+    matches = matches.filter(m => {
+      const is1v1 = (m.gameMode && m.gameMode.toLowerCase() === '1v1') || 
+                    (m.gameStyle && m.gameStyle.toLowerCase() === '1v1') || 
+                    (m.players && m.players.length === 2);
+      if (is1v1) {
+        return activeStyles.includes('1v1');
       }
+      const isTeams = m.gameStyle && m.gameStyle.toLowerCase() === 'teams';
+      if (isTeams) {
+        return activeStyles.includes('teams');
+      }
+      // Otherwise Free-for-all
+      return activeStyles.includes('free-for-all');
+    });
+
+    // 3. Search Filters (Player and Character - Multi-select)
+    if (selectedSearchPlayers && selectedSearchPlayers.length > 0) {
+      const lowerPlayers = selectedSearchPlayers.map(p => p.toLowerCase().trim());
+      matches = matches.filter(m => m.players && m.players.some(p => lowerPlayers.includes(p.playerName.toLowerCase().trim())));
     }
-    if (mode && mode !== "All") {
-      matches = matches.filter(m => m.gameMode === mode);
-    }
-    if (player && player !== "All") {
-      matches = matches.filter(m => m.players && m.players.some(p => p.playerName.toLowerCase() === player.toLowerCase()));
-    }
-    if (character && character !== "All") {
-      matches = matches.filter(m => m.players && m.players.some(p => p.character.toLowerCase() === character.toLowerCase()));
+    if (selectedSearchFighters && selectedSearchFighters.length > 0) {
+      const lowerFighters = selectedSearchFighters.map(f => f.toLowerCase().trim());
+      matches = matches.filter(m => m.players && m.players.some(p => {
+        const fighterObj = api.getFighterDetails(p.character);
+        return lowerFighters.includes(p.character.toLowerCase().trim()) || lowerFighters.includes(fighterObj.id.toLowerCase().trim());
+      }));
     }
 
     const container = document.getElementById("history-matches-list");
@@ -587,6 +650,46 @@ document.addEventListener("DOMContentLoaded", () => {
       const headline = is1v1 ? "1V1" : (m.gameStyle && m.gameStyle.toLowerCase() === 'teams' ? "TEAMS" : "FREE-FOR-ALL");
       const badgeClass = is1v1 ? "badge-1v1" : (m.gameStyle && m.gameStyle.toLowerCase() === 'teams' ? "badge-teams" : "badge-ffa");
       const playerCountText = is1v1 ? "2 players" : `${m.players ? m.players.length : 0} players`;
+
+      // Generate markers for the timeline with collision avoidance
+      const percentageCounts = {};
+      let markersHtml = "";
+      if (m.players) {
+        m.players.forEach((p, idx) => {
+          const outAtSecs = parseOutAtToSeconds(p.outAt || (p.placement === 1 ? '---' : '5:00'));
+          const isSurvived = (outAtSecs === null);
+          const secondsVal = isSurvived ? 0 : outAtSecs;
+          
+          const pct = isSurvived ? 100 : ((300 - secondsVal) / 300) * 100;
+          const safePct = Math.max(0, Math.min(100, pct));
+          
+          const pctKey = safePct.toFixed(1);
+          if (!percentageCounts[pctKey]) {
+            percentageCounts[pctKey] = 0;
+          }
+          const staggerIndex = percentageCounts[pctKey]++;
+          
+          const markerColor = isSurvived ? 'var(--color-neon-yellow)' : 'var(--color-neon-magenta)';
+          const textColor = isSurvived ? 'var(--color-neon-yellow)' : 'var(--color-neon-magenta)';
+          const isAbove = (idx % 2 === 0);
+          
+          const offsetSize = 12 + staggerIndex * 22;
+          
+          markersHtml += `
+            <div class="timeline-marker" style="position: absolute; left: ${safePct}%; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: ${isAbove ? 'column-reverse' : 'column'}; align-items: center; z-index: 10;">
+              <!-- Details -->
+              <div class="timeline-player-info panel-beveled" style="text-align: center; white-space: nowrap; background: var(--color-bg-dark); border: 1px solid ${markerColor}; padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); margin: ${isAbove ? `0 0 ${offsetSize}px 0` : `${offsetSize}px 0 0 0`}; box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px; pointer-events: none; user-select: none;">
+                <span style="font-weight: bold; color: #fff; text-shadow: 0 0 2px rgba(255,255,255,0.5);">${p.playerName}</span>
+                <span style="color: ${textColor}; font-weight: bold; margin-left: 4px; text-shadow: 0 0 4px ${textColor};">${p.character} ${p.outAt === '---' || p.placement === 1 ? '🏆' : '(' + (p.outAt || '5:00') + ')'}</span>
+              </div>
+              <!-- Connector line -->
+              <div class="timeline-connector" style="width: 2px; height: ${offsetSize}px; background: ${markerColor}; opacity: 0.8; position: absolute; ${isAbove ? 'bottom: 12px' : 'top: 12px'};"></div>
+              <!-- Dot marker -->
+              <div class="timeline-dot" style="width: 12px; height: 12px; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid ${markerColor}; box-shadow: 0 0 8px ${markerColor}; z-index: 11;"></div>
+            </div>
+          `;
+        });
+      }
 
       card.innerHTML = `
         <div class="match-card-header">
@@ -621,8 +724,17 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
           }).join('')}
         </div>
-        <div class="match-card-actions">
-          <button class="btn-arcade magenta delete-match-btn" data-id="${m.id}" style="font-size: 11px; padding: 4px 12px;">DELETE RECORD</button>
+        <div class="match-card-actions" style="display: flex; gap: 10px; justify-content: flex-start; align-items: center; flex-wrap: wrap;">
+          <button class="btn-arcade cyan toggle-timeline-btn" data-id="${m.id}" style="font-size: 11px; padding: 4px 12px; height: 28px; line-height: 1;">VIEW TIMELINE</button>
+          <button class="btn-arcade magenta delete-match-btn" data-id="${m.id}" style="font-size: 11px; padding: 4px 12px; height: 28px; line-height: 1;">DELETE RECORD</button>
+        </div>
+        <div class="match-timeline-drawer" id="timeline-drawer-${m.id}" style="display: none; padding: 50px 15px 50px 15px; margin-top: 20px; border-top: 1px solid var(--color-border-dark); overflow: visible;">
+          <div class="timeline-track-container" style="position: relative; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; border: 1px solid rgba(255,255,255,0.2);">
+            <div style="position: absolute; left: 0; top: 0; height: 100%; width: 100%; background: var(--color-neon-cyan); opacity: 0.3; border-radius: 3px; box-shadow: 0 0 10px var(--color-neon-cyan);"></div>
+            <div style="position: absolute; left: 0; top: -25px; font-family: var(--font-arcade); font-size: 9px; color: var(--color-neon-cyan); text-shadow: 0 0 4px var(--color-neon-cyan); font-weight: bold; letter-spacing: 0.5px;">5:00 (START)</div>
+            <div style="position: absolute; right: 0; top: -25px; font-family: var(--font-arcade); font-size: 9px; color: var(--color-neon-cyan); text-shadow: 0 0 4px var(--color-neon-cyan); font-weight: bold; letter-spacing: 0.5px;">0:00 (END)</div>
+            ${markersHtml}
+          </div>
         </div>
       `;
       container.appendChild(card);
@@ -814,6 +926,120 @@ document.addEventListener("DOMContentLoaded", () => {
     renderLeaderboard();
   };
 
+  // Podium Timeframe Toggles
+  const timeframeFilters = document.getElementById("podium-timeframe-filters");
+  if (timeframeFilters) {
+    timeframeFilters.addEventListener("click", (e) => {
+      const btn = e.target.closest(".toggle-btn");
+      if (!btn) return;
+      
+      // Deactivate other timeframe buttons
+      timeframeFilters.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
+      // Activate clicked button
+      btn.classList.add("active");
+      
+      currentPodiumTimeframe = btn.getAttribute("data-timeframe");
+      renderHome();
+    });
+  }
+
+  // Leaderboard Timeframe Toggles
+  const leaderboardTimeframeFilters = document.getElementById("leaderboard-timeframe-filters");
+  if (leaderboardTimeframeFilters) {
+    leaderboardTimeframeFilters.addEventListener("click", (e) => {
+      const btn = e.target.closest(".toggle-btn");
+      if (!btn) return;
+      
+      // Deactivate other timeframe buttons
+      leaderboardTimeframeFilters.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
+      // Activate clicked button
+      btn.classList.add("active");
+      
+      currentLeaderboardTimeframe = btn.getAttribute("data-timeframe");
+      renderLeaderboard();
+    });
+  }
+
+  // Podium Style Isolation Filters
+  const podiumStyleFilters = document.getElementById("podium-style-filters");
+  if (podiumStyleFilters) {
+    podiumStyleFilters.addEventListener("click", (e) => {
+      const btn = e.target.closest(".toggle-btn");
+      if (!btn) return;
+      
+      const allBtns = podiumStyleFilters.querySelectorAll(".toggle-btn");
+      const activeBtns = podiumStyleFilters.querySelectorAll(".toggle-btn.active");
+      const isClickedActive = btn.classList.contains("active");
+      
+      if (isClickedActive) {
+        if (activeBtns.length === 1) {
+          // Reset: activate all style buttons
+          allBtns.forEach(b => b.classList.add("active"));
+        } else {
+          // Isolate clicked button
+          allBtns.forEach(b => {
+            if (b === btn) {
+              b.classList.add("active");
+            } else {
+              b.classList.remove("active");
+            }
+          });
+        }
+      } else {
+        // Isolate clicked button
+        allBtns.forEach(b => {
+          if (b === btn) {
+            b.classList.add("active");
+          } else {
+            b.classList.remove("active");
+          }
+        });
+      }
+      
+      renderHome();
+    });
+  }
+
+  // Leaderboard Style Isolation Filters
+  const styleFilters = document.getElementById("leaderboard-style-filters");
+  if (styleFilters) {
+    styleFilters.addEventListener("click", (e) => {
+      const btn = e.target.closest(".toggle-btn");
+      if (!btn) return;
+      
+      const allBtns = styleFilters.querySelectorAll(".toggle-btn");
+      const activeBtns = styleFilters.querySelectorAll(".toggle-btn.active");
+      const isClickedActive = btn.classList.contains("active");
+      
+      if (isClickedActive) {
+        if (activeBtns.length === 1) {
+          // Reset: activate all style buttons
+          allBtns.forEach(b => b.classList.add("active"));
+        } else {
+          // Isolate clicked button
+          allBtns.forEach(b => {
+            if (b === btn) {
+              b.classList.add("active");
+            } else {
+              b.classList.remove("active");
+            }
+          });
+        }
+      } else {
+        // Isolate clicked button
+        allBtns.forEach(b => {
+          if (b === btn) {
+            b.classList.add("active");
+          } else {
+            b.classList.remove("active");
+          }
+        });
+      }
+      
+      renderLeaderboard();
+    });
+  }
+
 
   // ==========================================
   // 9. Initializations and Core Event Bindings
@@ -902,7 +1128,7 @@ document.addEventListener("DOMContentLoaded", () => {
       await window.Database.addMatchAsync(matchToSave);
       document.getElementById("scanner-confirm-panel").style.display = "none";
       lastScannedMatch = null;
-      window.location.hash = "#history";
+      window.location.hash = "#home";
     };
   }
 
@@ -910,6 +1136,29 @@ document.addEventListener("DOMContentLoaded", () => {
   const historyMatchesList = document.getElementById("history-matches-list");
   if (historyMatchesList) {
     historyMatchesList.onclick = async (e) => {
+      // Toggle Timeline Drawer
+      const toggleBtn = e.target.closest(".toggle-timeline-btn");
+      if (toggleBtn) {
+        const matchId = toggleBtn.getAttribute("data-id");
+        const drawer = document.getElementById(`timeline-drawer-${matchId}`);
+        if (drawer) {
+          const isHidden = drawer.style.display === "none" || !drawer.style.display;
+          drawer.style.display = isHidden ? "block" : "none";
+          toggleBtn.textContent = isHidden ? "HIDE TIMELINE" : "VIEW TIMELINE";
+          if (isHidden) {
+            toggleBtn.style.background = "var(--color-neon-magenta)";
+            toggleBtn.style.borderColor = "var(--color-neon-magenta)";
+            toggleBtn.style.boxShadow = "0 0 10px var(--color-neon-magenta)";
+          } else {
+            toggleBtn.style.background = "";
+            toggleBtn.style.borderColor = "";
+            toggleBtn.style.boxShadow = "";
+          }
+        }
+        return;
+      }
+
+      // Delete Record
       const btn = e.target.closest(".delete-match-btn");
       if (!btn) return;
       const matchId = btn.getAttribute("data-id");
@@ -920,20 +1169,193 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  // History filters
-  ["filter-style", "filter-mode", "filter-player", "filter-character"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener("change", renderHistoryList);
+  // --- Retro Multi-Select Search Drawer Logic ---
+  function updateSearchBadge() {
+    const totalCount = selectedSearchPlayers.length + selectedSearchFighters.length;
+    const badge = document.getElementById("search-active-badge");
+    if (badge) {
+      if (totalCount > 0) {
+        badge.textContent = totalCount;
+        badge.style.display = "flex";
+      } else {
+        badge.style.display = "none";
+      }
+    }
+  }
+
+  function setupRetroMultiSelect(containerId, options, selectedValues, onSelectionChange) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const btn = container.querySelector(".retro-multi-select-btn");
+    const dropdown = container.querySelector(".retro-multi-select-dropdown");
+    const selectedTextEl = btn.querySelector(".selected-text");
+
+    dropdown.innerHTML = "";
+
+    // "ALL" Option Row
+    const allRow = document.createElement("div");
+    allRow.className = "retro-multi-option-row all-option";
+    allRow.innerHTML = `
+      <label class="retro-checkbox-wrapper">
+        <input type="checkbox" class="retro-checkbox-input all-checkbox" ${selectedValues.length === 0 ? "checked" : ""}>
+        <span class="retro-checkbox-box"></span>
+      </label>
+      <span class="option-label">ALL</span>
+    `;
+    dropdown.appendChild(allRow);
+
+    const allCheckbox = allRow.querySelector(".all-checkbox");
+
+    // Other Options
+    const itemCheckboxes = [];
+    options.forEach(optVal => {
+      const isChecked = selectedValues.includes(optVal);
+      const row = document.createElement("div");
+      row.className = "retro-multi-option-row";
+      row.innerHTML = `
+        <label class="retro-checkbox-wrapper">
+          <input type="checkbox" class="retro-checkbox-input item-checkbox" value="${optVal}" ${isChecked ? "checked" : ""}>
+          <span class="retro-checkbox-box"></span>
+        </label>
+        <span class="option-label">${optVal.toUpperCase()}</span>
+      `;
+      dropdown.appendChild(row);
+
+      const checkbox = row.querySelector(".item-checkbox");
+      itemCheckboxes.push(checkbox);
+    });
+
+    // Toggle dropdown visibility
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      document.querySelectorAll(".retro-multi-select-dropdown").forEach(d => {
+        if (d !== dropdown) d.classList.add("dropdown-hidden");
+      });
+      dropdown.classList.toggle("dropdown-hidden");
+    };
+
+    dropdown.onclick = (e) => {
+      e.stopPropagation();
+    };
+
+    // Event listener for "ALL" checkbox
+    allCheckbox.onchange = () => {
+      if (allCheckbox.checked) {
+        itemCheckboxes.forEach(cb => cb.checked = false);
+        selectedValues.length = 0;
+      } else {
+        const anyChecked = itemCheckboxes.some(cb => cb.checked);
+        if (!anyChecked) {
+          allCheckbox.checked = true;
+        }
+      }
+      updateButtonText();
+      onSelectionChange();
+    };
+
+    // Event listeners for item checkboxes
+    itemCheckboxes.forEach(cb => {
+      cb.onchange = () => {
+        if (cb.checked) {
+          allCheckbox.checked = false;
+          if (!selectedValues.includes(cb.value)) {
+            selectedValues.push(cb.value);
+          }
+        } else {
+          const idx = selectedValues.indexOf(cb.value);
+          if (idx > -1) {
+            selectedValues.splice(idx, 1);
+          }
+          const anyChecked = itemCheckboxes.some(item => item.checked);
+          if (!anyChecked) {
+            allCheckbox.checked = true;
+          }
+        }
+        updateButtonText();
+        onSelectionChange();
+      };
+    });
+
+    // Row clicks trigger checkbox toggle
+    dropdown.querySelectorAll(".retro-multi-option-row").forEach(row => {
+      row.onclick = (e) => {
+        if (e.target.tagName !== "INPUT") {
+          const input = row.querySelector("input");
+          input.checked = !input.checked;
+          input.dispatchEvent(new Event("change"));
+        }
+      };
+    });
+
+    function updateButtonText() {
+      if (allCheckbox.checked || selectedValues.length === 0) {
+        selectedTextEl.textContent = containerId.includes("players") ? "ALL PLAYERS" : "ALL FIGHTERS";
+        btn.classList.remove("active-selection");
+      } else {
+        const display = selectedValues.map(v => v.toUpperCase()).join(", ");
+        selectedTextEl.textContent = display.length > 20 ? `${selectedValues.length} SELECTED` : display;
+        btn.classList.add("active-selection");
+      }
+    }
+
+    updateButtonText();
+  }
+
+  async function initSearchDropdowns() {
+    const stats = await window.Database.getStatsAsync();
+    const playerNames = stats.players.map(p => p.name).sort();
+    const fighters = await api.getAllFighters();
+
+    setupRetroMultiSelect("multi-select-players-container", playerNames, selectedSearchPlayers, () => {
+      updateSearchBadge();
+      renderHome();
+    });
+
+    setupRetroMultiSelect("multi-select-fighters-container", fighters, selectedSearchFighters, () => {
+      updateSearchBadge();
+      renderHome();
+    });
+  }
+
+  // Toggle search drawer visibility
+  const btnToggleSearch = document.getElementById("btn-toggle-search");
+  const searchDrawer = document.getElementById("podium-search-drawer");
+  if (btnToggleSearch && searchDrawer) {
+    btnToggleSearch.onclick = (e) => {
+      e.stopPropagation();
+      const isHidden = searchDrawer.style.display === "none" || !searchDrawer.style.display;
+      if (isHidden) {
+        searchDrawer.style.display = "flex";
+        btnToggleSearch.classList.add("active");
+      } else {
+        searchDrawer.style.display = "none";
+        btnToggleSearch.classList.remove("active");
+        document.querySelectorAll(".retro-multi-select-dropdown").forEach(d => {
+          d.classList.add("dropdown-hidden");
+        });
+      }
+    };
+  }
+
+  // Click outside closes dropdowns
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".retro-multi-select-container")) {
+      document.querySelectorAll(".retro-multi-select-dropdown").forEach(d => {
+        d.classList.add("dropdown-hidden");
+      });
+    }
   });
 
-  const btnClearFilters = document.getElementById("btn-clear-history-filters");
-  if (btnClearFilters) {
-    btnClearFilters.onclick = () => {
-      ["filter-style", "filter-mode", "filter-player", "filter-character"].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = "All";
-      });
-      renderHistoryList();
+  // Clear / Reset podium search filters
+  const btnClearPodiumSearch = document.getElementById("btn-clear-podium-search");
+  if (btnClearPodiumSearch) {
+    btnClearPodiumSearch.onclick = () => {
+      selectedSearchPlayers.length = 0;
+      selectedSearchFighters.length = 0;
+      initSearchDropdowns();
+      updateSearchBadge();
+      renderHome();
     };
   }
 
