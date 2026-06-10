@@ -117,6 +117,92 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("hashchange", router);
   router();
 
+  // Dynamic bidirectional hover highlighting between timeline and player rows
+  const historyMatchesListEl = document.getElementById("history-matches-list");
+  if (historyMatchesListEl) {
+    historyMatchesListEl.addEventListener("mouseover", (e) => {
+      // 1. Check if hovering a timeline item (timeline-marker or winner-sidebar-row)
+      const timelineMarker = e.target.closest(".timeline-marker, .winner-sidebar-row");
+      if (timelineMarker) {
+        if (e.relatedTarget && timelineMarker.contains(e.relatedTarget)) {
+          return;
+        }
+        const playerName = timelineMarker.getAttribute("data-player-name");
+        if (playerName) {
+          const matchCard = timelineMarker.closest(".match-history-card");
+          if (matchCard) {
+            // Find corresponding player row in the same match card
+            const playerRow = matchCard.querySelector(`.history-player-row[data-player-name="${playerName}"]`);
+            if (playerRow) {
+              playerRow.classList.add("hover-highlighted");
+            }
+          }
+        }
+        return;
+      }
+
+      // 2. Check if hovering a history player row (the player card)
+      const playerRow = e.target.closest(".history-player-row");
+      if (playerRow) {
+        if (e.relatedTarget && playerRow.contains(e.relatedTarget)) {
+          return;
+        }
+        const playerName = playerRow.getAttribute("data-player-name");
+        if (playerName) {
+          const matchCard = playerRow.closest(".match-history-card");
+          if (matchCard) {
+            // Find corresponding timeline items and victory/sudden-death rows
+            const timelineItems = matchCard.querySelectorAll(`[data-player-name="${playerName}"]`);
+            timelineItems.forEach(item => {
+              if (item !== playerRow) {
+                item.classList.add("hover-highlighted");
+              }
+            });
+          }
+        }
+      }
+    });
+
+    historyMatchesListEl.addEventListener("mouseout", (e) => {
+      // 1. Remove highlight when leaving a timeline item
+      const timelineMarker = e.target.closest(".timeline-marker, .winner-sidebar-row");
+      if (timelineMarker) {
+        if (e.relatedTarget && timelineMarker.contains(e.relatedTarget)) {
+          return;
+        }
+        const playerName = timelineMarker.getAttribute("data-player-name");
+        if (playerName) {
+          const matchCard = timelineMarker.closest(".match-history-card");
+          if (matchCard) {
+            const playerRow = matchCard.querySelector(`.history-player-row[data-player-name="${playerName}"]`);
+            if (playerRow) {
+              playerRow.classList.remove("hover-highlighted");
+            }
+          }
+        }
+        return;
+      }
+
+      // 2. Remove highlight when leaving a history player row
+      const playerRow = e.target.closest(".history-player-row");
+      if (playerRow) {
+        if (e.relatedTarget && playerRow.contains(e.relatedTarget)) {
+          return;
+        }
+        const playerName = playerRow.getAttribute("data-player-name");
+        if (playerName) {
+          const matchCard = playerRow.closest(".match-history-card");
+          if (matchCard) {
+            const timelineItems = matchCard.querySelectorAll(`[data-player-name="${playerName}"]`);
+            timelineItems.forEach(item => {
+              item.classList.remove("hover-highlighted");
+            });
+          }
+        }
+      }
+    });
+  }
+
 
   // ==========================================
   // 3. Render Home (The Main Stage)
@@ -887,29 +973,36 @@ document.addEventListener("DOMContentLoaded", () => {
           const fighterObj = api.getFighterDetails(p.character) || {};
           const iconUrl = fighterObj.icon || 'assets/mario.png';
 
+          const isPlayerFiltered = (selectedSearchPlayers && selectedSearchPlayers.some(sp => sp.toLowerCase() === p.playerName.toLowerCase())) || 
+                                   (selectedSearchWinnerPlayer && selectedSearchWinnerPlayer.toLowerCase() === p.playerName.toLowerCase());
+          const isFighterFiltered = (selectedSearchFighters && selectedSearchFighters.some(sf => sf.toLowerCase() === p.character.toLowerCase())) || 
+                                    (selectedSearchWinnerFighter && selectedSearchWinnerFighter.toLowerCase() === p.character.toLowerCase());
+          const isFilteredMatch = isPlayerFiltered || isFighterFiltered;
+          const filterClass = isFilteredMatch ? 'filter-highlighted' : '';
+
           if (hasNoKnockoutTime) {
             if (isWinner) {
               winnersHtml += `
-                <div class="winner-sidebar-row" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <div class="winner-sidebar-row" data-player-name="${p.playerName.toLowerCase()}" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
                   <!-- Dot marker (Character head-icon bubble in gold) -->
                   <div class="winner-icon-bubble" style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid var(--color-neon-yellow); box-shadow: 0 0 8px var(--color-neon-yellow); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
                     <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${p.character}" />
                   </div>
                   <!-- Name/Details in a panel-beveled gold border box -->
-                  <div class="panel-beveled winner-name-box" style="white-space: nowrap; background: var(--color-bg-dark); border: 1px solid var(--color-neon-yellow); padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px;">
+                  <div class="panel-beveled winner-name-box ${filterClass}" style="white-space: nowrap; background: var(--color-bg-dark); border: 1px solid var(--color-neon-yellow); padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px;">
                     <span style="font-weight: bold; color: #fff; text-shadow: 0 0 2px rgba(255,255,255,0.5);">${p.playerName} 🏆</span>
                   </div>
                 </div>
               `;
             } else {
               winnersHtml += `
-                <div class="winner-sidebar-row sudden-death-row" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; opacity: 0.65;">
+                <div class="winner-sidebar-row sudden-death-row" data-player-name="${p.playerName.toLowerCase()}" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; opacity: 0.65;">
                   <!-- Dot marker (Character head-icon bubble in grey) -->
                   <div class="winner-icon-bubble sudden-death-icon" style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid #555; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; filter: grayscale(0.8);">
                     <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${p.character}" />
                   </div>
                   <!-- Name/Details in a panel-beveled grey border box -->
-                  <div class="panel-beveled winner-name-box sudden-death-name-box" style="white-space: nowrap; background: var(--color-bg-dark); border: 1px solid #444; padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); border-radius: 4px; display: flex; flex-direction: column; gap: 1px; box-shadow: 0 0 4px rgba(0,0,0,0.5);">
+                  <div class="panel-beveled winner-name-box sudden-death-name-box ${filterClass}" style="white-space: nowrap; background: var(--color-bg-dark); border: 1px solid #444; padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); border-radius: 4px; display: flex; flex-direction: column; gap: 1px; box-shadow: 0 0 4px rgba(0,0,0,0.5);">
                     <span style="font-weight: bold; color: #aaa;">${p.playerName}</span>
                     <span style="font-size: 8px; color: #777; font-weight: bold; letter-spacing: 0.5px; line-height: 1;">SUDDEN DEATH</span>
                   </div>
@@ -937,7 +1030,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const displayTime = p.outAt || "5:00";
  
              markersHtml += `
-               <div class="timeline-marker" style="position: absolute; left: ${safePct}%; top: 50%; transform: translate(-50%, -50%); width: 24px; height: 24px; z-index: 10;">
+               <div class="timeline-marker" data-player-name="${p.playerName.toLowerCase()}" style="position: absolute; left: ${safePct}%; top: 50%; transform: translate(-50%, -50%); width: 24px; height: 24px; z-index: 10;">
                  <!-- Dot marker (Character head-icon bubble centered on timeline) -->
                  <div class="timeline-dot" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid ${markerColor}; box-shadow: 0 0 8px ${markerColor}; z-index: 11; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                    <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${p.character}" />
@@ -945,7 +1038,7 @@ document.addEventListener("DOMContentLoaded", () => {
                  <!-- Connector line coming out of the bubble -->
                  <div class="timeline-connector" style="position: absolute; left: 11px; ${isAbove ? `bottom: 24px` : `top: 24px`}; width: 2px; height: ${offsetSize}px; background: ${markerColor}; opacity: 0.8; z-index: 9;"></div>
                  <!-- Player details box -->
-                 <div class="timeline-player-info panel-beveled" style="position: absolute; left: 12px; ${isAbove ? `bottom: ${24 + offsetSize}px` : `top: ${24 + offsetSize}px`}; transform: translateX(-50%); text-align: center; white-space: nowrap; background: var(--color-bg-dark); border: 1px solid ${markerColor}; padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px; pointer-events: auto; user-select: none; z-index: 10;">
+                 <div class="timeline-player-info panel-beveled ${filterClass}" style="position: absolute; left: 12px; ${isAbove ? `bottom: ${24 + offsetSize}px` : `top: ${24 + offsetSize}px`}; transform: translateX(-50%); text-align: center; white-space: nowrap; background: var(--color-bg-dark); border: 1px solid ${markerColor}; padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px; pointer-events: auto; user-select: none; z-index: 10;">
                    <span style="font-weight: bold; color: #fff; text-shadow: 0 0 2px rgba(255,255,255,0.5);">${p.playerName}</span>
                    <span class="hover-time" style="color: ${textColor}; font-weight: bold; text-shadow: 0 0 4px ${textColor};">(${displayTime})</span>
                  </div>
@@ -974,8 +1067,16 @@ document.addEventListener("DOMContentLoaded", () => {
             const teamClass = hasTeamColor ? `team-${p.teamColor.toLowerCase()}` : '';
             const fighterObj = api.getFighterDetails(p.character) || {};
             const iconUrl = fighterObj.icon || 'assets/mario.png';
+
+            const isPlayerFiltered = (selectedSearchPlayers && selectedSearchPlayers.some(sp => sp.toLowerCase() === p.playerName.toLowerCase())) || 
+                                     (selectedSearchWinnerPlayer && selectedSearchWinnerPlayer.toLowerCase() === p.playerName.toLowerCase());
+            const isFighterFiltered = (selectedSearchFighters && selectedSearchFighters.some(sf => sf.toLowerCase() === p.character.toLowerCase())) || 
+                                      (selectedSearchWinnerFighter && selectedSearchWinnerFighter.toLowerCase() === p.character.toLowerCase());
+            const isFilteredMatch = isPlayerFiltered || isFighterFiltered;
+            const filterClass = isFilteredMatch ? 'filter-highlighted' : '';
+
             return `
-              <div class="history-player-row ${p.placement === 1 ? 'winner' : ''} ${teamClass}">
+              <div class="history-player-row ${p.placement === 1 ? 'winner' : ''} ${teamClass} ${filterClass}" data-player-name="${p.playerName.toLowerCase()}">
                 <div class="history-p-top-row">
                   <div class="history-p-placement">${p.placement === 1 ? '1ST' : p.placement === 2 ? '2ND' : p.placement === 3 ? '3RD' : p.placement + 'TH'}</div>
                   <img src="${iconUrl}" alt="${p.character}" style="width: 24px; height: 24px; margin-right: 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.5); object-fit: contain; flex-shrink: 0;" />

@@ -2744,3 +2744,106 @@ body.theme-retro .btn-arcade {
   border-color: var(--color-neon-magenta) !important;
   box-shadow: 0 0 10px rgba(255, 0, 255, 0.3) !important;
 }
+
+/* ========================================== */
+/* Active Filter & Interactive Hover Highlights */
+/* ========================================== */
+
+/* Filter Highlighted State (Selected in Filter) */
+.history-player-row.filter-highlighted {
+  border-color: var(--color-neon-cyan) !important;
+  background: rgba(0, 240, 255, 0.08) !important;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.25), inset 0 0 5px rgba(0, 240, 255, 0.15) !important;
+  transform: scale(1.01);
+  z-index: 5;
+}
+
+.history-player-row.winner.filter-highlighted {
+  border-color: var(--color-neon-yellow) !important;
+  background: rgba(255, 230, 0, 0.08) !important;
+  box-shadow: 0 0 10px rgba(255, 230, 0, 0.25), inset 0 0 5px rgba(255, 230, 0, 0.15) !important;
+}
+
+.timeline-player-info.filter-highlighted,
+.winner-name-box.filter-highlighted {
+  border-color: var(--color-neon-cyan) !important;
+  background: rgba(0, 240, 255, 0.15) !important;
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.4) !important;
+  transition: all 0.2s ease;
+}
+
+.timeline-player-info.filter-highlighted {
+  border-color: var(--color-neon-magenta) !important;
+  background: rgba(255, 0, 127, 0.15) !important;
+  box-shadow: 0 0 8px rgba(255, 0, 127, 0.4) !important;
+}
+
+.winner-name-box.filter-highlighted {
+  border-color: var(--color-neon-yellow) !important;
+  background: rgba(255, 230, 0, 0.15) !important;
+  box-shadow: 0 0 8px rgba(255, 230, 0, 0.4) !important;
+}
+
+.winner-name-box.sudden-death-name-box.filter-highlighted {
+  border-color: var(--color-neon-magenta) !important;
+  background: rgba(255, 0, 127, 0.15) !important;
+  box-shadow: 0 0 8px rgba(255, 0, 127, 0.4) !important;
+}
+
+/* Hover Highlighted State (Dynamic Active Hover) */
+.history-player-row.hover-highlighted {
+  border-color: #fff !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.5), inset 0 0 8px rgba(255, 255, 255, 0.25) !important;
+  transform: translateY(-2px) scale(1.02);
+  transition: all 0.15s ease-out;
+  z-index: 10;
+}
+
+.history-player-row.winner.hover-highlighted {
+  border-color: var(--color-neon-yellow) !important;
+  background: rgba(255, 230, 0, 0.15) !important;
+  box-shadow: 0 0 20px var(--color-neon-yellow), inset 0 0 10px rgba(255, 230, 0, 0.3) !important;
+}
+
+/* Elevate the timeline elements when matching card element is hovered */
+.timeline-marker.hover-highlighted {
+  z-index: 120 !important;
+}
+
+.timeline-marker.hover-highlighted .timeline-dot {
+  transform: scale(1.3) !important;
+  box-shadow: 0 0 20px var(--color-neon-magenta) !important;
+}
+
+.timeline-marker.hover-highlighted .timeline-player-info {
+  border-color: var(--color-neon-magenta) !important;
+  box-shadow: 0 0 12px var(--color-neon-magenta) !important;
+  background: rgba(255, 0, 127, 0.15) !important;
+}
+
+.winner-sidebar-row.hover-highlighted {
+  transform: translateX(6px) !important;
+  opacity: 1 !important;
+}
+
+.winner-sidebar-row.hover-highlighted .winner-icon-bubble {
+  transform: scale(1.25) !important;
+  box-shadow: 0 0 18px var(--color-neon-yellow) !important;
+}
+
+.winner-sidebar-row.hover-highlighted .winner-name-box {
+  border-color: var(--color-neon-yellow) !important;
+  box-shadow: 0 0 15px rgba(255, 220, 0, 0.6) !important;
+}
+
+.winner-sidebar-row.sudden-death-row.hover-highlighted .winner-icon-bubble {
+  filter: grayscale(0) !important;
+  border-color: var(--color-neon-magenta) !important;
+  box-shadow: 0 0 18px var(--color-neon-magenta) !important;
+}
+
+.winner-sidebar-row.sudden-death-row.hover-highlighted .winner-name-box {
+  border-color: var(--color-neon-magenta) !important;
+  box-shadow: 0 0 15px rgba(255, 0, 127, 0.6) !important;
+}
