@@ -1095,18 +1095,14 @@ body {
   width: 32px;
   height: 32px;
   object-fit: contain;
-  background-color: var(--bg-metal);
-  border: 2px solid var(--color-neon-yellow);
-  box-shadow: 0 0 6px rgba(255, 234, 0, 0.4);
-  border-radius: 4px;
   image-rendering: pixelated;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  filter: drop-shadow(0 0 4px rgba(255, 234, 0, 0.4));
+  transition: transform 0.2s ease, filter 0.2s ease;
 }
 
 .leaderboard-table tr:hover .leaderboard-avatar-img {
   transform: scale(1.15) rotate(2deg);
-  box-shadow: 0 0 10px rgba(255, 0, 127, 0.8);
-  border-color: var(--color-neon-magenta);
+  filter: drop-shadow(0 0 8px rgba(255, 0, 127, 0.9));
 }
 
 
