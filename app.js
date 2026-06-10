@@ -741,8 +741,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const badgeClass = is1v1 ? "badge-1v1" : (m.gameStyle && m.gameStyle.toLowerCase() === 'teams' ? "badge-teams" : "badge-ffa");
       const playerCountText = is1v1 ? "2 players" : `${m.players ? m.players.length : 0} players`;
 
-      // Generate markers for the timeline with collision avoidance
-      const percentageCounts = {};
+      // Generate markers for the timeline with collision avoidance (separated by above/below direction to avoid double-height lines for simultaneous opposite knockouts)
+      const staggerCounts = { above: {}, below: {} };
       let markersHtml = "";
       let winnersHtml = "";
       let markerIdx = 0;
@@ -788,16 +788,18 @@ document.addEventListener("DOMContentLoaded", () => {
             const pct = (outAtSecs / 300) * 100;
             const safePct = Math.max(0, Math.min(100, pct));
             
+            const isAbove = (markerIdx % 2 === 0);
+            markerIdx++;
+
             const pctKey = safePct.toFixed(1);
-            if (!percentageCounts[pctKey]) {
-              percentageCounts[pctKey] = 0;
+            const sideKey = isAbove ? 'above' : 'below';
+            if (!staggerCounts[sideKey][pctKey]) {
+              staggerCounts[sideKey][pctKey] = 0;
             }
-            const staggerIndex = percentageCounts[pctKey]++;
+            const staggerIndex = staggerCounts[sideKey][pctKey]++;
             
             const markerColor = 'var(--color-neon-magenta)';
             const textColor = 'var(--color-neon-magenta)';
-            const isAbove = (markerIdx % 2 === 0);
-            markerIdx++;
             
             const offsetSize = 15 + staggerIndex * 30;
             const displayTime = p.outAt || "5:00";

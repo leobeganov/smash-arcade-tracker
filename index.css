@@ -2586,7 +2586,7 @@ body.theme-retro .btn-arcade {
   display: flex !important;
   gap: 30px;
   align-items: stretch;
-  padding: 50px 15px 50px 15px;
+  padding: 40px 15px 30px 15px;
   margin-top: 20px;
   border-top: 1px solid var(--color-border-dark);
   overflow: visible;
