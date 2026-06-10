@@ -13,9 +13,14 @@ document.addEventListener("DOMContentLoaded", () => {
   let lastScannedMatch = null;
   let currentPodiumTimeframe = "7days";
   let currentLeaderboardTimeframe = "alltime";
+  let currentPlayerTimeframe = "alltime";
+  let currentFighterTimeframe = "alltime";
   let selectedSearchPlayers = [];
   let selectedSearchFighters = [];
+  let selectedSearchWinnerPlayer = null;
+  let selectedSearchWinnerFighter = null;
   let isSearchDropdownsInitialized = false;
+  let shouldScrollToMatchList = false;
 
   // --- DOM Elements ---
   const views = {
@@ -94,8 +99,10 @@ document.addEventListener("DOMContentLoaded", () => {
       isSearchDropdownsInitialized = false;
       await renderHome();
     } else if (target === "player") {
+      currentPlayerTimeframe = "alltime";
       await renderPlayerProfile(id);
     } else if (target === "fighter") {
+      currentFighterTimeframe = "alltime";
       await renderFighterProfile(id);
     } else if (target === "leaderboard") {
       await renderLeaderboard();
@@ -113,6 +120,92 @@ document.addEventListener("DOMContentLoaded", () => {
   // Bind router and trigger initial routing
   window.addEventListener("hashchange", router);
   router();
+
+  // Dynamic bidirectional hover highlighting between timeline and player rows
+  const historyMatchesListEl = document.getElementById("history-matches-list");
+  if (historyMatchesListEl) {
+    historyMatchesListEl.addEventListener("mouseover", (e) => {
+      // 1. Check if hovering a timeline item (timeline-marker or winner-sidebar-row)
+      const timelineMarker = e.target.closest(".timeline-marker, .winner-sidebar-row");
+      if (timelineMarker) {
+        if (e.relatedTarget && timelineMarker.contains(e.relatedTarget)) {
+          return;
+        }
+        const playerName = timelineMarker.getAttribute("data-player-name");
+        if (playerName) {
+          const matchCard = timelineMarker.closest(".match-history-card");
+          if (matchCard) {
+            // Find corresponding player row in the same match card
+            const playerRow = matchCard.querySelector(`.history-player-row[data-player-name="${playerName}"]`);
+            if (playerRow) {
+              playerRow.classList.add("hover-highlighted");
+            }
+          }
+        }
+        return;
+      }
+
+      // 2. Check if hovering a history player row (the player card)
+      const playerRow = e.target.closest(".history-player-row");
+      if (playerRow) {
+        if (e.relatedTarget && playerRow.contains(e.relatedTarget)) {
+          return;
+        }
+        const playerName = playerRow.getAttribute("data-player-name");
+        if (playerName) {
+          const matchCard = playerRow.closest(".match-history-card");
+          if (matchCard) {
+            // Find corresponding timeline items and victory/sudden-death rows
+            const timelineItems = matchCard.querySelectorAll(`[data-player-name="${playerName}"]`);
+            timelineItems.forEach(item => {
+              if (item !== playerRow) {
+                item.classList.add("hover-highlighted");
+              }
+            });
+          }
+        }
+      }
+    });
+
+    historyMatchesListEl.addEventListener("mouseout", (e) => {
+      // 1. Remove highlight when leaving a timeline item
+      const timelineMarker = e.target.closest(".timeline-marker, .winner-sidebar-row");
+      if (timelineMarker) {
+        if (e.relatedTarget && timelineMarker.contains(e.relatedTarget)) {
+          return;
+        }
+        const playerName = timelineMarker.getAttribute("data-player-name");
+        if (playerName) {
+          const matchCard = timelineMarker.closest(".match-history-card");
+          if (matchCard) {
+            const playerRow = matchCard.querySelector(`.history-player-row[data-player-name="${playerName}"]`);
+            if (playerRow) {
+              playerRow.classList.remove("hover-highlighted");
+            }
+          }
+        }
+        return;
+      }
+
+      // 2. Remove highlight when leaving a history player row
+      const playerRow = e.target.closest(".history-player-row");
+      if (playerRow) {
+        if (e.relatedTarget && playerRow.contains(e.relatedTarget)) {
+          return;
+        }
+        const playerName = playerRow.getAttribute("data-player-name");
+        if (playerName) {
+          const matchCard = playerRow.closest(".match-history-card");
+          if (matchCard) {
+            const timelineItems = matchCard.querySelectorAll(`[data-player-name="${playerName}"]`);
+            timelineItems.forEach(item => {
+              item.classList.remove("hover-highlighted");
+            });
+          }
+        }
+      }
+    });
+  }
 
 
   // ==========================================
@@ -139,7 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
       activeStyles.push('1v1', 'free-for-all', 'teams');
     }
 
-    const podiumData = await api.getPodium(currentPodiumTimeframe, activeStyles, selectedSearchPlayers, selectedSearchFighters);
+    const podiumData = await api.getPodium(currentPodiumTimeframe, activeStyles, selectedSearchPlayers, selectedSearchFighters, selectedSearchWinnerPlayer, selectedSearchWinnerFighter);
 
     // Populate Gold (1st)
     const gold = podiumData.find(p => p.rank === 1);
@@ -177,7 +270,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const silverName = document.getElementById("podium-silver-name");
     const silverStat = document.getElementById("podium-silver-stat");
     const silverInfo = document.getElementById("podium-silver-info");
+    const silverCol = document.getElementById("podium-silver");
     if (silver) {
+      if (silverCol) silverCol.style.display = "flex";
       if (silverImg) {
         silverImg.src = silver.fighter.img;
         silverImg.style.opacity = "1";
@@ -189,6 +284,7 @@ document.addEventListener("DOMContentLoaded", () => {
         silverInfo.style.cursor = "pointer";
       }
     } else {
+      if (silverCol) silverCol.style.display = "none";
       if (silverImg) {
         silverImg.src = "assets/mario.png?v=5";
         silverImg.style.opacity = "0.1";
@@ -207,7 +303,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const bronzeName = document.getElementById("podium-bronze-name");
     const bronzeStat = document.getElementById("podium-bronze-stat");
     const bronzeInfo = document.getElementById("podium-bronze-info");
+    const bronzeCol = document.getElementById("podium-bronze");
     if (bronze) {
+      if (bronzeCol) bronzeCol.style.display = "flex";
       if (bronzeImg) {
         bronzeImg.src = bronze.fighter.img;
         bronzeImg.style.opacity = "1";
@@ -219,6 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
         bronzeInfo.style.cursor = "pointer";
       }
     } else {
+      if (bronzeCol) bronzeCol.style.display = "none";
       if (bronzeImg) {
         bronzeImg.src = "assets/mario.png?v=5";
         bronzeImg.style.opacity = "0.1";
@@ -230,7 +329,61 @@ document.addEventListener("DOMContentLoaded", () => {
         bronzeInfo.style.cursor = "default";
       }
     }
+    // Winner Filter Badge UI
+    const badgeContainer = document.getElementById("winner-filter-container");
+    const badgeName = document.getElementById("winner-filter-name");
+    const badgeClearBtn = document.getElementById("btn-clear-winner-filter");
+
+    if (badgeContainer && badgeName) {
+      if (selectedSearchWinnerPlayer || selectedSearchWinnerFighter) {
+        badgeName.textContent = (selectedSearchWinnerPlayer || selectedSearchWinnerFighter).toUpperCase();
+        badgeContainer.style.display = "flex";
+        if (badgeClearBtn) {
+          badgeClearBtn.onclick = () => {
+            selectedSearchWinnerPlayer = null;
+            selectedSearchWinnerFighter = null;
+            badgeContainer.style.display = "none";
+            isSearchDropdownsInitialized = false; // force dropdown re-initialization
+            renderHome();
+          };
+        }
+      } else {
+        badgeContainer.style.display = "none";
+      }
+    }
+
+    // Sync timeframe filter toggle buttons
+    const timeframeFilters = document.getElementById("podium-timeframe-filters");
+    if (timeframeFilters) {
+      timeframeFilters.querySelectorAll(".toggle-btn").forEach(btn => {
+        if (btn.getAttribute("data-timeframe") === currentPodiumTimeframe) {
+          btn.classList.add("active");
+        } else {
+          btn.classList.remove("active");
+        }
+      });
+    }
+
+    updateSearchBadge();
     await renderHomeMatchesList();
+
+    if (shouldScrollToMatchList) {
+      shouldScrollToMatchList = false;
+      setTimeout(() => {
+        const matchesList = document.getElementById("history-matches-list");
+        if (matchesList) {
+          const isWinnerBadgeActive = !!(selectedSearchWinnerPlayer || selectedSearchWinnerFighter);
+          const filterHeader = document.querySelector(".podium-header-row");
+          const filterHeaderHeight = filterHeader ? filterHeader.getBoundingClientRect().height : 62;
+          const winnerFilterHeader = document.getElementById("winner-filter-container");
+          const winnerFilterHeight = (isWinnerBadgeActive && winnerFilterHeader && winnerFilterHeader.style.display !== "none") ? winnerFilterHeader.getBoundingClientRect().height : 0;
+          
+          const stickyHeaderHeight = filterHeaderHeight + winnerFilterHeight;
+          const targetY = matchesList.getBoundingClientRect().top + window.scrollY - stickyHeaderHeight - 15;
+          window.scrollTo({ top: targetY, behavior: "smooth" });
+        }
+      }, 400);
+    }
 
     // Enforce smooth minimum display delay of 250ms
     const elapsed = Date.now() - startTime;
@@ -247,7 +400,34 @@ document.addEventListener("DOMContentLoaded", () => {
   // 4. Render Player Profile
   // ==========================================
   async function renderPlayerProfile(playerId) {
-    const stats = await api.getPlayerProfile(playerId);
+    // Sync timeframe filter toggle buttons
+    const ptf = document.getElementById("player-timeframe-filters");
+    if (ptf) {
+      ptf.querySelectorAll(".toggle-btn").forEach(btn => {
+        if (btn.getAttribute("data-timeframe") === currentPlayerTimeframe) {
+          btn.classList.add("active");
+        } else {
+          btn.classList.remove("active");
+        }
+      });
+    }
+
+    // Fetch and filter matches dynamically
+    let matches = await window.Database.getMatchesAsync();
+    const now = Date.now();
+    if (currentPlayerTimeframe === 'today') {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      matches = matches.filter(m => m.timestamp >= todayStart.getTime());
+    } else if (currentPlayerTimeframe === '7days') {
+      const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
+      matches = matches.filter(m => m.timestamp >= sevenDaysAgo);
+    } else if (currentPlayerTimeframe === '30days') {
+      const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
+      matches = matches.filter(m => m.timestamp >= thirtyDaysAgo);
+    }
+
+    const stats = await api.getPlayerProfile(playerId, matches);
     if (!stats) return;
 
     // Sidebar Portrait and Info
@@ -310,6 +490,36 @@ document.addEventListener("DOMContentLoaded", () => {
       nemesisCard.onclick = null;
       nemesisCard.style.cursor = "default";
     }
+
+    // See all matches button integration
+    const btnSeeMatches = document.getElementById("btn-player-see-matches");
+    if (btnSeeMatches) {
+      btnSeeMatches.onclick = () => {
+        selectedSearchPlayers = [stats.player.name];
+        selectedSearchFighters = [];
+        selectedSearchWinnerPlayer = null;
+        selectedSearchWinnerFighter = null;
+        currentPodiumTimeframe = "30days";
+        shouldScrollToMatchList = true;
+        isSearchDropdownsInitialized = false; // force dropdown re-initialization
+        window.location.hash = "#home";
+      };
+    }
+
+    // Win rate cell click-through integration
+    const winrateCell = document.getElementById("player-winrate-cell");
+    if (winrateCell) {
+      winrateCell.onclick = () => {
+        selectedSearchPlayers = [stats.player.name];
+        selectedSearchFighters = [];
+        selectedSearchWinnerPlayer = stats.player.name;
+        selectedSearchWinnerFighter = null;
+        currentPodiumTimeframe = "30days";
+        shouldScrollToMatchList = true;
+        isSearchDropdownsInitialized = false; // force dropdown re-initialization
+        window.location.hash = "#home";
+      };
+    }
   }
 
 
@@ -317,7 +527,34 @@ document.addEventListener("DOMContentLoaded", () => {
   // 5. Render Fighter Profile
   // ==========================================
   async function renderFighterProfile(fighterId) {
-    const stats = await api.getFighterProfile(fighterId);
+    // Sync timeframe filter toggle buttons
+    const ftf = document.getElementById("fighter-timeframe-filters");
+    if (ftf) {
+      ftf.querySelectorAll(".toggle-btn").forEach(btn => {
+        if (btn.getAttribute("data-timeframe") === currentFighterTimeframe) {
+          btn.classList.add("active");
+        } else {
+          btn.classList.remove("active");
+        }
+      });
+    }
+
+    // Fetch and filter matches dynamically
+    let matches = await window.Database.getMatchesAsync();
+    const now = Date.now();
+    if (currentFighterTimeframe === 'today') {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      matches = matches.filter(m => m.timestamp >= todayStart.getTime());
+    } else if (currentFighterTimeframe === '7days') {
+      const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
+      matches = matches.filter(m => m.timestamp >= sevenDaysAgo);
+    } else if (currentFighterTimeframe === '30days') {
+      const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
+      matches = matches.filter(m => m.timestamp >= thirtyDaysAgo);
+    }
+
+    const stats = await api.getFighterProfile(fighterId, matches);
     if (!stats) return;
 
     // Set dynamic series background watermark
@@ -333,10 +570,32 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Sidebar Portrait and Bio
+    // Render Series Brand Badge
+    const seriesContainer = document.getElementById("fighter-profile-series-container");
+    const seriesImg = document.getElementById("fighter-profile-series-img");
+    const seriesName = document.getElementById("fighter-profile-series-name");
+    
+    if (stats.fighter.series) {
+      if (stats.fighter.series.icon) {
+        seriesImg.src = stats.fighter.series.icon;
+        seriesImg.style.display = "block";
+      } else {
+        seriesImg.style.display = "none";
+      }
+      seriesName.textContent = stats.fighter.series.name.toUpperCase();
+      seriesContainer.style.display = "flex";
+    } else {
+      seriesContainer.style.display = "none";
+    }
+
+    // Sidebar Portrait and Backstory
     document.getElementById("fighter-profile-img").src = stats.fighter.img;
     document.getElementById("fighter-profile-name").textContent = stats.fighter.name;
-    document.getElementById("fighter-profile-bio").textContent = stats.fighter.bio;
+
+    // Extract backstory (origin tips) or fallback to standard bio
+    const originTips = stats.fighter.tips ? stats.fighter.tips.filter(t => t.type === "origin") : [];
+    const backstoryText = originTips.map(t => t.description).join("\n\n") || stats.fighter.bio;
+    document.getElementById("fighter-profile-bio").textContent = backstoryText;
 
     // Stat grids
     document.getElementById("fighter-stat-wins").textContent = stats.adjustedWins;
@@ -389,6 +648,119 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     } else {
       topPlayersContainer.innerHTML = `<div style="font-family: var(--font-stats); opacity: 0.6; font-size: 13px;">NO BATTLE RECORD</div>`;
+    }
+
+    // Render Moves Registry List
+    const movesContainer = document.getElementById("fighter-moves-list");
+    movesContainer.innerHTML = "";
+
+    const tips = stats.fighter.tips || [];
+    const categories = {};
+    
+    tips.forEach(t => {
+      if (!t.move) return; 
+      const cat = t.type || "Other Moves";
+      if (!categories[cat]) {
+        categories[cat] = [];
+      }
+      categories[cat].push(t);
+    });
+
+    const sortedCategories = [
+      "Standard Ground Attacks",
+      "Aerial Attacks",
+      "Smash Attacks",
+      "Throws & Grabs",
+      "Standard Special Moves",
+      "Special Variant Combinations"
+    ];
+
+    let hasAnyMoves = false;
+    sortedCategories.forEach(catName => {
+      const moves = categories[catName];
+      if (!moves || moves.length === 0) return;
+      hasAnyMoves = true;
+
+      const catBlock = document.createElement("div");
+      catBlock.className = "moves-category-group";
+      catBlock.style.display = "flex";
+      catBlock.style.flexDirection = "column";
+      catBlock.style.gap = "12px";
+
+      catBlock.innerHTML = `
+        <h4 class="moves-category-title" style="font-family: var(--font-arcade); font-size: 11px; color: var(--color-neon-yellow); margin: 15px 0 5px 0; letter-spacing: 0.5px; border-left: 3px solid var(--color-neon-cyan); padding-left: 8px;">${catName.toUpperCase()}</h4>
+        <div class="moves-grid" style="display: grid; grid-template-columns: 1fr; gap: 12px;">
+        </div>
+      `;
+
+      const grid = catBlock.querySelector(".moves-grid");
+
+      moves.forEach(m => {
+        const moveCard = document.createElement("div");
+        moveCard.className = "move-card-retro";
+        moveCard.style.background = "rgba(0, 10, 20, 0.45)";
+        moveCard.style.border = "1px solid rgba(0, 240, 255, 0.2)";
+        moveCard.style.padding = "15px";
+        moveCard.style.display = "flex";
+        moveCard.style.flexDirection = "column";
+        moveCard.style.gap = "8px";
+        moveCard.style.transition = "border-color 0.2s ease, box-shadow 0.2s ease";
+
+        moveCard.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+            <span class="move-name text-glow-cyan" style="font-family: var(--font-header); font-size: 13px; color: #fff; text-shadow: 0 0 5px rgba(0, 240, 255, 0.4);">${m.name}</span>
+            <span class="move-command-badge" style="font-family: var(--font-arcade); font-size: 9px; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--color-neon-cyan); color: var(--color-neon-cyan); padding: 4px 10px; border-radius: 4px; box-shadow: 0 0 5px rgba(0, 240, 255, 0.2);">${m.move.toUpperCase()}</span>
+          </div>
+          <p class="move-desc" style="font-family: monospace; font-size: 12px; color: #c4c6d0; opacity: 0.9; margin: 0; line-height: 1.5; text-align: left;">${m.description}</p>
+        `;
+
+        moveCard.onmouseover = () => {
+          moveCard.style.borderColor = "var(--color-neon-cyan)";
+          moveCard.style.boxShadow = "0 0 10px rgba(0, 240, 255, 0.2)";
+        };
+        moveCard.onmouseout = () => {
+          moveCard.style.borderColor = "rgba(0, 240, 255, 0.2)";
+          moveCard.style.boxShadow = "none";
+        };
+
+        grid.appendChild(moveCard);
+      });
+
+      movesContainer.appendChild(catBlock);
+    });
+
+    if (!hasAnyMoves) {
+      movesContainer.innerHTML = `<div style="font-family: var(--font-stats); opacity: 0.6; font-size: 13px;">NO MOVES REGISTERED FOR THIS FIGHTER</div>`;
+    }
+
+    // See all matches button integration
+    const btnSeeMatches = document.getElementById("btn-fighter-see-matches");
+    if (btnSeeMatches) {
+      btnSeeMatches.onclick = () => {
+        selectedSearchFighters = [stats.fighter.name];
+        selectedSearchPlayers = [];
+        selectedSearchWinnerPlayer = null;
+        selectedSearchWinnerFighter = null;
+        currentPodiumTimeframe = "30days";
+        shouldScrollToMatchList = true;
+        isSearchDropdownsInitialized = false; // force dropdown re-initialization
+        window.location.hash = "#home";
+      };
+    }
+
+    // Win rate cell click-through integration
+    const winrateCell = document.getElementById("fighter-winrate-cell");
+    if (winrateCell) {
+      winrateCell.onclick = () => {
+        selectedSearchFighters = [stats.fighter.name];
+        selectedSearchPlayers = [];
+        selectedSearchWinnerPlayer = null;
+        selectedSearchWinnerFighter = stats.fighter.name;
+        currentPodiumTimeframe = "30days";
+        shouldScrollToMatchList = true;
+        isSearchDropdownsInitialized = false; // force dropdown re-initialization
+        window.location.hash = "#home";
+      };
     }
   }
 
@@ -722,6 +1094,15 @@ document.addEventListener("DOMContentLoaded", () => {
       }));
     }
 
+    if (selectedSearchWinnerPlayer) {
+      const wpLower = selectedSearchWinnerPlayer.toLowerCase().trim();
+      matches = matches.filter(m => m.players && m.players.some(p => p.playerName.toLowerCase().trim() === wpLower && p.placement === 1));
+    }
+    if (selectedSearchWinnerFighter) {
+      const wfLower = selectedSearchWinnerFighter.toLowerCase().trim();
+      matches = matches.filter(m => m.players && m.players.some(p => p.character.toLowerCase().trim() === wfLower && p.placement === 1));
+    }
+
     const container = document.getElementById("history-matches-list");
     container.innerHTML = "";
 
@@ -741,47 +1122,92 @@ document.addEventListener("DOMContentLoaded", () => {
       const badgeClass = is1v1 ? "badge-1v1" : (m.gameStyle && m.gameStyle.toLowerCase() === 'teams' ? "badge-teams" : "badge-ffa");
       const playerCountText = is1v1 ? "2 players" : `${m.players ? m.players.length : 0} players`;
 
-      // Generate markers for the timeline with collision avoidance
-      const percentageCounts = {};
+      // Generate markers for the timeline with collision avoidance (separated by above/below direction to avoid double-height lines for simultaneous opposite knockouts)
+      const staggerCounts = { above: {}, below: {} };
       let markersHtml = "";
+      let winnersHtml = "";
+      let markerIdx = 0;
+
       if (m.players) {
-        m.players.forEach((p, idx) => {
-          const outAtSecs = parseOutAtToSeconds(p.outAt || (p.placement === 1 ? '---' : '5:00'));
-          const isSurvived = (outAtSecs === null);
-          const secondsVal = isSurvived ? 0 : outAtSecs;
-          
-          const pct = isSurvived ? 100 : ((300 - secondsVal) / 300) * 100;
-          const safePct = Math.max(0, Math.min(100, pct));
-          
-          const pctKey = safePct.toFixed(1);
-          if (!percentageCounts[pctKey]) {
-            percentageCounts[pctKey] = 0;
-          }
-          const staggerIndex = percentageCounts[pctKey]++;
-          
-          const markerColor = isSurvived ? 'var(--color-neon-yellow)' : 'var(--color-neon-magenta)';
-          const textColor = isSurvived ? 'var(--color-neon-yellow)' : 'var(--color-neon-magenta)';
-          const isAbove = (idx % 2 === 0);
-          
-          const offsetSize = 15 + staggerIndex * 30;
+        m.players.forEach((p) => {
+          const outAtSecs = parseOutAtToSeconds(p.outAt);
+          const hasNoKnockoutTime = (outAtSecs === null);
+          const isWinner = (p.placement === 1);
           const fighterObj = api.getFighterDetails(p.character) || {};
           const iconUrl = fighterObj.icon || 'assets/mario.png';
-          
-          markersHtml += `
-            <div class="timeline-marker ${isSurvived ? 'survived' : ''}" style="position: absolute; left: ${safePct}%; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: ${isAbove ? 'column-reverse' : 'column'}; align-items: center; z-index: 10;">
-              <!-- Details -->
-              <div class="timeline-player-info panel-beveled" style="text-align: center; white-space: nowrap; background: var(--color-bg-dark); border: 1px solid ${markerColor}; padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); margin: ${isAbove ? `0 0 ${offsetSize}px 0` : `${offsetSize}px 0 0 0`}; box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px; pointer-events: none; user-select: none;">
-                <span style="font-weight: bold; color: #fff; text-shadow: 0 0 2px rgba(255,255,255,0.5);">${p.playerName}${isSurvived ? ' 🏆' : ''}</span>
-                <span class="hover-time" style="color: ${textColor}; font-weight: bold; text-shadow: 0 0 4px ${textColor};">(${isSurvived ? 'WINNER' : p.outAt || '5:00'})</span>
-              </div>
-              <!-- Connector line -->
-              <div class="timeline-connector" style="width: 2px; height: ${offsetSize}px; background: ${markerColor}; opacity: 0.8; position: absolute; ${isAbove ? 'bottom: 15px' : 'top: 15px'};"></div>
-              <!-- Dot marker (Character head-icon bubble) -->
-              <div class="timeline-dot" style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid ${markerColor}; box-shadow: 0 0 8px ${markerColor}; z-index: 11; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${p.character}" />
-              </div>
-            </div>
-          `;
+
+          const isPlayerFiltered = (selectedSearchPlayers && selectedSearchPlayers.some(sp => sp.toLowerCase() === p.playerName.toLowerCase())) || 
+                                   (selectedSearchWinnerPlayer && selectedSearchWinnerPlayer.toLowerCase() === p.playerName.toLowerCase());
+          const isFighterFiltered = (selectedSearchFighters && selectedSearchFighters.some(sf => sf.toLowerCase() === p.character.toLowerCase())) || 
+                                    (selectedSearchWinnerFighter && selectedSearchWinnerFighter.toLowerCase() === p.character.toLowerCase());
+          const isFilteredMatch = isPlayerFiltered || isFighterFiltered;
+          const filterClass = isFilteredMatch ? 'filter-highlighted' : '';
+
+          if (hasNoKnockoutTime) {
+            if (isWinner) {
+              winnersHtml += `
+                <div class="winner-sidebar-row" data-player-name="${p.playerName.toLowerCase()}" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                  <!-- Dot marker (Character head-icon bubble in gold) -->
+                  <div class="winner-icon-bubble" style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid var(--color-neon-yellow); box-shadow: 0 0 8px var(--color-neon-yellow); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+                    <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${p.character}" />
+                  </div>
+                  <!-- Name/Details in a panel-beveled gold border box -->
+                  <div class="panel-beveled winner-name-box ${filterClass}" style="white-space: nowrap; background: var(--color-bg-dark); border: 1px solid var(--color-neon-yellow); padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px;">
+                    <span style="font-weight: bold; color: #fff; text-shadow: 0 0 2px rgba(255,255,255,0.5);">${p.playerName} 🏆</span>
+                  </div>
+                </div>
+              `;
+            } else {
+              winnersHtml += `
+                <div class="winner-sidebar-row sudden-death-row" data-player-name="${p.playerName.toLowerCase()}" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; opacity: 0.65;">
+                  <!-- Dot marker (Character head-icon bubble in grey) -->
+                  <div class="winner-icon-bubble sudden-death-icon" style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid #555; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; filter: grayscale(0.8);">
+                    <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${p.character}" />
+                  </div>
+                  <!-- Name/Details in a panel-beveled grey border box -->
+                  <div class="panel-beveled winner-name-box sudden-death-name-box ${filterClass}" style="white-space: nowrap; background: var(--color-bg-dark); border: 1px solid #444; padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); border-radius: 4px; display: flex; flex-direction: column; gap: 1px; box-shadow: 0 0 4px rgba(0,0,0,0.5);">
+                    <span style="font-weight: bold; color: #aaa;">${p.playerName}</span>
+                    <span style="font-size: 8px; color: #777; font-weight: bold; letter-spacing: 0.5px; line-height: 1;">SUDDEN DEATH</span>
+                  </div>
+                </div>
+              `;
+            }
+          } else {
+            const pct = (outAtSecs / 300) * 100;
+            const safePct = Math.max(0, Math.min(100, pct));
+            
+            const isAbove = (markerIdx % 2 === 0);
+            markerIdx++;
+
+            const pctKey = safePct.toFixed(1);
+            const sideKey = isAbove ? 'above' : 'below';
+            if (!staggerCounts[sideKey][pctKey]) {
+              staggerCounts[sideKey][pctKey] = 0;
+            }
+            const staggerIndex = staggerCounts[sideKey][pctKey]++;
+            
+            const markerColor = 'var(--color-neon-magenta)';
+            const textColor = 'var(--color-neon-magenta)';
+            
+            const offsetSize = 15 + staggerIndex * 30;
+            const displayTime = p.outAt || "5:00";
+ 
+             markersHtml += `
+               <div class="timeline-marker" data-player-name="${p.playerName.toLowerCase()}" style="position: absolute; left: ${safePct}%; top: 50%; transform: translate(-50%, -50%); width: 24px; height: 24px; z-index: 10;">
+                 <!-- Dot marker (Character head-icon bubble centered on timeline) -->
+                 <div class="timeline-dot" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid ${markerColor}; box-shadow: 0 0 8px ${markerColor}; z-index: 11; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                   <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${p.character}" />
+                 </div>
+                 <!-- Connector line coming out of the bubble -->
+                 <div class="timeline-connector" style="position: absolute; left: 11px; ${isAbove ? `bottom: 24px` : `top: 24px`}; width: 2px; height: ${offsetSize}px; background: ${markerColor}; opacity: 0.8; z-index: 9;"></div>
+                 <!-- Player details box -->
+                 <div class="timeline-player-info panel-beveled ${filterClass}" style="position: absolute; left: 12px; ${isAbove ? `bottom: ${24 + offsetSize}px` : `top: ${24 + offsetSize}px`}; transform: translateX(-50%); text-align: center; white-space: nowrap; background: var(--color-bg-dark); border: 1px solid ${markerColor}; padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px; pointer-events: auto; user-select: none; z-index: 10;">
+                   <span style="font-weight: bold; color: #fff; text-shadow: 0 0 2px rgba(255,255,255,0.5);">${p.playerName}</span>
+                   <span class="hover-time" style="color: ${textColor}; font-weight: bold; text-shadow: 0 0 4px ${textColor};">(${displayTime})</span>
+                 </div>
+               </div>
+             `;
+           }
         });
       }
 
@@ -793,7 +1219,10 @@ document.addEventListener("DOMContentLoaded", () => {
             </span>
             <span class="match-card-mode-text">${playerCountText.toUpperCase()}</span>
           </div>
-          <div class="match-card-meta">${new Date(m.timestamp).toLocaleDateString()} ${new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+          <div style="display: flex; align-items: center; gap: 15px;">
+            <div class="match-card-meta">${new Date(m.timestamp).toLocaleDateString()} ${new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+            <button class="delete-match-btn" data-id="${m.id}" style="background: none; border: none; color: var(--color-neon-magenta); font-family: var(--font-arcade); font-size: 16px; line-height: 1; cursor: pointer; padding: 0; margin: 0; transition: transform 0.2s ease, color 0.2s ease; text-shadow: 0 0 6px var(--color-neon-magenta);" onmouseover="this.style.transform='scale(1.25)'; this.style.color='#fff';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--color-neon-magenta)';">&times;</button>
+          </div>
         </div>
         <div class="match-card-players-grid ${m.players && m.players.length > 4 ? 'large-lobby' : ''}">
           ${m.players.map(p => {
@@ -801,8 +1230,16 @@ document.addEventListener("DOMContentLoaded", () => {
             const teamClass = hasTeamColor ? `team-${p.teamColor.toLowerCase()}` : '';
             const fighterObj = api.getFighterDetails(p.character) || {};
             const iconUrl = fighterObj.icon || 'assets/mario.png';
+
+            const isPlayerFiltered = (selectedSearchPlayers && selectedSearchPlayers.some(sp => sp.toLowerCase() === p.playerName.toLowerCase())) || 
+                                     (selectedSearchWinnerPlayer && selectedSearchWinnerPlayer.toLowerCase() === p.playerName.toLowerCase());
+            const isFighterFiltered = (selectedSearchFighters && selectedSearchFighters.some(sf => sf.toLowerCase() === p.character.toLowerCase())) || 
+                                      (selectedSearchWinnerFighter && selectedSearchWinnerFighter.toLowerCase() === p.character.toLowerCase());
+            const isFilteredMatch = isPlayerFiltered || isFighterFiltered;
+            const filterClass = isFilteredMatch ? 'filter-highlighted' : '';
+
             return `
-              <div class="history-player-row ${p.placement === 1 ? 'winner' : ''} ${teamClass}">
+              <div class="history-player-row ${p.placement === 1 ? 'winner' : ''} ${teamClass} ${filterClass}" data-player-name="${p.playerName.toLowerCase()}">
                 <div class="history-p-top-row">
                   <div class="history-p-placement">${p.placement === 1 ? '1ST' : p.placement === 2 ? '2ND' : p.placement === 3 ? '3RD' : p.placement + 'TH'}</div>
                   <img src="${iconUrl}" alt="${p.character}" style="width: 24px; height: 24px; margin-right: 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.5); object-fit: contain; flex-shrink: 0;" />
@@ -815,22 +1252,28 @@ document.addEventListener("DOMContentLoaded", () => {
                   <span class="player-stat-badge ko">Kills: ${p.kos !== undefined ? p.kos : 0}</span>
                   <span class="player-stat-badge fall">Falls: ${p.falls !== undefined ? Math.abs(p.falls) : 0}</span>
                   <span class="player-stat-badge sd">SDs: ${p.sds !== undefined ? Math.abs(p.sds) : 0}</span>
-                  <span class="player-stat-badge out">Out: ${p.outAt || (p.placement === 1 ? '---' : '5:00')}</span>
                 </div>
               </div>
             `;
           }).join('')}
         </div>
-        <div class="match-card-actions" style="display: flex; gap: 10px; justify-content: flex-start; align-items: center; flex-wrap: wrap;">
-          <button class="btn-arcade cyan toggle-timeline-btn" data-id="${m.id}" style="font-size: 11px; padding: 4px 12px; height: 28px; line-height: 1;">VIEW TIMELINE</button>
-          <button class="btn-arcade magenta delete-match-btn" data-id="${m.id}" style="font-size: 11px; padding: 4px 12px; height: 28px; line-height: 1;">DELETE RECORD</button>
-        </div>
-        <div class="match-timeline-drawer" id="timeline-drawer-${m.id}" style="display: none; padding: 50px 15px 50px 15px; margin-top: 20px; border-top: 1px solid var(--color-border-dark); overflow: visible;">
-          <div class="timeline-track-container" style="position: relative; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; border: 1px solid rgba(255,255,255,0.2);">
-            <div style="position: absolute; left: 0; top: 0; height: 100%; width: 100%; background: var(--color-neon-cyan); opacity: 0.3; border-radius: 3px; box-shadow: 0 0 10px var(--color-neon-cyan);"></div>
-            <div style="position: absolute; left: 0; top: -25px; font-family: var(--font-arcade); font-size: 9px; color: var(--color-neon-cyan); text-shadow: 0 0 4px var(--color-neon-cyan); font-weight: bold; letter-spacing: 0.5px;">5:00 (START)</div>
-            <div style="position: absolute; right: 0; top: -25px; font-family: var(--font-arcade); font-size: 9px; color: var(--color-neon-cyan); text-shadow: 0 0 4px var(--color-neon-cyan); font-weight: bold; letter-spacing: 0.5px;">END</div>
-            ${markersHtml}
+        <div class="match-timeline-drawer" id="timeline-drawer-${m.id}">
+          <!-- Timeline Track Column -->
+          <div class="timeline-track-column">
+            <div class="timeline-track-container">
+              <div class="timeline-track-glow"></div>
+              <div class="timeline-label start">0:00 (START)</div>
+              <div class="timeline-label end">5:00 (END)</div>
+              ${markersHtml}
+            </div>
+          </div>
+          
+          <!-- Victory Sidebar Column -->
+          <div class="timeline-victory-column">
+            <div class="timeline-victory-title">🏆 VICTORY</div>
+            <div class="timeline-victory-list">
+              ${winnersHtml || `<div style="font-family: var(--font-stats); font-size: 11px; color: #666;">NO SURVIVORS</div>`}
+            </div>
           </div>
         </div>
       `;
@@ -1054,6 +1497,42 @@ document.addEventListener("DOMContentLoaded", () => {
       
       currentLeaderboardTimeframe = btn.getAttribute("data-timeframe");
       renderLeaderboard();
+    });
+  }
+
+  // Player Profile Timeframe Toggles
+  const playerTimeframeFilters = document.getElementById("player-timeframe-filters");
+  if (playerTimeframeFilters) {
+    playerTimeframeFilters.addEventListener("click", (e) => {
+      const btn = e.target.closest(".toggle-btn");
+      if (!btn) return;
+      
+      playerTimeframeFilters.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      
+      currentPlayerTimeframe = btn.getAttribute("data-timeframe");
+      const parts = window.location.hash.split("/");
+      if (parts[0] === "#player" && parts[1]) {
+        renderPlayerProfile(parts[1]);
+      }
+    });
+  }
+
+  // Fighter Profile Timeframe Toggles
+  const fighterTimeframeFilters = document.getElementById("fighter-timeframe-filters");
+  if (fighterTimeframeFilters) {
+    fighterTimeframeFilters.addEventListener("click", (e) => {
+      const btn = e.target.closest(".toggle-btn");
+      if (!btn) return;
+      
+      fighterTimeframeFilters.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      
+      currentFighterTimeframe = btn.getAttribute("data-timeframe");
+      const parts = window.location.hash.split("/");
+      if (parts[0] === "#fighter" && parts[1]) {
+        renderFighterProfile(parts[1]);
+      }
     });
   }
 
@@ -1418,6 +1897,8 @@ document.addEventListener("DOMContentLoaded", () => {
     btnClearPodiumSearch.onclick = () => {
       selectedSearchPlayers.length = 0;
       selectedSearchFighters.length = 0;
+      selectedSearchWinnerPlayer = null;
+      selectedSearchWinnerFighter = null;
       initSearchDropdowns();
       updateSearchBadge();
       renderHome();

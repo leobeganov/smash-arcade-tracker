@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Smashalytics - Super Smash Brothers Ultimate AI Screenshot Results Scanner & Retro Match Tracker">
   <title>SMASHALYTICS // ARCADE CABINET</title>
-  <link rel="stylesheet" href="index.css?v=12">
+  <link rel="stylesheet" href="index.css?v=19">
 </head>
 <body class="theme-storm">
 
@@ -104,6 +104,15 @@
           </div>
         </div>
 
+        <!-- Active Winner Filter Badge (Only shown when a winner filter is active from player/character profile pages) -->
+        <div id="winner-filter-container" style="display: none; width: 100%; max-width: 1125px; margin-top: 0; padding: 10px; margin-left: -10px; align-items: center; justify-content: flex-start; position: sticky; top: 62px; z-index: 140; background: rgba(12, 13, 18, 0.95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-sizing: border-box;">
+          <div class="panel-beveled neon-magenta" style="display: inline-flex; align-items: center; gap: 10px; padding: 6px 15px; font-family: var(--font-arcade); font-size: 11px; background: rgba(255, 0, 127, 0.15); border: 1px solid var(--color-neon-magenta); border-radius: 4px; box-shadow: 0 0 10px rgba(255, 0, 127, 0.3); color: #fff;">
+            <span id="winner-filter-icon" style="color: var(--color-neon-yellow); text-shadow: 0 0 4px var(--color-neon-yellow);">🏆</span>
+            <span id="winner-filter-label" style="letter-spacing: 0.5px;">ONLY SHOWING MATCHES WON BY: <span id="winner-filter-name" class="text-glow-yellow" style="font-weight: bold;"></span></span>
+            <button id="btn-clear-winner-filter" style="background: none; border: none; color: var(--color-neon-magenta); font-family: var(--font-arcade); font-size: 14px; font-weight: bold; line-height: 1; cursor: pointer; padding: 0; margin-left: 10px; transition: transform 0.2s ease, color 0.2s ease; text-shadow: 0 0 4px var(--color-neon-magenta);" onmouseover="this.style.transform='scale(1.25)'; this.style.color='#fff';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--color-neon-magenta)';">&times;</button>
+          </div>
+        </div>
+
         <!-- 3D Olympic Podium -->
         <div class="podium-stage">
           
@@ -151,8 +160,6 @@
 
         </div>
 
-
-
         <!-- Merged Match list container -->
         <div class="history-list-container" id="history-matches-list" style="width: 100%; max-width: 1125px; margin-top: 20px; margin-bottom: 40px;">
           <!-- Dynamic listing of match panels -->
@@ -167,16 +174,30 @@
     <main class="view-container" id="player-profile-view">
       <div class="profile-view-layout">
         
-        <div class="profile-sidebar">
-          <div class="panel-beveled neon-magenta fighter-card-box">
+        <div class="profile-sidebar" style="display: flex; flex-direction: column; gap: 15px;">
+          <div class="panel-beveled neon-magenta fighter-card-box" style="margin-bottom: 0;">
             <img src="" alt="" class="fighter-card-img" id="player-profile-fighter-img">
             <h2 class="profile-title-name" id="player-profile-name">Leo</h2>
           </div>
+          <button class="btn-arcade magenta" id="btn-player-see-matches" style="width: 100%; font-size: 10px; padding: 10px 15px;">SEE ALL MATCHES</button>
         </div>
 
         <!-- Main stats panels -->
         <div class="profile-content-area">
           
+          <!-- Timeframe Selector -->
+          <div class="profile-timeframe-row" style="display: flex; align-items: center; justify-content: flex-end; margin-bottom: -5px;">
+            <div class="timeframe-filter-wrapper" style="display: flex; align-items: center; gap: 10px;">
+              <span class="mode-toggle-label" style="font-size: 10px; color: var(--color-neon-magenta); letter-spacing: 0.5px; font-family: var(--font-arcade);">TIMEFRAME:</span>
+              <div class="toggle-switch-beveled" id="player-timeframe-filters" style="border-color: var(--color-neon-magenta); box-shadow: 0 0 10px rgba(255, 0, 128, 0.2);">
+                <button class="toggle-btn" data-timeframe="today">Today</button>
+                <button class="toggle-btn" data-timeframe="7days">7 Days</button>
+                <button class="toggle-btn" data-timeframe="30days">30 Days</button>
+                <button class="toggle-btn active" data-timeframe="alltime">All Time</button>
+              </div>
+            </div>
+          </div>
+
           <!-- Numerical stats grid -->
           <div class="stats-grid-container">
             <div class="stat-cell-retro">
@@ -188,9 +209,10 @@
               <div class="stat-title">Losses</div>
               <div class="stat-num text-glow-magenta" id="player-stat-losses">-</div>
             </div>
-            <div class="stat-cell-retro">
+            <div class="stat-cell-retro" id="player-winrate-cell" style="cursor: pointer;">
               <div class="stat-title">Win Rate</div>
               <div class="stat-num text-glow-yellow" id="player-stat-winrate">-%</div>
+              <div style="font-size: 8px; color: var(--color-neon-yellow); font-family: var(--font-arcade); margin-top: 5px; opacity: 0.8; letter-spacing: 0.5px;">(SEE WON MATCHES)</div>
             </div>
             <div class="stat-cell-retro">
               <div class="stat-title">Knockout / Fall Ratio</div>
@@ -234,17 +256,42 @@
       <div class="fighter-series-backdrop" id="fighter-profile-backdrop"></div>
       <div class="fighter-view-layout">
         
-        <div class="profile-sidebar">
-          <div class="panel-beveled neon-cyan fighter-card-box">
+        <div class="profile-sidebar" style="display: flex; flex-direction: column; gap: 15px;">
+          <div class="panel-beveled neon-cyan fighter-card-box" style="margin-bottom: 0; padding: 20px;">
+            <!-- Series info -->
+            <div class="fighter-series-badge" id="fighter-profile-series-container" style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; border-bottom: 1px dashed rgba(0, 240, 255, 0.3); padding-bottom: 8px;">
+              <img src="" alt="" id="fighter-profile-series-img" style="height: 20px; width: auto; opacity: 0.8; filter: drop-shadow(0 0 5px rgba(0, 240, 255, 0.5));">
+              <span id="fighter-profile-series-name" style="font-family: var(--font-arcade); font-size: 10px; color: var(--color-neon-cyan); letter-spacing: 1px;">-</span>
+            </div>
+
             <img src="" alt="" class="fighter-card-img" id="fighter-profile-img">
             <h2 class="fighter-title-name text-glow-cyan" id="fighter-profile-name">Mario</h2>
-            <p class="fighter-bio-text" id="fighter-profile-bio">Loading details...</p>
+
+            <!-- Backstory -->
+            <div class="fighter-backstory-box" style="margin-top: 15px; border-top: 1px dashed rgba(0, 240, 255, 0.3); padding-top: 12px; text-align: left;">
+              <h4 style="font-family: var(--font-arcade); font-size: 10px; color: var(--color-neon-cyan); margin: 0 0 8px 0; letter-spacing: 0.5px;">BACKSTORY</h4>
+              <p class="fighter-bio-text" id="fighter-profile-bio" style="font-family: monospace; font-size: 12px; color: var(--color-neon-cyan); opacity: 0.85; line-height: 1.5; margin: 0; padding-top: 0; border-top: none;"></p>
+            </div>
           </div>
+          <button class="btn-arcade cyan" id="btn-fighter-see-matches" style="width: 100%; font-size: 10px; padding: 10px 15px;">SEE ALL MATCHES</button>
         </div>
 
         <!-- Main stats columns -->
         <div class="profile-content-area">
           
+          <!-- Timeframe Selector -->
+          <div class="profile-timeframe-row" style="display: flex; align-items: center; justify-content: flex-end; margin-bottom: -5px;">
+            <div class="timeframe-filter-wrapper" style="display: flex; align-items: center; gap: 10px;">
+              <span class="mode-toggle-label" style="font-size: 10px; color: var(--color-neon-cyan); letter-spacing: 0.5px; font-family: var(--font-arcade);">TIMEFRAME:</span>
+              <div class="toggle-switch-beveled" id="fighter-timeframe-filters" style="border-color: var(--color-neon-cyan); box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);">
+                <button class="toggle-btn" data-timeframe="today">Today</button>
+                <button class="toggle-btn" data-timeframe="7days">7 Days</button>
+                <button class="toggle-btn" data-timeframe="30days">30 Days</button>
+                <button class="toggle-btn active" data-timeframe="alltime">All Time</button>
+              </div>
+            </div>
+          </div>
+
           <!-- Numerical stats grid -->
           <div class="stats-grid-container">
             <div class="stat-cell-retro">
@@ -256,9 +303,10 @@
               <div class="stat-title">Fighter Losses</div>
               <div class="stat-num text-glow-magenta" id="fighter-stat-losses">-</div>
             </div>
-            <div class="stat-cell-retro">
+            <div class="stat-cell-retro" id="fighter-winrate-cell" style="cursor: pointer;">
               <div class="stat-title">Win Rate</div>
               <div class="stat-num text-glow-yellow" id="fighter-stat-winrate">-%</div>
+              <div style="font-size: 8px; color: var(--color-neon-yellow); font-family: var(--font-arcade); margin-top: 5px; opacity: 0.8; letter-spacing: 0.5px;">(SEE WON MATCHES)</div>
             </div>
             <div class="stat-cell-retro">
               <div class="stat-title">Knockout / Fall Ratio</div>
@@ -283,6 +331,14 @@
               <div class="meta-content-wrapper top-players-list" id="fighter-top-players">
                 <!-- Injected dynamically by JS -->
               </div>
+            </div>
+          </div>
+
+          <!-- Moves Registry Section -->
+          <div class="panel-beveled neon-cyan" id="fighter-moves-container" style="padding: 25px; margin-top: 10px;">
+            <h3 class="stats-heading text-glow-cyan" style="font-family: var(--font-arcade); font-size: 14px; margin-top: 0; margin-bottom: 20px; letter-spacing: 1px; border-bottom: 2px solid var(--color-neon-cyan); padding-bottom: 10px;">MOVES REGISTRY</h3>
+            <div class="moves-list-wrapper" id="fighter-moves-list" style="display: flex; flex-direction: column; gap: 20px;">
+              <!-- Dynamic JS content -->
             </div>
           </div>
 
@@ -600,11 +656,11 @@
     <div class="vs-stripe-curtain-bottom"></div>
   </div>
   <!-- Load mock database and SPA modules -->
-  <script src="mockData.js?v=12"></script>
-  <script src="database.js?v=12"></script>
-  <script src="apiService.js?v=12"></script>
-  <script src="gemini.js?v=12"></script>
-  <script src="charts.js?v=12"></script>
-  <script src="app.js?v=12"></script>
+  <script src="mockData.js?v=19"></script>
+  <script src="database.js?v=19"></script>
+  <script src="apiService.js?v=19"></script>
+  <script src="gemini.js?v=19"></script>
+  <script src="charts.js?v=19"></script>
+  <script src="app.js?v=19"></script>
 </body>
 </html>
