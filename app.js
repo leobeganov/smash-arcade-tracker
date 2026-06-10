@@ -244,6 +244,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("fighter-stat-kd").textContent = stats.kdRatio;
 
     // Render Nemesis Fighter
+    const nemesisCard = document.getElementById("fighter-nemesis-card");
     const nemesisImg = document.getElementById("fighter-nemesis-img");
     const nemesisName = document.getElementById("fighter-nemesis-name");
     const nemesisCount = document.getElementById("fighter-nemesis-count");
@@ -253,10 +254,16 @@ document.addEventListener("DOMContentLoaded", () => {
       nemesisImg.style.display = "block";
       nemesisName.textContent = stats.nemesis.name;
       nemesisCount.textContent = `${stats.nemesis.count} matchups`;
+      nemesisCard.style.cursor = "pointer";
+      nemesisCard.onclick = () => {
+        window.location.hash = `#fighter/${stats.nemesis.id}`;
+      };
     } else {
       nemesisImg.style.display = "none";
       nemesisName.textContent = "None";
       nemesisCount.textContent = "0 matchups";
+      nemesisCard.style.cursor = "default";
+      nemesisCard.onclick = null;
     }
 
     // Render Top Players
@@ -522,7 +529,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Always refresh players list as new players might have been scanned
     const currentVal = filterPlayer.value || "All";
     filterPlayer.innerHTML = '<option value="All">All players</option>';
-    const stats = window.Database.getStats();
+    const stats = await window.Database.getStatsAsync();
     stats.players.forEach(p => {
       const opt = document.createElement("option");
       opt.value = p.name;
@@ -540,7 +547,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const player = document.getElementById("filter-player").value;
     const character = document.getElementById("filter-character").value;
 
-    let matches = window.Database.getMatches();
+    let matches = await window.Database.getMatchesAsync();
 
     if (style && style !== "All") {
       const lowerStyle = style.toLowerCase();
@@ -575,34 +582,44 @@ document.addEventListener("DOMContentLoaded", () => {
       card.className = "match-history-card panel-beveled neon-cyan";
       card.style.marginBottom = "20px";
 
+      // 1v1, Teams, or Free-for-all headline logic
+      const is1v1 = (m.gameMode && m.gameMode.toLowerCase() === '1v1') || (m.gameStyle && m.gameStyle.toLowerCase() === '1v1') || (m.players && m.players.length === 2);
+      const headline = is1v1 ? "1V1" : (m.gameStyle && m.gameStyle.toLowerCase() === 'teams' ? "TEAMS" : "FREE-FOR-ALL");
+      const badgeClass = is1v1 ? "badge-1v1" : (m.gameStyle && m.gameStyle.toLowerCase() === 'teams' ? "badge-teams" : "badge-ffa");
+      const playerCountText = is1v1 ? "2 players" : `${m.players ? m.players.length : 0} players`;
+
       card.innerHTML = `
         <div class="match-card-header">
           <div class="match-card-title">
-            <span class="match-card-mode-text">${m.gameMode.toUpperCase()}</span>
-            <span class="match-style-badge ${m.gameStyle && m.gameStyle.toLowerCase() === 'teams' ? 'badge-teams' : 'badge-ffa'}">
-              ${m.gameStyle && m.gameStyle.toLowerCase() === 'teams' ? 'TEAMS' : 'FREE-FOR-ALL'}
+            <span class="match-style-badge ${badgeClass}">
+              ${headline}
             </span>
+            <span class="match-card-mode-text">${playerCountText.toUpperCase()}</span>
           </div>
           <div class="match-card-meta">${new Date(m.timestamp).toLocaleDateString()} ${new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
         </div>
         <div class="match-card-players-grid ${m.players && m.players.length > 4 ? 'large-lobby' : ''}">
-          ${m.players.map(p => `
-            <div class="history-player-row ${p.placement === 1 ? 'winner' : ''}">
-              <div class="history-p-top-row">
-                <div class="history-p-placement">${p.placement === 1 ? '1ST' : p.placement === 2 ? '2ND' : p.placement === 3 ? '3RD' : p.placement + 'TH'}</div>
-                <div class="history-p-details">
-                  <div class="history-p-name text-glow-${p.placement === 1 ? 'yellow' : 'cyan'}" style="cursor: pointer;" onclick="window.location.hash = '#player/${p.playerName.toLowerCase().replace(/\s+/g, '-')}'">${p.playerName}</div>
-                  <div class="history-p-char" style="cursor: pointer;" onclick="window.location.hash = '#fighter/${p.character.toLowerCase().replace(/\s+/g, '-')}'">${p.character}</div>
+          ${m.players.map(p => {
+            const hasTeamColor = m.gameStyle && m.gameStyle.toLowerCase() === 'teams' && p.teamColor && p.teamColor.toLowerCase() !== 'none';
+            const teamClass = hasTeamColor ? `team-${p.teamColor.toLowerCase()}` : '';
+            return `
+              <div class="history-player-row ${p.placement === 1 ? 'winner' : ''} ${teamClass}">
+                <div class="history-p-top-row">
+                  <div class="history-p-placement">${p.placement === 1 ? '1ST' : p.placement === 2 ? '2ND' : p.placement === 3 ? '3RD' : p.placement + 'TH'}</div>
+                  <div class="history-p-details">
+                    <div class="history-p-name text-glow-${p.placement === 1 ? 'yellow' : 'cyan'}" style="cursor: pointer;" onclick="window.location.hash = '#player/${p.playerName.toLowerCase().replace(/\s+/g, '-')}'">${p.playerName}</div>
+                    <div class="history-p-char" style="cursor: pointer;" onclick="window.location.hash = '#fighter/${p.character.toLowerCase().replace(/\s+/g, '-')}'">${p.character}</div>
+                  </div>
+                </div>
+                <div class="history-p-stats-badges">
+                  <span class="player-stat-badge ko">Kills: ${p.kos !== undefined ? p.kos : 0}</span>
+                  <span class="player-stat-badge fall">Falls: ${p.falls !== undefined ? Math.abs(p.falls) : 0}</span>
+                  <span class="player-stat-badge sd">SDs: ${p.sds !== undefined ? Math.abs(p.sds) : 0}</span>
+                  <span class="player-stat-badge out">Out: ${p.outAt || (p.placement === 1 ? '---' : '5:00')}</span>
                 </div>
               </div>
-              <div class="history-p-stats-badges">
-                <span class="player-stat-badge ko">Kills: ${p.kos !== undefined ? p.kos : 0}</span>
-                <span class="player-stat-badge fall">Falls: ${p.falls !== undefined ? Math.abs(p.falls) : 0}</span>
-                <span class="player-stat-badge sd">SDs: ${p.sds !== undefined ? Math.abs(p.sds) : 0}</span>
-                <span class="player-stat-badge out">Out: ${p.outAt || (p.placement === 1 ? '---' : '5:00')}</span>
-              </div>
-            </div>
-          `).join('')}
+            `;
+          }).join('')}
         </div>
         <div class="match-card-actions">
           <button class="btn-arcade magenta delete-match-btn" data-id="${m.id}" style="font-size: 11px; padding: 4px 12px;">DELETE RECORD</button>
@@ -617,7 +634,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Telemetry Dashboard View Controllers
   // ==========================================
   async function renderTelemetry() {
-    const stats = window.Database.getStats();
+    const stats = await window.Database.getStatsAsync();
 
     // Populate KPI panels
     document.getElementById("tel-kpi-matches").textContent = stats.totalMatches;
@@ -866,7 +883,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const btnSaveMatch = document.getElementById("btn-save-match");
   if (btnSaveMatch) {
-    btnSaveMatch.onclick = () => {
+    btnSaveMatch.onclick = async () => {
       if (!lastScannedMatch) {
         alert("NO CAPTURE ENCOUNTERED.");
         return;
@@ -882,7 +899,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
 
-      window.Database.addMatch(matchToSave);
+      await window.Database.addMatchAsync(matchToSave);
       document.getElementById("scanner-confirm-panel").style.display = "none";
       lastScannedMatch = null;
       window.location.hash = "#history";
@@ -897,7 +914,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!btn) return;
       const matchId = btn.getAttribute("data-id");
       if (confirm("Are you sure you want to delete this record?")) {
-        window.Database.deleteMatch(matchId);
+        await window.Database.deleteMatchAsync(matchId);
         await renderHistoryList();
       }
     };
@@ -923,9 +940,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // Database maintenance controls
   const btnExportDb = document.getElementById("btn-export-db");
   if (btnExportDb) {
-    btnExportDb.onclick = () => {
+    btnExportDb.onclick = async () => {
       const data = {
-        matches: window.Database.getMatches(),
+        matches: await window.Database.getMatchesAsync(),
         apiKey: window.Database.getApiKey(),
         theme: window.Database.getTheme()
       };
@@ -948,11 +965,11 @@ document.addEventListener("DOMContentLoaded", () => {
     importDbFile.onchange = (e) => {
       if (e.target.files.length === 0) return;
       const reader = new FileReader();
-      reader.onload = () => {
+      reader.onload = async () => {
         try {
           const data = JSON.parse(reader.result);
           if (data.matches) {
-            window.Database.saveMatches(data.matches);
+            await window.Database.saveMatchesAsync(data.matches);
           }
           if (data.apiKey) {
             window.Database.saveApiKey(data.apiKey);
@@ -973,9 +990,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const btnResetDb = document.getElementById("btn-reset-db");
   if (btnResetDb) {
-    btnResetDb.onclick = () => {
+    btnResetDb.onclick = async () => {
       if (confirm("RESTORE FACTORY SEEDS AND ERASE UNBACKED LOGS?")) {
-        window.Database.resetToSeeds();
+        await window.Database.resetToSeedsAsync();
         alert("DATABASE RE-INITIALIZED WITH DEFAULTS.");
         router();
       }
@@ -984,9 +1001,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const btnClearDb = document.getElementById("btn-clear-db");
   if (btnClearDb) {
-    btnClearDb.onclick = () => {
+    btnClearDb.onclick = async () => {
       if (confirm("ERASE ALL BATTLE LOGS FROM STORAGE COMPLETELY?")) {
-        window.Database.clearMatches();
+        await window.Database.clearMatchesAsync();
         alert("ALL BATTLE LOGS PURGED FROM DRIVES.");
         router();
       }

@@ -1739,6 +1739,23 @@ body.theme-retro .btn-arcade {
   background: rgba(255, 230, 0, 0.03);
 }
 
+.history-player-row.team-red {
+  border-left: 4px solid #ff4136 !important;
+  box-shadow: inset 3px 0 6px rgba(255, 65, 54, 0.25);
+}
+.history-player-row.team-blue {
+  border-left: 4px solid #0074d9 !important;
+  box-shadow: inset 3px 0 6px rgba(0, 116, 217, 0.25);
+}
+.history-player-row.team-green {
+  border-left: 4px solid #2ecc40 !important;
+  box-shadow: inset 3px 0 6px rgba(46, 204, 64, 0.25);
+}
+.history-player-row.team-yellow {
+  border-left: 4px solid #ffdc00 !important;
+  box-shadow: inset 3px 0 6px rgba(255, 220, 0, 0.25);
+}
+
 .history-p-top-row {
   display: flex;
   align-items: center;
@@ -1837,6 +1854,13 @@ body.theme-retro .btn-arcade {
   border: 1px solid var(--color-neon-magenta);
   color: var(--color-neon-magenta);
   box-shadow: 0 0 5px rgba(255, 0, 127, 0.3);
+}
+
+.badge-1v1 {
+  background-color: rgba(255, 230, 0, 0.15);
+  border: 1px solid var(--color-neon-yellow);
+  color: var(--color-neon-yellow);
+  box-shadow: 0 0 5px rgba(255, 230, 0, 0.3);
 }
 
 .match-card-actions {
