@@ -246,7 +246,7 @@ document.addEventListener("DOMContentLoaded", () => {
         goldImg.style.opacity = "1";
       }
       if (goldName) goldName.textContent = gold.player.name;
-      if (goldStat) goldStat.textContent = `${gold.wins}/${gold.total} WINS (${gold.fighter.name})`;
+      if (goldStat) goldStat.textContent = `${gold.wins}/${gold.total} WINS`;
       if (goldInfo) {
         goldInfo.onclick = () => window.location.hash = `#player/${gold.player.id}`;
         goldInfo.style.cursor = "pointer";
@@ -278,7 +278,7 @@ document.addEventListener("DOMContentLoaded", () => {
         silverImg.style.opacity = "1";
       }
       if (silverName) silverName.textContent = silver.player.name;
-      if (silverStat) silverStat.textContent = `${silver.wins}/${silver.total} WINS (${silver.fighter.name})`;
+      if (silverStat) silverStat.textContent = `${silver.wins}/${silver.total} WINS`;
       if (silverInfo) {
         silverInfo.onclick = () => window.location.hash = `#player/${silver.player.id}`;
         silverInfo.style.cursor = "pointer";
@@ -311,7 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
         bronzeImg.style.opacity = "1";
       }
       if (bronzeName) bronzeName.textContent = bronze.player.name;
-      if (bronzeStat) bronzeStat.textContent = `${bronze.wins}/${bronze.total} WINS (${bronze.fighter.name})`;
+      if (bronzeStat) bronzeStat.textContent = `${bronze.wins}/${bronze.total} WINS`;
       if (bronzeInfo) {
         bronzeInfo.onclick = () => window.location.hash = `#player/${bronze.player.id}`;
         bronzeInfo.style.cursor = "pointer";
@@ -647,7 +647,7 @@ document.addEventListener("DOMContentLoaded", () => {
         topPlayersContainer.appendChild(item);
       });
     } else {
-      topPlayersContainer.innerHTML = `<div style="font-family: var(--font-stats); opacity: 0.6; font-size: 13px;">NO BATTLE RECORD</div>`;
+      topPlayersContainer.innerHTML = `<div style="font-family: var(--font-stats); opacity: 0.6; font-size: var(--font-size-sm);">NO BATTLE RECORD</div>`;
     }
 
     // Render Moves Registry List
@@ -811,12 +811,12 @@ document.addEventListener("DOMContentLoaded", () => {
       headersRow.appendChild(th);
     });
 
-    // Gather selected styles
-    const activeStyles = [];
-    const activeStyleBtns = document.querySelectorAll("#leaderboard-style-filters .toggle-btn.active");
-    activeStyleBtns.forEach(btn => {
-      activeStyles.push(btn.getAttribute("data-style"));
-    });
+    // Gather selected styles from custom single-select dropdown
+    let activeStyles = ["1v1", "free-for-all", "teams"];
+    const styleSelectEl = document.getElementById("leaderboard-style-select");
+    if (styleSelectEl && styleSelectEl.value !== "all") {
+      activeStyles = [styleSelectEl.value];
+    }
 
     // Fetch and Sort Data
     const records = await api.getLeaderboard(currentSortBy, isFighterMode, activeStyles, currentLeaderboardTimeframe);
@@ -842,7 +842,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tr.innerHTML = `
         <td class="rank-cell">#${rec.rank}</td>
         <td class="name-cell text-glow-cyan" onclick="window.location.hash = '${mainLink}'">${rec.name}</td>
-        <td class="numeric-cell text-glow-yellow">${rec.adjustedWins} <span style="font-size: 13px; opacity: 0.6; font-family: var(--font-stats);">(${rec.wins}/${rec.totalGames})</span></td>
+        <td class="numeric-cell text-glow-yellow">${rec.adjustedWins} <span style="font-size: var(--font-size-sm); opacity: 0.6; font-family: var(--font-stats);">(${rec.wins}/${rec.totalGames})</span></td>
         <td class="numeric-cell">${rec.KOs}</td>
         <td class="numeric-cell">${rec.winRate}%</td>
         <td class="numeric-cell text-glow-magenta">${rec.kd}</td>
@@ -1107,7 +1107,7 @@ document.addEventListener("DOMContentLoaded", () => {
     container.innerHTML = "";
 
     if (matches.length === 0) {
-      container.innerHTML = `<div class="panel-beveled flex-center" style="padding: 40px; font-family: var(--font-arcade); color: #666; font-size: 13px;">NO COMPATIBLE BATTLE RECORD ENCOUNTERED</div>`;
+      container.innerHTML = `<div class="panel-beveled flex-center" style="padding: 40px; font-family: var(--font-arcade); color: #666; font-size: var(--font-size-sm);">NO COMPATIBLE BATTLE RECORD ENCOUNTERED</div>`;
       return;
     }
 
@@ -1219,10 +1219,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </span>
             <span class="match-card-mode-text">${playerCountText.toUpperCase()}</span>
           </div>
-          <div style="display: flex; align-items: center; gap: 15px;">
-            <div class="match-card-meta">${new Date(m.timestamp).toLocaleDateString()} ${new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-            <button class="delete-match-btn" data-id="${m.id}" style="background: none; border: none; color: var(--color-neon-magenta); font-family: var(--font-arcade); font-size: 16px; line-height: 1; cursor: pointer; padding: 0; margin: 0; transition: transform 0.2s ease, color 0.2s ease; text-shadow: 0 0 6px var(--color-neon-magenta);" onmouseover="this.style.transform='scale(1.25)'; this.style.color='#fff';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--color-neon-magenta)';">&times;</button>
-          </div>
+          <div class="match-card-meta">${new Date(m.timestamp).toLocaleDateString()} ${new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
         </div>
         <div class="match-card-players-grid ${m.players && m.players.length > 4 ? 'large-lobby' : ''}">
           ${m.players.map(p => {
@@ -1257,6 +1254,7 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
           }).join('')}
         </div>
+        <button class="delete-match-btn" data-id="${m.id}" title="Delete Record">🗑️</button>
         <div class="match-timeline-drawer" id="timeline-drawer-${m.id}">
           <!-- Timeline Track Column -->
           <div class="timeline-track-column">
@@ -1344,7 +1342,7 @@ document.addEventListener("DOMContentLoaded", () => {
     searchDropdown.innerHTML = "";
 
     if (results.length === 0) {
-      searchDropdown.innerHTML = `<div style="padding: 12px 20px; font-family: var(--font-header); font-size: 14px; color: #777;">NO ENCOUNTERS FOUND</div>`;
+      searchDropdown.innerHTML = `<div style="padding: 12px 20px; font-family: var(--font-header); font-size: var(--font-size-sm); color: #777;">NO ENCOUNTERS FOUND</div>`;
       searchDropdown.style.display = "block";
       return;
     }
@@ -1544,45 +1542,133 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Leaderboard Style Isolation Filters
-  const styleFilters = document.getElementById("leaderboard-style-filters");
-  if (styleFilters) {
-    styleFilters.addEventListener("click", (e) => {
-      const btn = e.target.closest(".toggle-btn");
-      if (!btn) return;
-      
-      const allBtns = styleFilters.querySelectorAll(".toggle-btn");
-      const activeBtns = styleFilters.querySelectorAll(".toggle-btn.active");
-      const isClickedActive = btn.classList.contains("active");
-      
-      if (isClickedActive) {
-        if (activeBtns.length === 1) {
-          // Reset: activate all style buttons
-          allBtns.forEach(b => b.classList.add("active"));
-        } else {
-          // Isolate clicked button
-          allBtns.forEach(b => {
-            if (b === btn) {
-              b.classList.add("active");
-            } else {
-              b.classList.remove("active");
-            }
-          });
-        }
-      } else {
-        // Isolate clicked button
-        allBtns.forEach(b => {
-          if (b === btn) {
-            b.classList.add("active");
-          } else {
-            b.classList.remove("active");
-          }
-        });
-      }
-      
+  // Leaderboard Style Dropdown Filter
+  const leaderboardStyleSelect = document.getElementById("leaderboard-style-select");
+  if (leaderboardStyleSelect) {
+    leaderboardStyleSelect.addEventListener("change", () => {
       renderLeaderboard();
     });
   }
+
+  function setupStyleDropdown() {
+    const container = document.getElementById("multi-select-style-container");
+    if (!container) return;
+
+    const btn = container.querySelector(".retro-multi-select-btn");
+    const dropdown = container.querySelector(".retro-multi-select-dropdown");
+    const selectedTextEl = btn.querySelector(".selected-text");
+    const hiddenInput = document.getElementById("podium-style-select");
+
+    // Toggle dropdown visibility on button click
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      document.querySelectorAll(".retro-multi-select-dropdown").forEach(d => {
+        if (d !== dropdown) d.classList.add("dropdown-hidden");
+      });
+      dropdown.classList.toggle("dropdown-hidden");
+    };
+
+    const rows = dropdown.querySelectorAll(".retro-multi-option-row");
+    rows.forEach(row => {
+      row.onclick = (e) => {
+        e.stopPropagation();
+        
+        // Deactivate all rows
+        rows.forEach(r => {
+          r.classList.remove("active-selection");
+          const chk = r.querySelector(".style-checkbox");
+          if (chk) chk.checked = false;
+        });
+
+        // Activate clicked row
+        row.classList.add("active-selection");
+        const chk = row.querySelector(".style-checkbox");
+        if (chk) chk.checked = true;
+
+        // Set hidden input value
+        const val = row.getAttribute("data-value");
+        if (hiddenInput) {
+          hiddenInput.value = val;
+          // Dispatch change event to notify listeners
+          hiddenInput.dispatchEvent(new Event("change"));
+        }
+
+        // Update button text & highlight
+        if (val === "all") {
+          selectedTextEl.textContent = "ALL GAMES";
+          btn.classList.remove("active-selection");
+        } else {
+          selectedTextEl.textContent = row.querySelector(".option-label").textContent;
+          btn.classList.add("active-selection");
+        }
+
+        // Hide dropdown
+        dropdown.classList.add("dropdown-hidden");
+      };
+    });
+  }
+
+  function setupLeaderboardStyleDropdown() {
+    const container = document.getElementById("leaderboard-multi-select-style-container");
+    if (!container) return;
+
+    const btn = container.querySelector(".retro-multi-select-btn");
+    const dropdown = container.querySelector(".retro-multi-select-dropdown");
+    const selectedTextEl = btn.querySelector(".selected-text");
+    const hiddenInput = document.getElementById("leaderboard-style-select");
+
+    // Toggle dropdown visibility on button click
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      document.querySelectorAll(".retro-multi-select-dropdown").forEach(d => {
+        if (d !== dropdown) d.classList.add("dropdown-hidden");
+      });
+      dropdown.classList.toggle("dropdown-hidden");
+    };
+
+    const rows = dropdown.querySelectorAll(".retro-multi-option-row");
+    rows.forEach(row => {
+      row.onclick = (e) => {
+        e.stopPropagation();
+        
+        // Deactivate all rows
+        rows.forEach(r => {
+          r.classList.remove("active-selection");
+          const chk = r.querySelector(".leaderboard-style-checkbox");
+          if (chk) chk.checked = false;
+        });
+
+        // Activate clicked row
+        row.classList.add("active-selection");
+        const chk = row.querySelector(".leaderboard-style-checkbox");
+        if (chk) chk.checked = true;
+
+        // Set hidden input value
+        const val = row.getAttribute("data-value");
+        if (hiddenInput) {
+          hiddenInput.value = val;
+          // Dispatch change event to notify listeners
+          hiddenInput.dispatchEvent(new Event("change"));
+        }
+
+        // Update button text & highlight
+        if (val === "all") {
+          selectedTextEl.textContent = "ALL GAMES";
+          btn.classList.remove("active-selection");
+        } else {
+          selectedTextEl.textContent = row.querySelector(".option-label").textContent;
+          btn.classList.add("active-selection");
+        }
+
+        // Hide dropdown
+        dropdown.classList.add("dropdown-hidden");
+      };
+    });
+  }
+
+  // Initialize custom style select dropdowns
+  setupStyleDropdown();
+  setupLeaderboardStyleDropdown();
 
 
   // ==========================================
