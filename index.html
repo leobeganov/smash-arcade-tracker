@@ -17,29 +17,29 @@
   <div id="app-container">
     
     <!-- Header Marquee & Navigation -->
-    <header>
+    <header class="main-header">
       <div class="logo-container" id="nav-logo-home" style="cursor: pointer; user-select: none;">
-        <span class="logo-main text-glow-cyan" style="font-family: var(--font-header); font-weight: 900; font-size: 24px; letter-spacing: -1px;">SMASH</span>
-        <span class="logo-sub text-glow-magenta" style="font-family: var(--font-arcade); font-size: 11px; letter-spacing: 1px; display: block; margin-top: -2px;">ALYTICS</span>
+        <img src="assets/smash_metrics_logo.png" alt="SmashMetrics Logo" class="nav-logo-img">
       </div>
 
-      <!-- Navigation Tabs -->
-      <nav class="arcade-nav">
-        <a href="#home" class="nav-item active" id="nav-tab-home">[ HOME / PODIUM ]</a>
-        <a href="#leaderboard" class="nav-item" id="nav-tab-leaderboard">[ LEADERBOARD ]</a>
-        <a href="#scanner" class="nav-item" id="nav-tab-scanner">[ OCR SCANNER ]</a>
-        <a href="#telemetry" class="nav-item" id="nav-tab-telemetry">[ TELEMETRY ]</a>
-        <a href="#settings" class="nav-item" id="nav-tab-settings">[ SPEC CONFIG ]</a>
-      </nav>
-
-      <!-- Autocomplete Search Bar -->
-      <div class="search-container">
+      <!-- Centered, Wide Autocomplete Search Bar -->
+      <div class="search-container centered-search">
         <div class="search-input-wrapper">
           <span class="search-icon-decor">&gt;</span>
           <input type="text" class="search-input" id="search-box" placeholder="Search" autocomplete="off">
         </div>
         <!-- Autocomplete Suggestions List -->
         <div class="search-results-dropdown" id="search-dropdown"></div>
+      </div>
+
+      <!-- Top Right Action Buttons -->
+      <div class="header-nav-buttons">
+        <a href="#leaderboard" class="btn-nav" id="nav-tab-leaderboard">
+          <span class="btn-nav-decor">&gt;</span> LEADERBOARD
+        </a>
+        <a href="#telemetry" class="btn-nav" id="nav-tab-telemetry">
+          <span class="btn-nav-decor">&gt;</span> TELEMETRY
+        </a>
       </div>
     </header>
 
@@ -136,10 +136,10 @@
             </div>
             <div class="podium-block">
               <div class="podium-num">2</div>
-              <div class="podium-plaque" id="podium-silver-plaque">
-                <div class="podium-player-name" id="podium-silver-name">Loading...</div>
-                <div class="podium-combo-stat" id="podium-silver-stat">-</div>
-              </div>
+            </div>
+            <div class="podium-floating-info" id="podium-silver-info">
+              <div class="podium-player-name" id="podium-silver-name">Loading...</div>
+              <div class="podium-combo-stat" id="podium-silver-stat">-</div>
             </div>
           </div>
 
@@ -150,10 +150,10 @@
             </div>
             <div class="podium-block">
               <div class="podium-num">1</div>
-              <div class="podium-plaque" id="podium-gold-plaque">
-                <div class="podium-player-name" id="podium-gold-name">Loading...</div>
-                <div class="podium-combo-stat" id="podium-gold-stat">-</div>
-              </div>
+            </div>
+            <div class="podium-floating-info" id="podium-gold-info">
+              <div class="podium-player-name" id="podium-gold-name">Loading...</div>
+              <div class="podium-combo-stat" id="podium-gold-stat">-</div>
             </div>
           </div>
 
@@ -164,10 +164,10 @@
             </div>
             <div class="podium-block">
               <div class="podium-num">3</div>
-              <div class="podium-plaque" id="podium-bronze-plaque">
-                <div class="podium-player-name" id="podium-bronze-name">Loading...</div>
-                <div class="podium-combo-stat" id="podium-bronze-stat">-</div>
-              </div>
+            </div>
+            <div class="podium-floating-info" id="podium-bronze-info">
+              <div class="podium-player-name" id="podium-bronze-name">Loading...</div>
+              <div class="podium-combo-stat" id="podium-bronze-stat">-</div>
             </div>
           </div>
 
@@ -603,9 +603,16 @@
 
   </div>
 
-  <!-- ========================================== -->
-  <!-- TRANSITION OVERLAY: THE "VS SCREEN" -->
-  <!-- ========================================== -->
+  <!-- Floating Settings Cog in Bottom Right -->
+  <div class="floating-settings-container">
+    <a href="#settings" class="btn-settings-cog" id="nav-tab-settings" title="Spec Config">
+      <svg class="cog-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+      </svg>
+    </a>
+  </div>
+
   <div id="vs-overlay">
     <div class="vs-stripe-curtain-top"></div>
     <div class="vs-stripe-curtain-bottom"></div>

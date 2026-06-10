@@ -33,17 +33,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const vsOverlay = document.getElementById("vs-overlay");
 
   // ==========================================
-  // 2. VS Screen Loading Transition Controller (Sleek Curtains)
+  // 2. VS Screen Loading Transition Controller (CRT Glitch Curtains)
   // ==========================================
   async function runVsTransition() {
     vsOverlay.classList.add("active");
-    // Wait for curtains to close (150ms)
-    await new Promise(resolve => setTimeout(resolve, 150));
+    // Wait for curtains to fully close (350ms)
+    await new Promise(resolve => setTimeout(resolve, 350));
   }
 
   async function endVsTransition() {
-    // Wait a brief moment before sliding curtains out (30ms)
-    await new Promise(resolve => setTimeout(resolve, 30));
+    // Wait a brief moment to let the CPU settle after DOM rendering (150ms)
+    await new Promise(resolve => setTimeout(resolve, 150));
     vsOverlay.classList.remove("active");
   }
 
@@ -133,21 +133,29 @@ document.addEventListener("DOMContentLoaded", () => {
     const goldImg = document.getElementById("podium-gold-img");
     const goldName = document.getElementById("podium-gold-name");
     const goldStat = document.getElementById("podium-gold-stat");
-    const goldPlaque = document.getElementById("podium-gold-plaque");
+    const goldInfo = document.getElementById("podium-gold-info");
     if (gold) {
-      goldImg.src = gold.fighter.img;
-      goldImg.style.opacity = "1";
-      goldName.textContent = gold.player.name;
-      goldStat.textContent = `${gold.wins}/${gold.total} WINS (${gold.fighter.name})`;
-      goldPlaque.onclick = () => window.location.hash = `#player/${gold.player.id}`;
-      goldPlaque.style.cursor = "pointer";
+      if (goldImg) {
+        goldImg.src = gold.fighter.img;
+        goldImg.style.opacity = "1";
+      }
+      if (goldName) goldName.textContent = gold.player.name;
+      if (goldStat) goldStat.textContent = `${gold.wins}/${gold.total} WINS (${gold.fighter.name})`;
+      if (goldInfo) {
+        goldInfo.onclick = () => window.location.hash = `#player/${gold.player.id}`;
+        goldInfo.style.cursor = "pointer";
+      }
     } else {
-      goldImg.src = "assets/mario.png?v=5";
-      goldImg.style.opacity = "0.1";
-      goldName.textContent = "VACANT";
-      goldStat.textContent = "0 WINS";
-      goldPlaque.onclick = null;
-      goldPlaque.style.cursor = "default";
+      if (goldImg) {
+        goldImg.src = "assets/mario.png?v=5";
+        goldImg.style.opacity = "0.1";
+      }
+      if (goldName) goldName.textContent = "VACANT";
+      if (goldStat) goldStat.textContent = "0 WINS";
+      if (goldInfo) {
+        goldInfo.onclick = null;
+        goldInfo.style.cursor = "default";
+      }
     }
 
     // Populate Silver (2nd)
@@ -155,21 +163,29 @@ document.addEventListener("DOMContentLoaded", () => {
     const silverImg = document.getElementById("podium-silver-img");
     const silverName = document.getElementById("podium-silver-name");
     const silverStat = document.getElementById("podium-silver-stat");
-    const silverPlaque = document.getElementById("podium-silver-plaque");
+    const silverInfo = document.getElementById("podium-silver-info");
     if (silver) {
-      silverImg.src = silver.fighter.img;
-      silverImg.style.opacity = "1";
-      silverName.textContent = silver.player.name;
-      silverStat.textContent = `${silver.wins}/${silver.total} WINS (${silver.fighter.name})`;
-      silverPlaque.onclick = () => window.location.hash = `#player/${silver.player.id}`;
-      silverPlaque.style.cursor = "pointer";
+      if (silverImg) {
+        silverImg.src = silver.fighter.img;
+        silverImg.style.opacity = "1";
+      }
+      if (silverName) silverName.textContent = silver.player.name;
+      if (silverStat) silverStat.textContent = `${silver.wins}/${silver.total} WINS (${silver.fighter.name})`;
+      if (silverInfo) {
+        silverInfo.onclick = () => window.location.hash = `#player/${silver.player.id}`;
+        silverInfo.style.cursor = "pointer";
+      }
     } else {
-      silverImg.src = "assets/mario.png?v=5";
-      silverImg.style.opacity = "0.1";
-      silverName.textContent = "VACANT";
-      silverStat.textContent = "0 WINS";
-      silverPlaque.onclick = null;
-      silverPlaque.style.cursor = "default";
+      if (silverImg) {
+        silverImg.src = "assets/mario.png?v=5";
+        silverImg.style.opacity = "0.1";
+      }
+      if (silverName) silverName.textContent = "VACANT";
+      if (silverStat) silverStat.textContent = "0 WINS";
+      if (silverInfo) {
+        silverInfo.onclick = null;
+        silverInfo.style.cursor = "default";
+      }
     }
 
     // Populate Bronze (3rd)
@@ -177,21 +193,29 @@ document.addEventListener("DOMContentLoaded", () => {
     const bronzeImg = document.getElementById("podium-bronze-img");
     const bronzeName = document.getElementById("podium-bronze-name");
     const bronzeStat = document.getElementById("podium-bronze-stat");
-    const bronzePlaque = document.getElementById("podium-bronze-plaque");
+    const bronzeInfo = document.getElementById("podium-bronze-info");
     if (bronze) {
-      bronzeImg.src = bronze.fighter.img;
-      bronzeImg.style.opacity = "1";
-      bronzeName.textContent = bronze.player.name;
-      bronzeStat.textContent = `${bronze.wins}/${bronze.total} WINS (${bronze.fighter.name})`;
-      bronzePlaque.onclick = () => window.location.hash = `#player/${bronze.player.id}`;
-      bronzePlaque.style.cursor = "pointer";
+      if (bronzeImg) {
+        bronzeImg.src = bronze.fighter.img;
+        bronzeImg.style.opacity = "1";
+      }
+      if (bronzeName) bronzeName.textContent = bronze.player.name;
+      if (bronzeStat) bronzeStat.textContent = `${bronze.wins}/${bronze.total} WINS (${bronze.fighter.name})`;
+      if (bronzeInfo) {
+        bronzeInfo.onclick = () => window.location.hash = `#player/${bronze.player.id}`;
+        bronzeInfo.style.cursor = "pointer";
+      }
     } else {
-      bronzeImg.src = "assets/mario.png?v=5";
-      bronzeImg.style.opacity = "0.1";
-      bronzeName.textContent = "VACANT";
-      bronzeStat.textContent = "0 WINS";
-      bronzePlaque.onclick = null;
-      bronzePlaque.style.cursor = "default";
+      if (bronzeImg) {
+        bronzeImg.src = "assets/mario.png?v=5";
+        bronzeImg.style.opacity = "0.1";
+      }
+      if (bronzeName) bronzeName.textContent = "VACANT";
+      if (bronzeStat) bronzeStat.textContent = "0 WINS";
+      if (bronzeInfo) {
+        bronzeInfo.onclick = null;
+        bronzeInfo.style.cursor = "default";
+      }
     }
     await renderHomeMatchesList();
   }
@@ -1372,7 +1396,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `smashalytics_backup_${Date.now()}.json`;
+      a.download = `smashmetrics_backup_${Date.now()}.json`;
       a.click();
       URL.revokeObjectURL(url);
     };
