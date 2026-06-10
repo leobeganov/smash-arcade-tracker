@@ -340,7 +340,6 @@ header {
   color: var(--color-neon-yellow);
 }
 
-/* Olympic Style 3D Podium Grid */
 .podium-stage {
   display: flex;
   justify-content: center;
@@ -350,6 +349,15 @@ header {
   height: 625px;     /* Scaled from 500px */
   margin-top: 50px;  /* Scaled from 40px */
   position: relative;
+  background-image: 
+    linear-gradient(rgba(10, 10, 18, 0.2), rgba(10, 10, 18, 0.4)),
+    url('assets/battlefield_podium_bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 16px;
+  border: 4px solid var(--color-neon-cyan);
+  box-shadow: 0 0 30px rgba(0, 240, 255, 0.35);
 }
 
 .podium-column {
