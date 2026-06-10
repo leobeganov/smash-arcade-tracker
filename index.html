@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Smashalytics - Super Smash Brothers Ultimate AI Screenshot Results Scanner & Retro Match Tracker">
   <title>SMASHALYTICS // ARCADE CABINET</title>
-  <link rel="stylesheet" href="index.css">
+  <link rel="stylesheet" href="index.css?v=2">
 </head>
 <body class="theme-storm">
 
@@ -25,7 +25,7 @@
 
       <!-- Navigation Tabs -->
       <nav class="arcade-nav">
-        <a href="#home" class="nav-item active" id="nav-tab-home">[ STAGE SELECT ]</a>
+        <a href="#home" class="nav-item active" id="nav-tab-home">[ HOME / PODIUM ]</a>
         <a href="#leaderboard" class="nav-item" id="nav-tab-leaderboard">[ LEADERBOARD ]</a>
         <a href="#scanner" class="nav-item" id="nav-tab-scanner">[ OCR SCANNER ]</a>
         <a href="#history" class="nav-item" id="nav-tab-history">[ BATTLE LOG ]</a>
@@ -37,7 +37,7 @@
       <div class="search-container">
         <div class="search-input-wrapper">
           <span class="search-icon-decor">&gt;</span>
-          <input type="text" class="search-input" id="search-box" placeholder="SEARCH OR PIN CODES..." autocomplete="off">
+          <input type="text" class="search-input" id="search-box" placeholder="Search" autocomplete="off">
         </div>
         <!-- Autocomplete Suggestions List -->
         <div class="search-results-dropdown" id="search-dropdown"></div>
@@ -121,7 +121,7 @@
           <!-- Numerical stats grid -->
           <div class="stats-grid-container">
             <div class="stat-cell-retro">
-              <div class="stat-title" id="player-stat-wins-title">Adj Wins</div>
+              <div class="stat-title" id="player-stat-wins-title">Rating</div>
               <div class="stat-num text-glow-yellow" id="player-stat-wins">-</div>
               <div class="stat-sub-label" id="player-stat-wins-raw" style="font-size: 13px; opacity: 0.6; font-family: var(--font-stats); margin-top: 4px;">-</div>
             </div>
@@ -189,7 +189,7 @@
           <!-- Numerical stats grid -->
           <div class="stats-grid-container">
             <div class="stat-cell-retro">
-              <div class="stat-title" id="fighter-stat-wins-title">Adj Wins</div>
+              <div class="stat-title" id="fighter-stat-wins-title">Rating</div>
               <div class="stat-num text-glow-yellow" id="fighter-stat-wins">-</div>
               <div class="stat-sub-label" id="fighter-stat-wins-raw" style="font-size: 13px; opacity: 0.6; font-family: var(--font-stats); margin-top: 4px;">-</div>
             </div>
@@ -314,71 +314,56 @@
           </div>
         </div>
 
-        <!-- Confirmation / Correction Form -->
+        <!-- Confirmation / Correction Panel (Read-only Preview) -->
         <div class="panel-beveled neon-cyan confirmation-cabinet" id="scanner-confirm-panel" style="display: none;">
           <div class="cabinet-header">
-            <h2 class="text-glow-cyan font-arcade">CONFIRM MATCH LOG</h2>
-            <p class="cabinet-subtitle">VERIFY CHRONOLOGICAL RESULTS DATA VALUES</p>
+            <h2 class="text-glow-cyan font-arcade">SCANNED GAMEPLAY TELEMETRY</h2>
+            <p class="cabinet-subtitle">VERIFIED RESULTS CAPTURED BY AI DECRYPTER</p>
           </div>
 
-          <form id="scanner-confirm-form" class="retro-form">
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label class="font-arcade">STAGE</label>
-                <select id="confirm-stage" class="retro-select" required></select>
+          <!-- Metadata Summary Row -->
+          <div class="confirm-metadata-panel panel-beveled">
+            <div class="metadata-grid">
+              <div class="metadata-block">
+                <span class="meta-label">MATCH MODE</span>
+                <span class="meta-value text-glow-cyan" id="confirm-mode-val">-</span>
               </div>
-              <div class="form-group">
-                <label class="font-arcade">MODE</label>
-                <select id="confirm-mode" class="retro-select" required>
-                  <option value="1v1">1v1</option>
-                  <option value="3-Player">3-Player</option>
-                  <option value="4-Player">4-Player</option>
-                  <option value="5-Player">5-Player</option>
-                  <option value="6-Player">6-Player</option>
-                  <option value="7-Player">7-Player</option>
-                  <option value="8-Player">8-Player</option>
-                </select>
+              <div class="metadata-block">
+                <span class="meta-label">RULES</span>
+                <span class="meta-value" id="confirm-rules-val">-</span>
+              </div>
+              <div class="metadata-block">
+                <span class="meta-label">STYLE</span>
+                <span class="meta-value text-glow-magenta" id="confirm-style-val">-</span>
               </div>
             </div>
+          </div>
 
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label class="font-arcade">RULES</label>
-                <input type="text" id="confirm-rules" class="retro-input" value="3 Stock, 5:00" required>
-              </div>
-              <div class="form-group">
-                <label class="font-arcade">STYLE</label>
-                <input type="text" id="confirm-style" class="retro-input" value="Free-for-All" required>
-              </div>
-            </div>
+          <h3 class="form-section-title font-arcade text-glow-yellow">PLAYER PLACEMENT RECORDS</h3>
+          <div class="confirm-players-table-container">
+            <table class="retro-form-table">
+              <thead>
+                <tr>
+                  <th>RANK</th>
+                  <th>PLAYER NAME</th>
+                  <th>FIGHTER</th>
+                  <th>KOs</th>
+                  <th>FALLS</th>
+                  <th>SDs</th>
+                  <th>ELIM TIME</th>
+                </tr>
+              </thead>
+              <tbody id="confirm-players-list">
+                <!-- Static rows injected dynamically by app.js -->
+              </tbody>
+            </table>
+          </div>
 
-            <h3 class="form-section-title font-arcade text-glow-yellow">PLAYER PLACEMENT SLOTS</h3>
-            <div class="confirm-players-table-container">
-              <table class="retro-form-table">
-                <thead>
-                  <tr>
-                    <th>PLACEMENT</th>
-                    <th>PLAYER NAME</th>
-                    <th>FIGHTER</th>
-                    <th>KOs</th>
-                    <th>FALLS</th>
-                    <th>SDs</th>
-                    <th>OUT AT</th>
-                  </tr>
-                </thead>
-                <tbody id="confirm-players-list">
-                  <!-- Editable Player Rows injected dynamically -->
-                </tbody>
-              </table>
-            </div>
-
-            <div class="form-actions-row">
-              <button type="button" class="btn-arcade magenta" id="btn-add-confirm-player">+ SLOT</button>
-              <div style="flex-grow: 1;"></div>
-              <button type="button" class="btn-arcade cyan" id="btn-cancel-scan">ABORT</button>
-              <button type="submit" class="btn-arcade yellow" id="btn-save-match">WRITE MATCH TO LOG</button>
-            </div>
-          </form>
+          <div class="form-actions-row" style="margin-top: 25px;">
+            <div style="flex-grow: 1;"></div>
+            <button type="button" class="btn-arcade magenta" id="btn-cancel-scan">DISCARD</button>
+            <button type="button" class="btn-arcade yellow" id="btn-save-match">WRITE MATCH TO LOG</button>
+          </div>
         </div>
       </div>
     </main>
@@ -394,15 +379,18 @@
 
           <div class="filters-row panel-beveled">
             <div class="filter-group">
-              <label>STAGE</label>
-              <select id="filter-stage" class="retro-select">
-                <option value="All">All Stages</option>
+              <label>MODE</label>
+              <select id="filter-style" class="retro-select">
+                <option value="All">All modes</option>
+                <option value="1v1">1v1</option>
+                <option value="Free-for-All">Free-for-All</option>
+                <option value="Teams">Teams</option>
               </select>
             </div>
             <div class="filter-group">
-              <label>MODE</label>
+              <label>PLAYER COUNT</label>
               <select id="filter-mode" class="retro-select">
-                <option value="All">All Modes</option>
+                <option value="All">All player counts</option>
                 <option value="1v1">1v1</option>
                 <option value="3-Player">3-Player</option>
                 <option value="4-Player">4-Player</option>
@@ -411,14 +399,17 @@
             <div class="filter-group">
               <label>PLAYER</label>
               <select id="filter-player" class="retro-select">
-                <option value="All">All Players</option>
+                <option value="All">All players</option>
               </select>
             </div>
             <div class="filter-group">
               <label>FIGHTER</label>
               <select id="filter-character" class="retro-select">
-                <option value="All">All Fighters</option>
+                <option value="All">All fighters</option>
               </select>
+            </div>
+            <div class="filter-group button-group" style="justify-content: flex-end;">
+              <button type="button" class="btn-arcade yellow" id="btn-clear-history-filters" style="font-size: 11px; padding: 6px 12px; height: 35px; width: 100%;">CLEAR FILTERS</button>
             </div>
           </div>
         </div>
@@ -452,10 +443,6 @@
               <div class="kpi-title">DOMINANT FIGHTER</div>
               <div class="kpi-value text-glow-magenta" id="tel-kpi-character">N/A</div>
             </div>
-            <div class="tel-kpi-box">
-              <div class="kpi-title">ACTIVE ARENA</div>
-              <div class="kpi-value text-glow-cyan" id="tel-kpi-stage">N/A</div>
-            </div>
           </div>
         </div>
 
@@ -478,9 +465,9 @@
             </div>
           </div>
 
-          <!-- Stage Outcomes Stacked Bar -->
+          <!-- Player Outcomes Stacked Bar -->
           <div class="panel-beveled tel-chart-box neon-yellow full-width-chart">
-            <h3 class="font-arcade text-glow-yellow chart-box-title">ARENA PLAYLOADS & STACKED OUTCOMES</h3>
+            <h3 class="font-arcade text-glow-yellow chart-box-title">PLAYER PLACEMENT DISTRIBUTION</h3>
             <div class="chart-content" style="min-height: 250px;">
               <div id="outcomes-stacked-bar-container" style="width:100%; height:100%; min-height:220px;">
                 <!-- Stacked Bar Chart SVG -->
@@ -569,11 +556,11 @@
   </div>
 
   <!-- Load mock database and SPA modules -->
-  <script src="mockData.js"></script>
-  <script src="database.js"></script>
-  <script src="apiService.js"></script>
-  <script src="gemini.js"></script>
-  <script src="charts.js"></script>
-  <script src="app.js"></script>
+  <script src="mockData.js?v=2"></script>
+  <script src="database.js?v=2"></script>
+  <script src="apiService.js?v=2"></script>
+  <script src="gemini.js?v=2"></script>
+  <script src="charts.js?v=2"></script>
+  <script src="app.js?v=2"></script>
 </body>
 </html>

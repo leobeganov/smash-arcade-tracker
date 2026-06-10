@@ -1022,8 +1022,8 @@ header {
   align-items: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease-in-out;
-  background-color: #000;
+  transition: opacity 0.15s ease-in-out;
+  background-color: transparent;
 }
 
 #vs-overlay.active {
@@ -1031,33 +1031,32 @@ header {
   pointer-events: all;
 }
 
-/* Diagonal Zebra-striped curtains */
+/* Sleek Solid curtains with subtle glowing borders */
 .vs-stripe-curtain-top, 
 .vs-stripe-curtain-bottom {
   position: absolute;
-  width: 200vw;
-  height: 55vh;
-  background: repeating-linear-gradient(
-    -45deg,
-    var(--bg-obsidian),
-    var(--bg-obsidian) 40px,
-    var(--color-neon-magenta) 40px,
-    var(--color-neon-magenta) 80px
-  );
-  transition: transform 0.3s cubic-bezier(0.85, 0, 0.15, 1);
+  width: 100vw;
+  height: 50.5vh;
+  background: rgba(10, 10, 12, 0.60);
+  backdrop-filter: blur(4px);
+  transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1);
   z-index: 1;
 }
 
 .vs-stripe-curtain-top {
   top: 0;
-  left: -50vw;
+  left: 0;
   transform: translateY(-100%);
+  border-bottom: 2px solid var(--color-neon-magenta);
+  box-shadow: 0 4px 15px rgba(255, 0, 127, 0.25);
 }
 
 .vs-stripe-curtain-bottom {
   bottom: 0;
-  right: -50vw;
+  right: 0;
   transform: translateY(100%);
+  border-top: 2px solid var(--color-neon-magenta);
+  box-shadow: 0 -4px 15px rgba(255, 0, 127, 0.25);
 }
 
 #vs-overlay.active .vs-stripe-curtain-top {
@@ -1469,18 +1468,18 @@ body.theme-retro .btn-arcade {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  background: linear-gradient(to bottom, rgba(255, 0, 127, 0) 0%, rgba(255, 0, 127, 0.15) 100%);
-  animation: scanLaserFade 1s infinite alternate;
+  background: linear-gradient(to bottom, rgba(255, 0, 127, 0) 0%, rgba(255, 0, 127, 0.05) 100%);
+  animation: scanLaserFade 1.5s infinite alternate;
 }
 
 .laser-line {
   position: absolute;
   width: 100%;
-  height: 4px;
+  height: 2px;
   background: var(--color-neon-magenta);
-  box-shadow: 0 0 15px var(--color-neon-magenta), 0 0 30px var(--color-neon-magenta);
+  box-shadow: 0 0 8px var(--color-neon-magenta);
   top: 0;
-  animation: laserSweepMove 2.5s infinite linear;
+  animation: laserSweepMove 3s infinite linear;
 }
 
 @keyframes laserSweepMove {
@@ -1713,17 +1712,21 @@ body.theme-retro .btn-arcade {
 
 .match-card-players-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 10px;
+}
+
+.match-card-players-grid.large-lobby {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
 .history-player-row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   background: rgba(20, 22, 26, 0.8);
   border: 1px solid var(--color-border-dark);
-  padding: 8px 12px;
+  padding: 10px 12px;
+  gap: 8px;
 }
 
 .history-player-row.winner {
@@ -1731,12 +1734,21 @@ body.theme-retro .btn-arcade {
   background: rgba(255, 230, 0, 0.03);
 }
 
+.history-p-top-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
 .history-p-placement {
   font-family: var(--font-arcade);
   font-size: 9px;
   color: #8a8d9a;
-  width: 25px;
+  width: 50px;
+  margin-right: 15px;
+  flex-shrink: 0;
 }
+
 .history-player-row.winner .history-p-placement {
   color: var(--color-neon-yellow);
 }
@@ -1763,14 +1775,19 @@ body.theme-retro .btn-arcade {
 .history-p-stats-badges {
   display: flex;
   gap: 6px;
+  width: 100%;
 }
 
 .player-stat-badge {
   font-family: var(--font-stats);
-  font-size: 12px;
-  padding: 2px 6px;
+  font-size: 11px;
+  padding: 3px 4px;
   background-color: var(--bg-metal);
   border: 1px solid var(--color-border-dark);
+  text-align: center;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
 }
 
 .player-stat-badge.ko {
@@ -1780,6 +1797,41 @@ body.theme-retro .btn-arcade {
 .player-stat-badge.fall {
   border-color: var(--color-neon-magenta);
   color: var(--color-neon-magenta);
+}
+.player-stat-badge.sd {
+  border-color: var(--color-neon-yellow);
+  color: var(--color-neon-yellow);
+}
+.player-stat-badge.out {
+  border-color: #8a8d9a;
+  color: #c4c6d0;
+}
+
+/* Match Game Style Badges (Teams vs FFA) */
+.match-style-badge {
+  font-family: var(--font-arcade);
+  font-size: 8px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  margin-left: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.badge-teams {
+  background-color: rgba(0, 240, 255, 0.15);
+  border: 1px solid var(--color-neon-cyan);
+  color: var(--color-neon-cyan);
+  box-shadow: 0 0 5px rgba(0, 240, 255, 0.3);
+}
+
+.badge-ffa {
+  background-color: rgba(255, 0, 127, 0.15);
+  border: 1px solid var(--color-neon-magenta);
+  color: var(--color-neon-magenta);
+  box-shadow: 0 0 5px rgba(255, 0, 127, 0.3);
 }
 
 .match-card-actions {
