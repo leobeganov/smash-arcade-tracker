@@ -58,24 +58,8 @@ function getFighterDetails(fighterNameOrId) {
     return { id: "unknown", name: "Unknown", img: "assets/mario.png?v=5", bio: "A mysterious newcomer." };
   }
 
-  const baseFighters = [
-    { id: "mario", name: "Mario", img: "assets/mario.png?v=5", bio: "The versatile jumpman. An all-around fighting champion." },
-    { id: "link", name: "Link", img: "assets/link.png?v=5", bio: "The hero of Hyrule. Lethal with master sword and bombs." },
-    { id: "samus", name: "Samus", img: "assets/samus.png?v=5", bio: "Intergalactic bounty hunter armed with a devastating arm cannon." },
-    { id: "fox", name: "Fox", img: "assets/fox.png?v=5", bio: "Leader of Star Fox. Blazing fast speed and laser reflector." },
-    { id: "pikachu", name: "Pikachu", img: "assets/pikachu.png?v=5", bio: "The electric mouse. Shocks opponents with lightning speed." },
-    { id: "donkey_kong", name: "Donkey Kong", img: "assets/donkey_kong.png?v=5", bio: "The powerhouse of Kong Island. Devastating giant punches." }
-  ];
-
-  // Try exact match on ID or name
-  const foundBase = baseFighters.find(f => 
-    f.id.toLowerCase() === fighterNameOrId.toLowerCase() || 
-    f.name.toLowerCase() === fighterNameOrId.toLowerCase()
-  );
-  if (foundBase) return foundBase;
-
-  // Search roster_slots data
-  if (Array.isArray(rosterData)) {
+  // Search roster_slots data first
+  if (Array.isArray(rosterData) && rosterData.length > 0) {
     const foundRoster = rosterData.find(r => 
       r.name.toLowerCase() === fighterNameOrId.toLowerCase() || 
       r.slug.toLowerCase() === fighterNameOrId.toLowerCase() ||
@@ -91,10 +75,28 @@ function getFighterDetails(fighterNameOrId) {
         id: foundRoster.slug,
         name: foundRoster.name,
         img: imgUrl,
-        bio: bioText
+        bio: bioText,
+        icon: foundRoster.icon,
+        series: foundRoster.series
       };
     }
   }
+
+  const baseFighters = [
+    { id: "mario", name: "Mario", img: "assets/mario.png?v=5", bio: "The versatile jumpman. An all-around fighting champion." },
+    { id: "link", name: "Link", img: "assets/link.png?v=5", bio: "The hero of Hyrule. Lethal with master sword and bombs." },
+    { id: "samus", name: "Samus", img: "assets/samus.png?v=5", bio: "Intergalactic bounty hunter armed with a devastating arm cannon." },
+    { id: "fox", name: "Fox", img: "assets/fox.png?v=5", bio: "Leader of Star Fox. Blazing fast speed and laser reflector." },
+    { id: "pikachu", name: "Pikachu", img: "assets/pikachu.png?v=5", bio: "The electric mouse. Shocks opponents with lightning speed." },
+    { id: "donkey_kong", name: "Donkey Kong", img: "assets/donkey_kong.png?v=5", bio: "The powerhouse of Kong Island. Devastating giant punches." }
+  ];
+
+  // Try fallback exact match on ID or name
+  const foundBase = baseFighters.find(f => 
+    f.id.toLowerCase() === fighterNameOrId.toLowerCase() || 
+    f.name.toLowerCase() === fighterNameOrId.toLowerCase()
+  );
+  if (foundBase) return foundBase;
 
   // Fallback slug generation
   return {
@@ -450,10 +452,11 @@ const apiService = {
         mostUsedFighter: rivalMostUsedFighter ? {
           name: rivalMostUsedFighter.name,
           id: rivalMostUsedFighter.id,
-          img: rivalMostUsedFighter.img
+          img: rivalMostUsedFighter.img,
+          icon: rivalMostUsedFighter.icon
         } : null
       } : null,
-      mostUsedFighter: mostUsedFighter ? { name: mostUsedFighter.name, id: mostUsedFighter.id, img: mostUsedFighter.img, count: fighterCount } : null
+      mostUsedFighter: mostUsedFighter ? { name: mostUsedFighter.name, id: mostUsedFighter.id, img: mostUsedFighter.img, icon: mostUsedFighter.icon, count: fighterCount } : null
     };
   },
 
@@ -634,7 +637,8 @@ const apiService = {
           detailLabel: stats.mostUsedFighter ? stats.mostUsedFighter.name : "None",
           detailId: stats.mostUsedFighter ? stats.mostUsedFighter.id : null,
           detailType: "fighter",
-          detailImg: stats.mostUsedFighter ? stats.mostUsedFighter.img : null
+          detailImg: stats.mostUsedFighter ? stats.mostUsedFighter.img : null,
+          detailIcon: stats.mostUsedFighter ? stats.mostUsedFighter.icon : null
         });
       }
     } else {

@@ -119,6 +119,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // 3. Render Home (The Main Stage)
   // ==========================================
   async function renderHome() {
+    const loader = document.getElementById("podium-loader");
+    if (loader) {
+      loader.style.display = "inline-flex";
+    }
+    const startTime = Date.now();
+
     // Gather selected styles
     const activeStyles = [];
     const styleSelect = document.getElementById("podium-style-select");
@@ -225,6 +231,15 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
     await renderHomeMatchesList();
+
+    // Enforce smooth minimum display delay of 250ms
+    const elapsed = Date.now() - startTime;
+    if (elapsed < 250) {
+      await new Promise(resolve => setTimeout(resolve, 250 - elapsed));
+    }
+    if (loader) {
+      loader.style.display = "none";
+    }
   }
 
 
@@ -305,6 +320,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const stats = await api.getFighterProfile(fighterId);
     if (!stats) return;
 
+    // Set dynamic series background watermark
+    const backdropEl = document.getElementById("fighter-profile-backdrop");
+    if (backdropEl) {
+      const seriesIcon = stats.fighter.series && stats.fighter.series.icon ? stats.fighter.series.icon : "";
+      if (seriesIcon) {
+        backdropEl.style.backgroundImage = `url('${seriesIcon}')`;
+        backdropEl.style.display = "block";
+      } else {
+        backdropEl.style.backgroundImage = "none";
+        backdropEl.style.display = "none";
+      }
+    }
+
     // Sidebar Portrait and Bio
     document.getElementById("fighter-profile-img").src = stats.fighter.img;
     document.getElementById("fighter-profile-name").textContent = stats.fighter.name;
@@ -369,6 +397,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // 6. Render Global Leaderboard
   // ==========================================
   async function renderLeaderboard() {
+    const loader = document.getElementById("leaderboard-loader");
+    if (loader) {
+      loader.style.display = "inline-flex";
+    }
+    const startTime = Date.now();
+
     const isFighterMode = currentLeaderboardMode === "fighters";
     const headerTitle = document.getElementById("leaderboard-header-title");
     headerTitle.textContent = isFighterMode ? "RANKINGS: FIGHTER MODE" : "RANKINGS: PLAYER MODE";
@@ -426,9 +460,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const mainLink = rec.type === "player" ? `#player/${rec.id}` : `#fighter/${rec.id}`;
       const detailLink = rec.detailType === "player" ? `#player/${rec.detailId}` : `#fighter/${rec.detailId}`;
 
-      const detailContent = (rec.detailType === "fighter" && rec.detailImg)
+      const detailContent = (rec.detailType === "fighter" && (rec.detailIcon || rec.detailImg))
         ? `<div class="leaderboard-avatar-container">
-             <img src="${rec.detailImg}" class="leaderboard-avatar-img" alt="${rec.detailLabel}">
+             <img src="${rec.detailIcon || rec.detailImg}" class="leaderboard-avatar-img" alt="${rec.detailLabel}">
              <span>${rec.detailLabel}</span>
            </div>`
         : rec.detailLabel;
@@ -447,6 +481,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       rowsBody.appendChild(tr);
     });
+
+    // Enforce smooth minimum display delay of 250ms
+    const elapsed = Date.now() - startTime;
+    if (elapsed < 250) {
+      await new Promise(resolve => setTimeout(resolve, 250 - elapsed));
+    }
+    if (loader) {
+      loader.style.display = "none";
+    }
   }
 
 
@@ -720,19 +763,23 @@ document.addEventListener("DOMContentLoaded", () => {
           const textColor = isSurvived ? 'var(--color-neon-yellow)' : 'var(--color-neon-magenta)';
           const isAbove = (idx % 2 === 0);
           
-          const offsetSize = 12 + staggerIndex * 22;
+          const offsetSize = 15 + staggerIndex * 30;
+          const fighterObj = api.getFighterDetails(p.character) || {};
+          const iconUrl = fighterObj.icon || 'assets/mario.png';
           
           markersHtml += `
-            <div class="timeline-marker" style="position: absolute; left: ${safePct}%; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: ${isAbove ? 'column-reverse' : 'column'}; align-items: center; z-index: 10;">
+            <div class="timeline-marker ${isSurvived ? 'survived' : ''}" style="position: absolute; left: ${safePct}%; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: ${isAbove ? 'column-reverse' : 'column'}; align-items: center; z-index: 10;">
               <!-- Details -->
               <div class="timeline-player-info panel-beveled" style="text-align: center; white-space: nowrap; background: var(--color-bg-dark); border: 1px solid ${markerColor}; padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); margin: ${isAbove ? `0 0 ${offsetSize}px 0` : `${offsetSize}px 0 0 0`}; box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px; pointer-events: none; user-select: none;">
-                <span style="font-weight: bold; color: #fff; text-shadow: 0 0 2px rgba(255,255,255,0.5);">${p.playerName}</span>
-                <span style="color: ${textColor}; font-weight: bold; margin-left: 4px; text-shadow: 0 0 4px ${textColor};">${p.character} ${p.outAt === '---' || p.placement === 1 ? '🏆' : '(' + (p.outAt || '5:00') + ')'}</span>
+                <span style="font-weight: bold; color: #fff; text-shadow: 0 0 2px rgba(255,255,255,0.5);">${p.playerName}${isSurvived ? ' 🏆' : ''}</span>
+                <span class="hover-time" style="color: ${textColor}; font-weight: bold; text-shadow: 0 0 4px ${textColor};">(${isSurvived ? 'WINNER' : p.outAt || '5:00'})</span>
               </div>
               <!-- Connector line -->
-              <div class="timeline-connector" style="width: 2px; height: ${offsetSize}px; background: ${markerColor}; opacity: 0.8; position: absolute; ${isAbove ? 'bottom: 12px' : 'top: 12px'};"></div>
-              <!-- Dot marker -->
-              <div class="timeline-dot" style="width: 12px; height: 12px; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid ${markerColor}; box-shadow: 0 0 8px ${markerColor}; z-index: 11;"></div>
+              <div class="timeline-connector" style="width: 2px; height: ${offsetSize}px; background: ${markerColor}; opacity: 0.8; position: absolute; ${isAbove ? 'bottom: 15px' : 'top: 15px'};"></div>
+              <!-- Dot marker (Character head-icon bubble) -->
+              <div class="timeline-dot" style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid ${markerColor}; box-shadow: 0 0 8px ${markerColor}; z-index: 11; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${p.character}" />
+              </div>
             </div>
           `;
         });
@@ -752,10 +799,13 @@ document.addEventListener("DOMContentLoaded", () => {
           ${m.players.map(p => {
             const hasTeamColor = m.gameStyle && m.gameStyle.toLowerCase() === 'teams' && p.teamColor && p.teamColor.toLowerCase() !== 'none';
             const teamClass = hasTeamColor ? `team-${p.teamColor.toLowerCase()}` : '';
+            const fighterObj = api.getFighterDetails(p.character) || {};
+            const iconUrl = fighterObj.icon || 'assets/mario.png';
             return `
               <div class="history-player-row ${p.placement === 1 ? 'winner' : ''} ${teamClass}">
                 <div class="history-p-top-row">
                   <div class="history-p-placement">${p.placement === 1 ? '1ST' : p.placement === 2 ? '2ND' : p.placement === 3 ? '3RD' : p.placement + 'TH'}</div>
+                  <img src="${iconUrl}" alt="${p.character}" style="width: 24px; height: 24px; margin-right: 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.5); object-fit: contain; flex-shrink: 0;" />
                   <div class="history-p-details">
                     <div class="history-p-name text-glow-${p.placement === 1 ? 'yellow' : 'cyan'}" style="cursor: pointer;" onclick="window.location.hash = '#player/${p.playerName.toLowerCase().replace(/\s+/g, '-')}'">${p.playerName}</div>
                     <div class="history-p-char" style="cursor: pointer;" onclick="window.location.hash = '#fighter/${p.character.toLowerCase().replace(/\s+/g, '-')}'">${p.character}</div>
@@ -779,7 +829,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="timeline-track-container" style="position: relative; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; border: 1px solid rgba(255,255,255,0.2);">
             <div style="position: absolute; left: 0; top: 0; height: 100%; width: 100%; background: var(--color-neon-cyan); opacity: 0.3; border-radius: 3px; box-shadow: 0 0 10px var(--color-neon-cyan);"></div>
             <div style="position: absolute; left: 0; top: -25px; font-family: var(--font-arcade); font-size: 9px; color: var(--color-neon-cyan); text-shadow: 0 0 4px var(--color-neon-cyan); font-weight: bold; letter-spacing: 0.5px;">5:00 (START)</div>
-            <div style="position: absolute; right: 0; top: -25px; font-family: var(--font-arcade); font-size: 9px; color: var(--color-neon-cyan); text-shadow: 0 0 4px var(--color-neon-cyan); font-weight: bold; letter-spacing: 0.5px;">0:00 (END)</div>
+            <div style="position: absolute; right: 0; top: -25px; font-family: var(--font-arcade); font-size: 9px; color: var(--color-neon-cyan); text-shadow: 0 0 4px var(--color-neon-cyan); font-weight: bold; letter-spacing: 0.5px;">END</div>
             ${markersHtml}
           </div>
         </div>
