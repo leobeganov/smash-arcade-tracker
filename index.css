@@ -359,6 +359,7 @@ body {
   align-items: center;
   gap: 15px;
   flex-wrap: nowrap;
+  width: 100%;
 }
 
 .podium-style-wrapper {
@@ -371,6 +372,7 @@ body {
   display: flex;
   align-items: center;
   gap: 15px;
+  margin-left: auto;
 }
 
 .marquee-banner {
