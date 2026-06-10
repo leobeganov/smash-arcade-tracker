@@ -180,7 +180,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const silverName = document.getElementById("podium-silver-name");
     const silverStat = document.getElementById("podium-silver-stat");
     const silverInfo = document.getElementById("podium-silver-info");
+    const silverCol = document.getElementById("podium-silver");
     if (silver) {
+      if (silverCol) silverCol.style.display = "flex";
       if (silverImg) {
         silverImg.src = silver.fighter.img;
         silverImg.style.opacity = "1";
@@ -192,6 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
         silverInfo.style.cursor = "pointer";
       }
     } else {
+      if (silverCol) silverCol.style.display = "none";
       if (silverImg) {
         silverImg.src = "assets/mario.png?v=5";
         silverImg.style.opacity = "0.1";
@@ -210,7 +213,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const bronzeName = document.getElementById("podium-bronze-name");
     const bronzeStat = document.getElementById("podium-bronze-stat");
     const bronzeInfo = document.getElementById("podium-bronze-info");
+    const bronzeCol = document.getElementById("podium-bronze");
     if (bronze) {
+      if (bronzeCol) bronzeCol.style.display = "flex";
       if (bronzeImg) {
         bronzeImg.src = bronze.fighter.img;
         bronzeImg.style.opacity = "1";
@@ -222,6 +227,7 @@ document.addEventListener("DOMContentLoaded", () => {
         bronzeInfo.style.cursor = "pointer";
       }
     } else {
+      if (bronzeCol) bronzeCol.style.display = "none";
       if (bronzeImg) {
         bronzeImg.src = "assets/mario.png?v=5";
         bronzeImg.style.opacity = "0.1";
@@ -276,7 +282,15 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => {
         const matchesList = document.getElementById("history-matches-list");
         if (matchesList) {
-          matchesList.scrollIntoView({ behavior: "smooth" });
+          const isWinnerBadgeActive = !!(selectedSearchWinnerPlayer || selectedSearchWinnerFighter);
+          const filterHeader = document.querySelector(".podium-header-row");
+          const filterHeaderHeight = filterHeader ? filterHeader.getBoundingClientRect().height : 62;
+          const winnerFilterHeader = document.getElementById("winner-filter-container");
+          const winnerFilterHeight = (isWinnerBadgeActive && winnerFilterHeader && winnerFilterHeader.style.display !== "none") ? winnerFilterHeader.getBoundingClientRect().height : 0;
+          
+          const stickyHeaderHeight = filterHeaderHeight + winnerFilterHeight;
+          const targetY = matchesList.getBoundingClientRect().top + window.scrollY - stickyHeaderHeight - 15;
+          window.scrollTo({ top: targetY, behavior: "smooth" });
         }
       }, 400);
     }

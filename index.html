@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Smashalytics - Super Smash Brothers Ultimate AI Screenshot Results Scanner & Retro Match Tracker">
   <title>SMASHALYTICS // ARCADE CABINET</title>
-  <link rel="stylesheet" href="index.css?v=18">
+  <link rel="stylesheet" href="index.css?v=19">
 </head>
 <body class="theme-storm">
 
@@ -104,6 +104,15 @@
           </div>
         </div>
 
+        <!-- Active Winner Filter Badge (Only shown when a winner filter is active from player/character profile pages) -->
+        <div id="winner-filter-container" style="display: none; width: 100%; max-width: 1125px; margin-top: 0; padding: 10px; margin-left: -10px; align-items: center; justify-content: flex-start; position: sticky; top: 62px; z-index: 140; background: rgba(12, 13, 18, 0.95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-sizing: border-box;">
+          <div class="panel-beveled neon-magenta" style="display: inline-flex; align-items: center; gap: 10px; padding: 6px 15px; font-family: var(--font-arcade); font-size: 11px; background: rgba(255, 0, 127, 0.15); border: 1px solid var(--color-neon-magenta); border-radius: 4px; box-shadow: 0 0 10px rgba(255, 0, 127, 0.3); color: #fff;">
+            <span id="winner-filter-icon" style="color: var(--color-neon-yellow); text-shadow: 0 0 4px var(--color-neon-yellow);">🏆</span>
+            <span id="winner-filter-label" style="letter-spacing: 0.5px;">ONLY SHOWING MATCHES WON BY: <span id="winner-filter-name" class="text-glow-yellow" style="font-weight: bold;"></span></span>
+            <button id="btn-clear-winner-filter" style="background: none; border: none; color: var(--color-neon-magenta); font-family: var(--font-arcade); font-size: 14px; font-weight: bold; line-height: 1; cursor: pointer; padding: 0; margin-left: 10px; transition: transform 0.2s ease, color 0.2s ease; text-shadow: 0 0 4px var(--color-neon-magenta);" onmouseover="this.style.transform='scale(1.25)'; this.style.color='#fff';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--color-neon-magenta)';">&times;</button>
+          </div>
+        </div>
+
         <!-- 3D Olympic Podium -->
         <div class="podium-stage">
           
@@ -149,17 +158,6 @@
             </div>
           </div>
 
-        </div>
-
-
-
-        <!-- Active Winner Filter Badge (Only shown when a winner filter is active from player/character profile pages) -->
-        <div id="winner-filter-container" style="display: none; width: 100%; max-width: 1125px; margin-top: 0; padding: 10px; margin-left: -10px; align-items: center; justify-content: flex-start; position: sticky; top: 62px; z-index: 140; background: rgba(12, 13, 18, 0.95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-sizing: border-box;">
-          <div class="panel-beveled neon-magenta" style="display: inline-flex; align-items: center; gap: 10px; padding: 6px 15px; font-family: var(--font-arcade); font-size: 11px; background: rgba(255, 0, 127, 0.15); border: 1px solid var(--color-neon-magenta); border-radius: 4px; box-shadow: 0 0 10px rgba(255, 0, 127, 0.3); color: #fff;">
-            <span id="winner-filter-icon" style="color: var(--color-neon-yellow); text-shadow: 0 0 4px var(--color-neon-yellow);">🏆</span>
-            <span id="winner-filter-label" style="letter-spacing: 0.5px;">ONLY SHOWING MATCHES WON BY: <span id="winner-filter-name" class="text-glow-yellow" style="font-weight: bold;"></span></span>
-            <button id="btn-clear-winner-filter" style="background: none; border: none; color: var(--color-neon-magenta); font-family: var(--font-arcade); font-size: 14px; font-weight: bold; line-height: 1; cursor: pointer; padding: 0; margin-left: 10px; transition: transform 0.2s ease, color 0.2s ease; text-shadow: 0 0 4px var(--color-neon-magenta);" onmouseover="this.style.transform='scale(1.25)'; this.style.color='#fff';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--color-neon-magenta)';">&times;</button>
-          </div>
         </div>
 
         <!-- Merged Match list container -->
@@ -613,11 +611,11 @@
     <div class="vs-stripe-curtain-bottom"></div>
   </div>
   <!-- Load mock database and SPA modules -->
-  <script src="mockData.js?v=18"></script>
-  <script src="database.js?v=18"></script>
-  <script src="apiService.js?v=18"></script>
-  <script src="gemini.js?v=18"></script>
-  <script src="charts.js?v=18"></script>
-  <script src="app.js?v=18"></script>
+  <script src="mockData.js?v=19"></script>
+  <script src="database.js?v=19"></script>
+  <script src="apiService.js?v=19"></script>
+  <script src="gemini.js?v=19"></script>
+  <script src="charts.js?v=19"></script>
+  <script src="app.js?v=19"></script>
 </body>
 </html>
