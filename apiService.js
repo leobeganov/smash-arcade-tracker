@@ -16,10 +16,12 @@ async function initRoster() {
   }
 }
 
-function getPlayersList() {
+function getPlayersList(matches) {
   if (!window.Database) return [];
 
-  const matches = window.Database.getMatches();
+  if (!matches) {
+    matches = window.Database.getMatches();
+  }
   const playersMap = {};
 
   const specialTaglines = {
@@ -27,11 +29,8 @@ function getPlayersList() {
     "polo": "The Technical Prodigy",
     "matt": "The Wall of Defense",
     "sylv": "The Aggressive Rusher",
-    "bob": "The Combo King",
-    "alice": "The Technical Prodigy",
-    "charlie": "The Unpredictable Tactician",
-    "david": "The Wall of Defense",
-    "eva": "The Aggressive Rusher"
+    "bones": "The Arcade Legend",
+    "mojo": "The Speed Demon"
   };
 
   matches.forEach(m => {
@@ -116,8 +115,8 @@ const apiService = {
 
     if (!window.Database) return [];
 
-    const matches = window.Database.getMatches();
-    const playersList = getPlayersList();
+    const matches = await window.Database.getMatchesAsync();
+    const playersList = getPlayersList(matches);
     const comboStats = {};
 
     matches.forEach(match => {
@@ -194,7 +193,8 @@ const apiService = {
     const results = [];
 
     // Search players
-    const playersList = getPlayersList();
+    const matches = await window.Database.getMatchesAsync();
+    const playersList = getPlayersList(matches);
     playersList.forEach(player => {
       if (player.name.toLowerCase().includes(lowerQuery)) {
         results.push({
@@ -258,11 +258,10 @@ const apiService = {
 
     if (!window.Database) return null;
 
-    const playersList = getPlayersList();
+    const matches = await window.Database.getMatchesAsync();
+    const playersList = getPlayersList(matches);
     const player = playersList.find(p => p.id === playerId || p.name.toLowerCase() === playerId.toLowerCase());
     if (!player) return null;
-
-    const matches = window.Database.getMatches();
     const playerMatches = matches.filter(m => 
       m.players && m.players.some(p => p.playerName.toLowerCase() === player.name.toLowerCase())
     );
@@ -386,8 +385,8 @@ const apiService = {
     const fighter = getFighterDetails(fighterId);
     if (!fighter) return null;
 
-    const matches = window.Database.getMatches();
-    const playersList = getPlayersList();
+    const matches = await window.Database.getMatchesAsync();
+    const playersList = getPlayersList(matches);
     
     // Find all player records in any match that played this fighter
     const fighterRecords = [];
@@ -490,7 +489,8 @@ const apiService = {
 
     if (!isFighterMode) {
       // Gather Player Stats
-      const playersList = getPlayersList();
+      const matches = await window.Database.getMatchesAsync();
+      const playersList = getPlayersList(matches);
       for (const player of playersList) {
         const stats = await this.getPlayerProfile(player.id);
         if (!stats) continue;
@@ -522,7 +522,7 @@ const apiService = {
       const playedSlugs = new Set(baseSlugs);
       
       if (window.Database) {
-        const matches = window.Database.getMatches();
+        const matches = await window.Database.getMatchesAsync();
         matches.forEach(m => {
           if (m.players) {
             m.players.forEach(p => {

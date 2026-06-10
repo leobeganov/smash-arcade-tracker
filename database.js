@@ -4,7 +4,7 @@
  */
 
 const STORAGE_KEYS = {
-  MATCHES: 'smashalytics_matches',
+  MATCHES: 'smashalytics_matches_v3',
   API_KEY: 'smashalytics_api_key',
   THEME: 'smashalytics_theme',
   PLAYERS: 'smashalytics_players' // Custom nickname mappings
@@ -14,107 +14,193 @@ const STORAGE_KEYS = {
 const POC_SEED_MATCHES = [
   {
     id: "match-seed-1",
-    timestamp: Date.now() - 1000 * 60 * 60 * 2, // 2 hours ago
+    timestamp: Date.now() - 1000 * 60 * 60 * 1, // 1 hour ago
     screenType: "EndScreen",
     stage: "Small Battlefield",
     rules: "3 Stock, 5:00",
-    gameMode: "4-Player",
+    gameMode: "1v1",
+    gameStyle: "1v1",
     players: [
-      { playerNumber: "P2", playerName: "jack", character: "Donkey Kong", placement: 1, kos: 4, falls: -2, sds: 0, outAt: "---" },
-      { playerNumber: "P3", playerName: "polo", character: "Ness", placement: 2, kos: 2, falls: -3, sds: 0, outAt: "4:12" },
-      { playerNumber: "P4", playerName: "Matt", character: "Pikachu", placement: 3, kos: 1, falls: -3, sds: 0, outAt: "3:04" },
-      { playerNumber: "P1", playerName: "sylv", character: "Zero Suit Samus", placement: 4, kos: 1, falls: -3, sds: 0, outAt: "2:15" }
+      { playerNumber: "P1", playerName: "Matt", character: "Pikachu", placement: 1, kos: 3, falls: -1, sds: 0, outAt: "---", teamColor: "None" },
+      { playerNumber: "P2", playerName: "Leo", character: "Joker", placement: 2, kos: 1, falls: -3, sds: 0, outAt: "4:15", teamColor: "None" }
     ]
   },
   {
     id: "match-seed-2",
-    timestamp: Date.now() - 1000 * 60 * 60 * 24, // 1 day ago
+    timestamp: Date.now() - 1000 * 60 * 60 * 3, // 3 hours ago
     screenType: "EndScreen",
-    stage: "Small Battlefield",
+    stage: "Battlefield",
     rules: "3 Stock, 5:00",
     gameMode: "3-Player",
+    gameStyle: "Free-for-All",
     players: [
-      { playerNumber: "P2", playerName: "jack", character: "Bayonetta", placement: 1, kos: 3, falls: -2, sds: 0, outAt: "---" },
-      { playerNumber: "P3", playerName: "polo", character: "Richter", placement: 2, kos: 3, falls: -3, sds: 0, outAt: "2:48" },
-      { playerNumber: "P4", playerName: "Matt", character: "Terry", placement: 3, kos: 1, falls: -2, sds: -1, outAt: "1:42" }
+      { playerNumber: "P1", playerName: "Jack", character: "Donkey Kong", placement: 1, kos: 4, falls: -2, sds: 0, outAt: "---", teamColor: "None" },
+      { playerNumber: "P2", playerName: "Polo", character: "Ness", placement: 2, kos: 2, falls: -3, sds: 0, outAt: "4:02", teamColor: "None" },
+      { playerNumber: "P3", playerName: "Ceets", character: "Zelda", placement: 3, kos: 1, falls: -3, sds: -1, outAt: "2:45", teamColor: "None" }
     ]
   },
   {
     id: "match-seed-3",
-    timestamp: Date.now() - 1000 * 60 * 60 * 48, // 2 days ago
+    timestamp: Date.now() - 1000 * 60 * 60 * 6, // 6 hours ago
     screenType: "EndScreen",
     stage: "Final Destination",
     rules: "3 Stock, 5:00",
-    gameMode: "1v1",
+    gameMode: "4-Player",
+    gameStyle: "Free-for-All",
     players: [
-      { playerNumber: "P4", playerName: "Matt", character: "Pikachu", placement: 1, kos: 3, falls: -1, sds: 0, outAt: "---" },
-      { playerNumber: "P3", playerName: "polo", character: "Ness", placement: 2, kos: 1, falls: -3, sds: 0, outAt: "4:01" }
+      { playerNumber: "P1", playerName: "Leo", character: "Joker", placement: 1, kos: 4, falls: -1, sds: 0, outAt: "---", teamColor: "None" },
+      { playerNumber: "P2", playerName: "Matt", character: "Pikachu", placement: 2, kos: 2, falls: -3, sds: 0, outAt: "4:30", teamColor: "None" },
+      { playerNumber: "P3", playerName: "Polo", character: "Ness", placement: 3, kos: 1, falls: -3, sds: 0, outAt: "3:15", teamColor: "None" },
+      { playerNumber: "P4", playerName: "Jack", character: "Donkey Kong", placement: 4, kos: 0, falls: -3, sds: -1, outAt: "1:50", teamColor: "None" }
     ]
   },
   {
     id: "match-seed-4",
-    timestamp: Date.now() - 1000 * 60 * 60 * 72, // 3 days ago
-    screenType: "EndScreen",
-    stage: "Battlefield",
-    rules: "3 Stock, 5:00",
-    gameMode: "4-Player",
-    players: [
-      { playerNumber: "P3", playerName: "polo", character: "Ness", placement: 1, kos: 4, falls: -1, sds: 0, outAt: "---" },
-      { playerNumber: "P2", playerName: "jack", character: "Donkey Kong", placement: 2, kos: 3, falls: -3, sds: 0, outAt: "4:45" },
-      { playerNumber: "P1", playerName: "sylv", character: "Zero Suit Samus", placement: 3, kos: 1, falls: -3, sds: 0, outAt: "3:20" },
-      { playerNumber: "P4", playerName: "Matt", character: "Pikachu", placement: 4, kos: 0, falls: -3, sds: -1, outAt: "1:55" }
-    ]
-  },
-  {
-    id: "match-seed-5",
-    timestamp: Date.now() - 1000 * 60 * 60 * 96, // 4 days ago
-    screenType: "EndScreen",
-    stage: "Town and City",
-    rules: "3 Stock, 5:00",
-    gameMode: "3-Player",
-    players: [
-      { playerNumber: "P4", playerName: "Matt", character: "Terry", placement: 1, kos: 4, falls: -1, sds: 0, outAt: "---" },
-      { playerNumber: "P2", playerName: "jack", character: "Bayonetta", placement: 2, kos: 1, falls: -3, sds: 0, outAt: "3:58" },
-      { playerNumber: "P3", playerName: "polo", character: "Richter", placement: 3, kos: 1, falls: -3, sds: 0, outAt: "2:10" }
-    ]
-  },
-  {
-    id: "match-seed-6",
-    timestamp: Date.now() - 1000 * 60 * 60 * 120, // 5 days ago
+    timestamp: Date.now() - 1000 * 60 * 60 * 12, // 12 hours ago
     screenType: "EndScreen",
     stage: "Small Battlefield",
     rules: "3 Stock, 5:00",
     gameMode: "4-Player",
+    gameStyle: "Free-for-All",
     players: [
-      { playerNumber: "P1", playerName: "sylv", character: "Zero Suit Samus", placement: 1, kos: 3, falls: -2, sds: 0, outAt: "---" },
-      { playerNumber: "P4", playerName: "Matt", character: "Pikachu", placement: 2, kos: 2, falls: -3, sds: 0, outAt: "4:32" },
-      { playerNumber: "P2", playerName: "jack", character: "Donkey Kong", placement: 3, kos: 2, falls: -3, sds: 0, outAt: "3:40" },
-      { playerNumber: "P3", playerName: "polo", character: "Ness", placement: 4, kos: 1, falls: -3, sds: 0, outAt: "2:50" }
+      { playerNumber: "P1", playerName: "Jack", character: "Terry", placement: 1, kos: 3, falls: -2, sds: 0, outAt: "---", teamColor: "None" },
+      { playerNumber: "P2", playerName: "Leo", character: "Sephiroth", placement: 2, kos: 3, falls: -3, sds: 0, outAt: "4:45", teamColor: "None" },
+      { playerNumber: "P3", playerName: "Ceets", character: "Peach", placement: 3, kos: 2, falls: -3, sds: 0, outAt: "3:40", teamColor: "None" },
+      { playerNumber: "P4", playerName: "Matt", character: "Mario", placement: 4, kos: 1, falls: -3, sds: 0, outAt: "2:20", teamColor: "None" }
+    ]
+  },
+  {
+    id: "match-seed-5",
+    timestamp: Date.now() - 1000 * 60 * 60 * 24, // 1 day ago
+    screenType: "EndScreen",
+    stage: "Town and City",
+    rules: "3 Stock, 5:00",
+    gameMode: "4-Player",
+    gameStyle: "Free-for-All",
+    players: [
+      { playerNumber: "P1", playerName: "Polo", character: "Richter", placement: 1, kos: 5, falls: -1, sds: 0, outAt: "---", teamColor: "None" },
+      { playerNumber: "P2", playerName: "Jack", character: "Banjo & Kazooie", placement: 2, kos: 2, falls: -3, sds: 0, outAt: "4:10", teamColor: "None" },
+      { playerNumber: "P3", playerName: "Matt", character: "Link", placement: 3, kos: 1, falls: -3, sds: 0, outAt: "3:02", teamColor: "None" },
+      { playerNumber: "P4", playerName: "Leo", character: "Cloud", placement: 4, kos: 0, falls: -3, sds: -1, outAt: "1:40", teamColor: "None" }
+    ]
+  },
+  {
+    id: "match-seed-6",
+    timestamp: Date.now() - 1000 * 60 * 60 * 36, // 1.5 days ago
+    screenType: "EndScreen",
+    stage: "Smashville",
+    rules: "3 Stock, 5:00",
+    gameMode: "5-Player",
+    gameStyle: "Free-for-All",
+    players: [
+      { playerNumber: "P1", playerName: "Ceets", character: "Samus", placement: 1, kos: 4, falls: -2, sds: 0, outAt: "---", teamColor: "None" },
+      { playerNumber: "P2", playerName: "Matt", character: "Pikachu", placement: 2, kos: 3, falls: -3, sds: 0, outAt: "4:25", teamColor: "None" },
+      { playerNumber: "P3", playerName: "Polo", character: "Fox", placement: 3, kos: 2, falls: -3, sds: 0, outAt: "3:30", teamColor: "None" },
+      { playerNumber: "P4", playerName: "Jack", character: "Bowser", placement: 4, kos: 1, falls: -3, sds: -1, outAt: "2:15", teamColor: "None" },
+      { playerNumber: "P5", playerName: "Leo", character: "Joker", placement: 5, kos: 1, falls: -3, sds: 0, outAt: "1:30", teamColor: "None" }
     ]
   },
   {
     id: "match-seed-7",
-    timestamp: Date.now() - 1000 * 60 * 60 * 144, // 6 days ago
+    timestamp: Date.now() - 1000 * 60 * 60 * 48, // 2 days ago
     screenType: "EndScreen",
-    stage: "Yoshi's Story",
+    stage: "Small Battlefield",
     rules: "3 Stock, 5:00",
-    gameMode: "1v1",
+    gameMode: "6-Player",
+    gameStyle: "Free-for-All",
     players: [
-      { playerNumber: "P2", playerName: "jack", character: "Donkey Kong", placement: 1, kos: 3, falls: -0, sds: 0, outAt: "---" },
-      { playerNumber: "P4", playerName: "Matt", character: "Terry", placement: 2, kos: 0, falls: -3, sds: 0, outAt: "3:12" }
+      { playerNumber: "P1", playerName: "Leo", character: "Byleth", placement: 1, kos: 5, falls: -1, sds: 0, outAt: "---", teamColor: "None" },
+      { playerNumber: "P2", playerName: "Jack", character: "Donkey Kong", placement: 2, kos: 3, falls: -3, sds: 0, outAt: "4:40", teamColor: "None" },
+      { playerNumber: "P3", playerName: "Polo", character: "Hero", placement: 3, kos: 2, falls: -3, sds: 0, outAt: "3:50", teamColor: "None" },
+      { playerNumber: "P4", playerName: "Ceets", character: "Zelda", placement: 4, kos: 2, falls: -3, sds: -1, outAt: "2:55", teamColor: "None" },
+      { playerNumber: "P5", playerName: "Matt", character: "Sonic", placement: 5, kos: 1, falls: -3, sds: 0, outAt: "2:10", teamColor: "None" },
+      { playerNumber: "P6", playerName: "Sylv", character: "Zero Suit Samus", placement: 6, kos: 0, falls: -3, sds: 0, outAt: "1:15", teamColor: "None" }
     ]
   },
   {
     id: "match-seed-8",
+    timestamp: Date.now() - 1000 * 60 * 60 * 72, // 3 days ago
+    screenType: "EndScreen",
+    stage: "Battlefield",
+    rules: "3 Stock, 5:00",
+    gameMode: "7-Player",
+    gameStyle: "Free-for-All",
+    players: [
+      { playerNumber: "P1", playerName: "Matt", character: "Pikachu", placement: 1, kos: 5, falls: -2, sds: 0, outAt: "---", teamColor: "None" },
+      { playerNumber: "P2", playerName: "Ceets", character: "Peach", placement: 2, kos: 4, falls: -3, sds: 0, outAt: "4:50", teamColor: "None" },
+      { playerNumber: "P3", playerName: "Leo", character: "Pyra/Mythra", placement: 3, kos: 3, falls: -3, sds: 0, outAt: "4:05", teamColor: "None" },
+      { playerNumber: "P4", playerName: "Jack", character: "Kazuya", placement: 4, kos: 2, falls: -3, sds: -1, outAt: "3:20", teamColor: "None" },
+      { playerNumber: "P5", playerName: "Polo", character: "Ness", placement: 5, kos: 2, falls: -3, sds: 0, outAt: "2:30", teamColor: "None" },
+      { playerNumber: "P6", playerName: "Sylv", character: "Snake", placement: 6, kos: 1, falls: -3, sds: 0, outAt: "1:45", teamColor: "None" },
+      { playerNumber: "P7", playerName: "Bones", character: "Mario", placement: 7, kos: 0, falls: -3, sds: 0, outAt: "1:05", teamColor: "None" }
+    ]
+  },
+  {
+    id: "match-seed-9",
+    timestamp: Date.now() - 1000 * 60 * 60 * 96, // 4 days ago
+    screenType: "EndScreen",
+    stage: "Final Destination",
+    rules: "3 Stock, 5:00",
+    gameMode: "8-Player",
+    gameStyle: "Free-for-All",
+    players: [
+      { playerNumber: "P1", playerName: "Jack", character: "Donkey Kong", placement: 1, kos: 6, falls: -1, sds: 0, outAt: "---", teamColor: "None" },
+      { playerNumber: "P2", playerName: "Matt", character: "Pikachu", placement: 2, kos: 4, falls: -3, sds: 0, outAt: "4:55", teamColor: "None" },
+      { playerNumber: "P3", playerName: "Leo", character: "Joker", placement: 3, kos: 3, falls: -3, sds: 0, outAt: "4:20", teamColor: "None" },
+      { playerNumber: "P4", playerName: "Ceets", character: "Zelda", placement: 4, kos: 2, falls: -3, sds: -1, outAt: "3:40", teamColor: "None" },
+      { playerNumber: "P5", playerName: "Polo", character: "Ness", placement: 5, kos: 2, falls: -3, sds: 0, outAt: "3:00", teamColor: "None" },
+      { playerNumber: "P6", playerName: "Sylv", character: "Zero Suit Samus", placement: 6, kos: 1, falls: -3, sds: 0, outAt: "2:15", teamColor: "None" },
+      { playerNumber: "P7", playerName: "Bones", character: "Mario", placement: 7, kos: 1, falls: -3, sds: 0, outAt: "1:35", teamColor: "None" },
+      { playerNumber: "P8", playerName: "Mojo", character: "Link", placement: 8, kos: 0, falls: -3, sds: 0, outAt: "0:55", teamColor: "None" }
+    ]
+  },
+  {
+    id: "match-seed-10",
+    timestamp: Date.now() - 1000 * 60 * 60 * 120, // 5 days ago
+    screenType: "EndScreen",
+    stage: "Battlefield",
+    rules: "3 Stock, 5:00",
+    gameMode: "8-Player",
+    gameStyle: "Teams",
+    players: [
+      { playerNumber: "P1", playerName: "Matt", character: "Pikachu", placement: 1, kos: 4, falls: -1, sds: 0, outAt: "---", teamColor: "Red" },
+      { playerNumber: "P2", playerName: "Jack", character: "Donkey Kong", placement: 1, kos: 3, falls: -2, sds: 0, outAt: "---", teamColor: "Red" },
+      { playerNumber: "P3", playerName: "Polo", character: "Ness", placement: 1, kos: 2, falls: -2, sds: 0, outAt: "---", teamColor: "Red" },
+      { playerNumber: "P4", playerName: "Bones", character: "Mario", placement: 1, kos: 1, falls: -3, sds: 0, outAt: "---", teamColor: "Red" },
+      { playerNumber: "P5", playerName: "Leo", character: "Joker", placement: 2, kos: 2, falls: -3, sds: 0, outAt: "4:40", teamColor: "Blue" },
+      { playerNumber: "P6", playerName: "Ceets", character: "Zelda", placement: 2, kos: 1, falls: -3, sds: -1, outAt: "3:55", teamColor: "Blue" },
+      { playerNumber: "P7", playerName: "Sylv", character: "Zero Suit Samus", placement: 2, kos: 1, falls: -3, sds: 0, outAt: "3:10", teamColor: "Blue" },
+      { playerNumber: "P8", playerName: "Mojo", character: "Link", placement: 2, kos: 0, falls: -3, sds: 0, outAt: "2:25", teamColor: "Blue" }
+    ]
+  },
+  {
+    id: "match-seed-11",
+    timestamp: Date.now() - 1000 * 60 * 60 * 144, // 6 days ago
+    screenType: "EndScreen",
+    stage: "Small Battlefield",
+    rules: "3 Stock, 5:00",
+    gameMode: "4-Player",
+    gameStyle: "Teams",
+    players: [
+      { playerNumber: "P1", playerName: "Matt", character: "Pikachu", placement: 1, kos: 3, falls: -1, sds: 0, outAt: "---", teamColor: "Red" },
+      { playerNumber: "P2", playerName: "Leo", character: "Joker", placement: 1, kos: 2, falls: -2, sds: 0, outAt: "---", teamColor: "Red" },
+      { playerNumber: "P3", playerName: "Polo", character: "Ness", placement: 2, kos: 1, falls: -3, sds: 0, outAt: "4:15", teamColor: "Blue" },
+      { playerNumber: "P4", playerName: "Jack", character: "Donkey Kong", placement: 2, kos: 0, falls: -3, sds: -1, outAt: "3:20", teamColor: "Blue" }
+    ]
+  },
+  {
+    id: "match-seed-12",
     timestamp: Date.now() - 1000 * 60 * 60 * 168, // 7 days ago
     screenType: "EndScreen",
-    stage: "Smashville",
+    stage: "Town and City",
     rules: "3 Stock, 5:00",
-    gameMode: "3-Player",
+    gameMode: "4-Player",
+    gameStyle: "Teams",
     players: [
-      { playerNumber: "P3", playerName: "polo", character: "Richter", placement: 1, kos: 3, falls: -2, sds: 0, outAt: "---" },
-      { playerNumber: "P2", playerName: "jack", character: "Bayonetta", placement: 2, kos: 2, falls: -3, sds: 0, outAt: "4:05" },
-      { playerNumber: "P4", playerName: "Matt", character: "Pikachu", placement: 3, kos: 1, falls: -3, sds: 0, outAt: "3:12" }
+      { playerNumber: "P1", playerName: "Jack", character: "Donkey Kong", placement: 1, kos: 2, falls: -1, sds: 0, outAt: "---", teamColor: "Red" },
+      { playerNumber: "P2", playerName: "Polo", character: "Ness", placement: 1, kos: 2, falls: -2, sds: 0, outAt: "---", teamColor: "Red" },
+      { playerNumber: "P3", playerName: "Ceets", character: "Zelda", placement: 1, kos: 1, falls: -2, sds: 0, outAt: "---", teamColor: "Red" },
+      { playerNumber: "P4", playerName: "Leo", character: "Joker", placement: 2, kos: 4, falls: -3, sds: 0, outAt: "4:50", teamColor: "Blue" }
     ]
   }
 ];
@@ -207,57 +293,7 @@ const Database = {
   resetToSeeds() {
     let mergedSeeds = [];
 
-    // 1. Incorporate and convert coworker's retro matches
-    if (window.SMASH_MOCK_DATA) {
-      const { MATCHES, PLAYERS, FIGHTERS } = window.SMASH_MOCK_DATA;
-      if (Array.isArray(MATCHES) && Array.isArray(PLAYERS) && Array.isArray(FIGHTERS)) {
-        MATCHES.forEach(m => {
-          const winner = PLAYERS.find(p => p.id === m.winnerId) || { name: m.winnerId };
-          const loser = PLAYERS.find(p => p.id === m.loserId) || { name: m.loserId };
-          const winFighter = FIGHTERS.find(f => f.id === m.winnerFighter) || { name: m.winnerFighter };
-          const loseFighter = FIGHTERS.find(f => f.id === m.loserFighter) || { name: m.loserFighter };
-
-          // Construct standard multi-player placement record
-          mergedSeeds.push({
-            id: `match-retro-${m.id}`,
-            timestamp: Date.now() - (1000 * 60 * 60 * 3.5 * m.id), // staggered historical stamps
-            screenType: "EndScreen",
-            stage: "Battlefield",
-            rules: "4 Stock, 8:00",
-            gameMode: "1v1",
-            gameStyle: "Free-for-All",
-            players: [
-              {
-                playerNumber: "P1",
-                playerName: winner.name,
-                character: winFighter.name,
-                placement: 1,
-                kos: m.winnerKOs || 4,
-                falls: -Math.abs(m.winnerFalls !== undefined ? m.winnerFalls : 2),
-                sds: 0,
-                outAt: "---",
-                damageDealt: m.winnerDamageDealt || 250,
-                damageTaken: m.winnerDamageTaken || 180
-              },
-              {
-                playerNumber: "P2",
-                playerName: loser.name,
-                character: loseFighter.name,
-                placement: 2,
-                kos: m.loserKOs || 2,
-                falls: -Math.abs(m.loserFalls !== undefined ? m.loserFalls : 4),
-                sds: 0,
-                outAt: "5:30",
-                damageDealt: m.loserDamageDealt || 180,
-                damageTaken: m.loserDamageTaken || 250
-              }
-            ]
-          });
-        });
-      }
-    }
-
-    // 2. Incorporate POC's multi-player seeds
+    // Incorporate POC's multi-player seeds
     mergedSeeds = mergedSeeds.concat(POC_SEED_MATCHES);
 
     // Sort chronologically descending
@@ -414,6 +450,47 @@ const Database = {
       stages: stageList,
       recentMatches: matches.slice(0, 5)
     };
+  },
+
+  // --- Asynchronous API Emulation (Postgres Ready Adapter) ---
+  async getMatchesAsync() {
+    await new Promise(resolve => setTimeout(resolve, 150));
+    return this.getMatches();
+  },
+
+  async saveMatchesAsync(matches) {
+    await new Promise(resolve => setTimeout(resolve, 150));
+    return this.saveMatches(matches);
+  },
+
+  async addMatchAsync(match) {
+    await new Promise(resolve => setTimeout(resolve, 150));
+    return this.addMatch(match);
+  },
+
+  async deleteMatchAsync(id) {
+    await new Promise(resolve => setTimeout(resolve, 150));
+    return this.deleteMatch(id);
+  },
+
+  async updateMatchAsync(id, updatedMatch) {
+    await new Promise(resolve => setTimeout(resolve, 150));
+    return this.updateMatch(id, updatedMatch);
+  },
+
+  async clearMatchesAsync() {
+    await new Promise(resolve => setTimeout(resolve, 150));
+    return this.clearMatches();
+  },
+
+  async resetToSeedsAsync() {
+    await new Promise(resolve => setTimeout(resolve, 150));
+    return this.resetToSeeds();
+  },
+
+  async getStatsAsync(filters = {}) {
+    await new Promise(resolve => setTimeout(resolve, 150));
+    return this.getStats(filters);
   }
 };
 
