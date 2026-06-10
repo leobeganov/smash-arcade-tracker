@@ -13,6 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let lastScannedMatch = null;
   let currentPodiumTimeframe = "7days";
   let currentLeaderboardTimeframe = "alltime";
+  let currentPlayerTimeframe = "alltime";
+  let currentFighterTimeframe = "alltime";
   let selectedSearchPlayers = [];
   let selectedSearchFighters = [];
   let selectedSearchWinnerPlayer = null;
@@ -97,8 +99,10 @@ document.addEventListener("DOMContentLoaded", () => {
       isSearchDropdownsInitialized = false;
       await renderHome();
     } else if (target === "player") {
+      currentPlayerTimeframe = "alltime";
       await renderPlayerProfile(id);
     } else if (target === "fighter") {
+      currentFighterTimeframe = "alltime";
       await renderFighterProfile(id);
     } else if (target === "leaderboard") {
       await renderLeaderboard();
@@ -396,7 +400,34 @@ document.addEventListener("DOMContentLoaded", () => {
   // 4. Render Player Profile
   // ==========================================
   async function renderPlayerProfile(playerId) {
-    const stats = await api.getPlayerProfile(playerId);
+    // Sync timeframe filter toggle buttons
+    const ptf = document.getElementById("player-timeframe-filters");
+    if (ptf) {
+      ptf.querySelectorAll(".toggle-btn").forEach(btn => {
+        if (btn.getAttribute("data-timeframe") === currentPlayerTimeframe) {
+          btn.classList.add("active");
+        } else {
+          btn.classList.remove("active");
+        }
+      });
+    }
+
+    // Fetch and filter matches dynamically
+    let matches = await window.Database.getMatchesAsync();
+    const now = Date.now();
+    if (currentPlayerTimeframe === 'today') {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      matches = matches.filter(m => m.timestamp >= todayStart.getTime());
+    } else if (currentPlayerTimeframe === '7days') {
+      const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
+      matches = matches.filter(m => m.timestamp >= sevenDaysAgo);
+    } else if (currentPlayerTimeframe === '30days') {
+      const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
+      matches = matches.filter(m => m.timestamp >= thirtyDaysAgo);
+    }
+
+    const stats = await api.getPlayerProfile(playerId, matches);
     if (!stats) return;
 
     // Sidebar Portrait and Info
@@ -496,7 +527,34 @@ document.addEventListener("DOMContentLoaded", () => {
   // 5. Render Fighter Profile
   // ==========================================
   async function renderFighterProfile(fighterId) {
-    const stats = await api.getFighterProfile(fighterId);
+    // Sync timeframe filter toggle buttons
+    const ftf = document.getElementById("fighter-timeframe-filters");
+    if (ftf) {
+      ftf.querySelectorAll(".toggle-btn").forEach(btn => {
+        if (btn.getAttribute("data-timeframe") === currentFighterTimeframe) {
+          btn.classList.add("active");
+        } else {
+          btn.classList.remove("active");
+        }
+      });
+    }
+
+    // Fetch and filter matches dynamically
+    let matches = await window.Database.getMatchesAsync();
+    const now = Date.now();
+    if (currentFighterTimeframe === 'today') {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      matches = matches.filter(m => m.timestamp >= todayStart.getTime());
+    } else if (currentFighterTimeframe === '7days') {
+      const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
+      matches = matches.filter(m => m.timestamp >= sevenDaysAgo);
+    } else if (currentFighterTimeframe === '30days') {
+      const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
+      matches = matches.filter(m => m.timestamp >= thirtyDaysAgo);
+    }
+
+    const stats = await api.getFighterProfile(fighterId, matches);
     if (!stats) return;
 
     // Set dynamic series background watermark
@@ -512,10 +570,32 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Sidebar Portrait and Bio
+    // Render Series Brand Badge
+    const seriesContainer = document.getElementById("fighter-profile-series-container");
+    const seriesImg = document.getElementById("fighter-profile-series-img");
+    const seriesName = document.getElementById("fighter-profile-series-name");
+    
+    if (stats.fighter.series) {
+      if (stats.fighter.series.icon) {
+        seriesImg.src = stats.fighter.series.icon;
+        seriesImg.style.display = "block";
+      } else {
+        seriesImg.style.display = "none";
+      }
+      seriesName.textContent = stats.fighter.series.name.toUpperCase();
+      seriesContainer.style.display = "flex";
+    } else {
+      seriesContainer.style.display = "none";
+    }
+
+    // Sidebar Portrait and Backstory
     document.getElementById("fighter-profile-img").src = stats.fighter.img;
     document.getElementById("fighter-profile-name").textContent = stats.fighter.name;
-    document.getElementById("fighter-profile-bio").textContent = stats.fighter.bio;
+
+    // Extract backstory (origin tips) or fallback to standard bio
+    const originTips = stats.fighter.tips ? stats.fighter.tips.filter(t => t.type === "origin") : [];
+    const backstoryText = originTips.map(t => t.description).join("\n\n") || stats.fighter.bio;
+    document.getElementById("fighter-profile-bio").textContent = backstoryText;
 
     // Stat grids
     document.getElementById("fighter-stat-wins").textContent = stats.adjustedWins;
@@ -568,6 +648,89 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     } else {
       topPlayersContainer.innerHTML = `<div style="font-family: var(--font-stats); opacity: 0.6; font-size: 13px;">NO BATTLE RECORD</div>`;
+    }
+
+    // Render Moves Registry List
+    const movesContainer = document.getElementById("fighter-moves-list");
+    movesContainer.innerHTML = "";
+
+    const tips = stats.fighter.tips || [];
+    const categories = {};
+    
+    tips.forEach(t => {
+      if (!t.move) return; 
+      const cat = t.type || "Other Moves";
+      if (!categories[cat]) {
+        categories[cat] = [];
+      }
+      categories[cat].push(t);
+    });
+
+    const sortedCategories = [
+      "Standard Ground Attacks",
+      "Aerial Attacks",
+      "Smash Attacks",
+      "Throws & Grabs",
+      "Standard Special Moves",
+      "Special Variant Combinations"
+    ];
+
+    let hasAnyMoves = false;
+    sortedCategories.forEach(catName => {
+      const moves = categories[catName];
+      if (!moves || moves.length === 0) return;
+      hasAnyMoves = true;
+
+      const catBlock = document.createElement("div");
+      catBlock.className = "moves-category-group";
+      catBlock.style.display = "flex";
+      catBlock.style.flexDirection = "column";
+      catBlock.style.gap = "12px";
+
+      catBlock.innerHTML = `
+        <h4 class="moves-category-title" style="font-family: var(--font-arcade); font-size: 11px; color: var(--color-neon-yellow); margin: 15px 0 5px 0; letter-spacing: 0.5px; border-left: 3px solid var(--color-neon-cyan); padding-left: 8px;">${catName.toUpperCase()}</h4>
+        <div class="moves-grid" style="display: grid; grid-template-columns: 1fr; gap: 12px;">
+        </div>
+      `;
+
+      const grid = catBlock.querySelector(".moves-grid");
+
+      moves.forEach(m => {
+        const moveCard = document.createElement("div");
+        moveCard.className = "move-card-retro";
+        moveCard.style.background = "rgba(0, 10, 20, 0.45)";
+        moveCard.style.border = "1px solid rgba(0, 240, 255, 0.2)";
+        moveCard.style.padding = "15px";
+        moveCard.style.display = "flex";
+        moveCard.style.flexDirection = "column";
+        moveCard.style.gap = "8px";
+        moveCard.style.transition = "border-color 0.2s ease, box-shadow 0.2s ease";
+
+        moveCard.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+            <span class="move-name text-glow-cyan" style="font-family: var(--font-header); font-size: 13px; color: #fff; text-shadow: 0 0 5px rgba(0, 240, 255, 0.4);">${m.name}</span>
+            <span class="move-command-badge" style="font-family: var(--font-arcade); font-size: 9px; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--color-neon-cyan); color: var(--color-neon-cyan); padding: 4px 10px; border-radius: 4px; box-shadow: 0 0 5px rgba(0, 240, 255, 0.2);">${m.move.toUpperCase()}</span>
+          </div>
+          <p class="move-desc" style="font-family: monospace; font-size: 12px; color: #c4c6d0; opacity: 0.9; margin: 0; line-height: 1.5; text-align: left;">${m.description}</p>
+        `;
+
+        moveCard.onmouseover = () => {
+          moveCard.style.borderColor = "var(--color-neon-cyan)";
+          moveCard.style.boxShadow = "0 0 10px rgba(0, 240, 255, 0.2)";
+        };
+        moveCard.onmouseout = () => {
+          moveCard.style.borderColor = "rgba(0, 240, 255, 0.2)";
+          moveCard.style.boxShadow = "none";
+        };
+
+        grid.appendChild(moveCard);
+      });
+
+      movesContainer.appendChild(catBlock);
+    });
+
+    if (!hasAnyMoves) {
+      movesContainer.innerHTML = `<div style="font-family: var(--font-stats); opacity: 0.6; font-size: 13px;">NO MOVES REGISTERED FOR THIS FIGHTER</div>`;
     }
 
     // See all matches button integration
@@ -1334,6 +1497,42 @@ document.addEventListener("DOMContentLoaded", () => {
       
       currentLeaderboardTimeframe = btn.getAttribute("data-timeframe");
       renderLeaderboard();
+    });
+  }
+
+  // Player Profile Timeframe Toggles
+  const playerTimeframeFilters = document.getElementById("player-timeframe-filters");
+  if (playerTimeframeFilters) {
+    playerTimeframeFilters.addEventListener("click", (e) => {
+      const btn = e.target.closest(".toggle-btn");
+      if (!btn) return;
+      
+      playerTimeframeFilters.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      
+      currentPlayerTimeframe = btn.getAttribute("data-timeframe");
+      const parts = window.location.hash.split("/");
+      if (parts[0] === "#player" && parts[1]) {
+        renderPlayerProfile(parts[1]);
+      }
+    });
+  }
+
+  // Fighter Profile Timeframe Toggles
+  const fighterTimeframeFilters = document.getElementById("fighter-timeframe-filters");
+  if (fighterTimeframeFilters) {
+    fighterTimeframeFilters.addEventListener("click", (e) => {
+      const btn = e.target.closest(".toggle-btn");
+      if (!btn) return;
+      
+      fighterTimeframeFilters.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      
+      currentFighterTimeframe = btn.getAttribute("data-timeframe");
+      const parts = window.location.hash.split("/");
+      if (parts[0] === "#fighter" && parts[1]) {
+        renderFighterProfile(parts[1]);
+      }
     });
   }
 

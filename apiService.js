@@ -77,7 +77,9 @@ function getFighterDetails(fighterNameOrId) {
         img: imgUrl,
         bio: bioText,
         icon: foundRoster.icon,
-        series: foundRoster.series
+        series: foundRoster.series,
+        tips: foundRoster.tips,
+        variants: foundRoster.variants
       };
     }
   }

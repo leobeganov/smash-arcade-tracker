@@ -2843,3 +2843,43 @@ body.theme-retro .btn-arcade {
   border-color: var(--color-neon-magenta) !important;
   box-shadow: 0 0 15px rgba(255, 0, 127, 0.6) !important;
 }
+
+/* Custom Profile page Timeframe override styles */
+#player-timeframe-filters .toggle-btn.active {
+  color: #fff !important;
+  background-color: var(--color-neon-magenta) !important;
+  box-shadow: 0 0 10px var(--color-neon-magenta) !important;
+}
+
+#player-timeframe-filters .toggle-btn:not(.active):hover {
+  color: var(--color-neon-magenta) !important;
+  text-shadow: 0 0 5px var(--color-neon-magenta) !important;
+  background-color: rgba(255, 0, 128, 0.1) !important;
+}
+
+#fighter-timeframe-filters .toggle-btn.active {
+  color: #000 !important;
+  background-color: var(--color-neon-cyan) !important;
+  box-shadow: 0 0 10px var(--color-neon-cyan) !important;
+}
+
+#fighter-timeframe-filters .toggle-btn:not(.active):hover {
+  color: var(--color-neon-cyan) !important;
+  text-shadow: 0 0 5px var(--color-neon-cyan) !important;
+  background-color: rgba(0, 240, 255, 0.1) !important;
+}
+
+/* Moves Registry layout and interactive card styling */
+.moves-list-wrapper {
+  margin-top: 15px;
+}
+
+.move-card-retro {
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.move-card-retro:hover {
+  background: rgba(0, 240, 255, 0.08) !important;
+  transform: translateY(-2px);
+}
+
