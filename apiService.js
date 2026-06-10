@@ -112,7 +112,7 @@ const apiService = {
   getFighterDetails,
 
   // 1. Get Top 3 Player-Fighter Combinations for the Olympic Podium
-  async getPodium(timeframe = '7days', activeStyles = ["1v1", "free-for-all", "teams"], selectedPlayers = [], selectedFighters = []) {
+  async getPodium(timeframe = '7days', activeStyles = ["1v1", "free-for-all", "teams"], selectedPlayers = [], selectedFighters = [], winnerPlayer = null, winnerFighter = null) {
     await initRoster();
     await apiDelay(250);
 
@@ -153,6 +153,16 @@ const apiService = {
       // Otherwise Free-for-all
       return activeStylesLower.includes('free-for-all');
     });
+
+    // Apply winner filters (from player or fighter click-through redirections)
+    if (winnerPlayer) {
+      const wpLower = winnerPlayer.toLowerCase().trim();
+      matches = matches.filter(m => m.players && m.players.some(p => p.playerName.toLowerCase().trim() === wpLower && p.placement === 1));
+    }
+    if (winnerFighter) {
+      const wfLower = winnerFighter.toLowerCase().trim();
+      matches = matches.filter(m => m.players && m.players.some(p => p.character.toLowerCase().trim() === wfLower && p.placement === 1));
+    }
 
     // Apply player selection filtering (if any specified)
     if (selectedPlayers && selectedPlayers.length > 0) {

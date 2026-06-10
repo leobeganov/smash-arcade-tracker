@@ -15,6 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentLeaderboardTimeframe = "alltime";
   let selectedSearchPlayers = [];
   let selectedSearchFighters = [];
+  let selectedSearchWinnerPlayer = null;
+  let selectedSearchWinnerFighter = null;
   let isSearchDropdownsInitialized = false;
 
   // --- DOM Elements ---
@@ -139,7 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
       activeStyles.push('1v1', 'free-for-all', 'teams');
     }
 
-    const podiumData = await api.getPodium(currentPodiumTimeframe, activeStyles, selectedSearchPlayers, selectedSearchFighters);
+    const podiumData = await api.getPodium(currentPodiumTimeframe, activeStyles, selectedSearchPlayers, selectedSearchFighters, selectedSearchWinnerPlayer, selectedSearchWinnerFighter);
 
     // Populate Gold (1st)
     const gold = podiumData.find(p => p.rank === 1);
@@ -230,6 +232,30 @@ document.addEventListener("DOMContentLoaded", () => {
         bronzeInfo.style.cursor = "default";
       }
     }
+    // Winner Filter Badge UI
+    const badgeContainer = document.getElementById("winner-filter-container");
+    const badgeName = document.getElementById("winner-filter-name");
+    const badgeClearBtn = document.getElementById("btn-clear-winner-filter");
+
+    if (badgeContainer && badgeName) {
+      if (selectedSearchWinnerPlayer || selectedSearchWinnerFighter) {
+        badgeName.textContent = (selectedSearchWinnerPlayer || selectedSearchWinnerFighter).toUpperCase();
+        badgeContainer.style.display = "flex";
+        if (badgeClearBtn) {
+          badgeClearBtn.onclick = () => {
+            selectedSearchWinnerPlayer = null;
+            selectedSearchWinnerFighter = null;
+            badgeContainer.style.display = "none";
+            isSearchDropdownsInitialized = false; // force dropdown re-initialization
+            renderHome();
+          };
+        }
+      } else {
+        badgeContainer.style.display = "none";
+      }
+    }
+
+    updateSearchBadge();
     await renderHomeMatchesList();
 
     // Enforce smooth minimum display delay of 250ms
@@ -310,6 +336,32 @@ document.addEventListener("DOMContentLoaded", () => {
       nemesisCard.onclick = null;
       nemesisCard.style.cursor = "default";
     }
+
+    // See all matches button integration
+    const btnSeeMatches = document.getElementById("btn-player-see-matches");
+    if (btnSeeMatches) {
+      btnSeeMatches.onclick = () => {
+        selectedSearchPlayers = [stats.player.name];
+        selectedSearchFighters = [];
+        selectedSearchWinnerPlayer = null;
+        selectedSearchWinnerFighter = null;
+        isSearchDropdownsInitialized = false; // force dropdown re-initialization
+        window.location.hash = "#home";
+      };
+    }
+
+    // Win rate cell click-through integration
+    const winrateCell = document.getElementById("player-winrate-cell");
+    if (winrateCell) {
+      winrateCell.onclick = () => {
+        selectedSearchPlayers = [stats.player.name];
+        selectedSearchFighters = [];
+        selectedSearchWinnerPlayer = stats.player.name;
+        selectedSearchWinnerFighter = null;
+        isSearchDropdownsInitialized = false; // force dropdown re-initialization
+        window.location.hash = "#home";
+      };
+    }
   }
 
 
@@ -389,6 +441,32 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     } else {
       topPlayersContainer.innerHTML = `<div style="font-family: var(--font-stats); opacity: 0.6; font-size: 13px;">NO BATTLE RECORD</div>`;
+    }
+
+    // See all matches button integration
+    const btnSeeMatches = document.getElementById("btn-fighter-see-matches");
+    if (btnSeeMatches) {
+      btnSeeMatches.onclick = () => {
+        selectedSearchFighters = [stats.fighter.name];
+        selectedSearchPlayers = [];
+        selectedSearchWinnerPlayer = null;
+        selectedSearchWinnerFighter = null;
+        isSearchDropdownsInitialized = false; // force dropdown re-initialization
+        window.location.hash = "#home";
+      };
+    }
+
+    // Win rate cell click-through integration
+    const winrateCell = document.getElementById("fighter-winrate-cell");
+    if (winrateCell) {
+      winrateCell.onclick = () => {
+        selectedSearchFighters = [stats.fighter.name];
+        selectedSearchPlayers = [];
+        selectedSearchWinnerPlayer = null;
+        selectedSearchWinnerFighter = stats.fighter.name;
+        isSearchDropdownsInitialized = false; // force dropdown re-initialization
+        window.location.hash = "#home";
+      };
     }
   }
 
@@ -720,6 +798,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const fighterObj = api.getFighterDetails(p.character);
         return lowerFighters.includes(p.character.toLowerCase().trim()) || lowerFighters.includes(fighterObj.id.toLowerCase().trim());
       }));
+    }
+
+    if (selectedSearchWinnerPlayer) {
+      const wpLower = selectedSearchWinnerPlayer.toLowerCase().trim();
+      matches = matches.filter(m => m.players && m.players.some(p => p.playerName.toLowerCase().trim() === wpLower && p.placement === 1));
+    }
+    if (selectedSearchWinnerFighter) {
+      const wfLower = selectedSearchWinnerFighter.toLowerCase().trim();
+      matches = matches.filter(m => m.players && m.players.some(p => p.character.toLowerCase().trim() === wfLower && p.placement === 1));
     }
 
     const container = document.getElementById("history-matches-list");
@@ -1465,6 +1552,8 @@ document.addEventListener("DOMContentLoaded", () => {
     btnClearPodiumSearch.onclick = () => {
       selectedSearchPlayers.length = 0;
       selectedSearchFighters.length = 0;
+      selectedSearchWinnerPlayer = null;
+      selectedSearchWinnerFighter = null;
       initSearchDropdowns();
       updateSearchBadge();
       renderHome();
