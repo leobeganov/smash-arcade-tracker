@@ -2681,12 +2681,58 @@ body.theme-retro .btn-arcade {
   }
 }
 
-/* Sudden Death Player Row Styling in Victory Column */
+/* Timeline Marker Layer Hierarchy Elevation on Hover */
+.timeline-marker:hover {
+  z-index: 100 !important;
+}
+
+/* --- High-Fidelity Victory & Sudden Death Sidebar Row Highlights --- */
+.winner-sidebar-row {
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.winner-sidebar-row .winner-icon-bubble {
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease-in-out, filter 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.winner-sidebar-row .winner-name-box {
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+/* Hover highlights for regular winners (Gold style) */
+.winner-sidebar-row:not(.sudden-death-row):hover {
+  transform: translateX(4px);
+}
+
+.winner-sidebar-row:not(.sudden-death-row):hover .winner-icon-bubble {
+  transform: scale(1.2);
+  box-shadow: 0 0 14px var(--color-neon-yellow) !important;
+}
+
+.winner-sidebar-row:not(.sudden-death-row):hover .winner-name-box {
+  border-color: var(--color-neon-yellow) !important;
+  box-shadow: 0 0 10px rgba(255, 220, 0, 0.4) !important;
+}
+
+/* Hover highlights for Sudden Death players (Muted to Neon Magenta style) */
 .winner-sidebar-row.sudden-death-row {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .winner-sidebar-row.sudden-death-row:hover {
   opacity: 0.95 !important;
-  transform: translateX(3px);
+  transform: translateX(4px);
+}
+
+.winner-sidebar-row.sudden-death-row:hover .winner-icon-bubble.sudden-death-icon {
+  filter: grayscale(0) !important;
+  border-color: var(--color-neon-magenta) !important;
+  box-shadow: 0 0 14px var(--color-neon-magenta) !important;
+  transform: scale(1.2);
+}
+
+.winner-sidebar-row.sudden-death-row:hover .winner-name-box.sudden-death-name-box {
+  border-color: var(--color-neon-magenta) !important;
+  box-shadow: 0 0 10px rgba(255, 0, 255, 0.3) !important;
 }

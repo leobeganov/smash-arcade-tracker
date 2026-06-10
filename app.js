@@ -760,11 +760,11 @@ document.addEventListener("DOMContentLoaded", () => {
               winnersHtml += `
                 <div class="winner-sidebar-row" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
                   <!-- Dot marker (Character head-icon bubble in gold) -->
-                  <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid var(--color-neon-yellow); box-shadow: 0 0 8px var(--color-neon-yellow); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+                  <div class="winner-icon-bubble" style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid var(--color-neon-yellow); box-shadow: 0 0 8px var(--color-neon-yellow); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
                     <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${p.character}" />
                   </div>
                   <!-- Name/Details in a panel-beveled gold border box -->
-                  <div class="panel-beveled" style="white-space: nowrap; background: var(--color-bg-dark); border: 1px solid var(--color-neon-yellow); padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px;">
+                  <div class="panel-beveled winner-name-box" style="white-space: nowrap; background: var(--color-bg-dark); border: 1px solid var(--color-neon-yellow); padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px;">
                     <span style="font-weight: bold; color: #fff; text-shadow: 0 0 2px rgba(255,255,255,0.5);">${p.playerName} 🏆</span>
                   </div>
                 </div>
@@ -773,11 +773,11 @@ document.addEventListener("DOMContentLoaded", () => {
               winnersHtml += `
                 <div class="winner-sidebar-row sudden-death-row" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; opacity: 0.65;">
                   <!-- Dot marker (Character head-icon bubble in grey) -->
-                  <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid #555; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; filter: grayscale(0.8);">
+                  <div class="winner-icon-bubble sudden-death-icon" style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid #555; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; filter: grayscale(0.8);">
                     <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${p.character}" />
                   </div>
                   <!-- Name/Details in a panel-beveled grey border box -->
-                  <div class="panel-beveled" style="white-space: nowrap; background: var(--color-bg-dark); border: 1px solid #444; padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); border-radius: 4px; display: flex; flex-direction: column; gap: 1px; box-shadow: 0 0 4px rgba(0,0,0,0.5);">
+                  <div class="panel-beveled winner-name-box sudden-death-name-box" style="white-space: nowrap; background: var(--color-bg-dark); border: 1px solid #444; padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); border-radius: 4px; display: flex; flex-direction: column; gap: 1px; box-shadow: 0 0 4px rgba(0,0,0,0.5);">
                     <span style="font-weight: bold; color: #aaa;">${p.playerName}</span>
                     <span style="font-size: 8px; color: #777; font-weight: bold; letter-spacing: 0.5px; line-height: 1;">SUDDEN DEATH</span>
                   </div>
@@ -801,23 +801,23 @@ document.addEventListener("DOMContentLoaded", () => {
             
             const offsetSize = 15 + staggerIndex * 30;
             const displayTime = p.outAt || "5:00";
-
-            markersHtml += `
-              <div class="timeline-marker" style="position: absolute; left: ${safePct}%; top: 50%; transform: translate(-50%, -50%); width: 24px; height: 24px; z-index: 10;">
-                <!-- Dot marker (Character head-icon bubble centered on timeline) -->
-                <div class="timeline-dot" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid ${markerColor}; box-shadow: 0 0 8px ${markerColor}; z-index: 11; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                  <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${p.character}" />
-                </div>
-                <!-- Connector line coming out of the bubble -->
-                <div class="timeline-connector" style="position: absolute; left: 11px; ${isAbove ? `bottom: 24px` : `top: 24px`}; width: 2px; height: ${offsetSize}px; background: ${markerColor}; opacity: 0.8; z-index: 9;"></div>
-                <!-- Player details box -->
-                <div class="timeline-player-info panel-beveled" style="position: absolute; left: 12px; ${isAbove ? `bottom: ${24 + offsetSize}px` : `top: ${24 + offsetSize}px`}; transform: translateX(-50%); text-align: center; white-space: nowrap; background: var(--color-bg-dark); border: 1px solid ${markerColor}; padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px; pointer-events: none; user-select: none; z-index: 10;">
-                  <span style="font-weight: bold; color: #fff; text-shadow: 0 0 2px rgba(255,255,255,0.5);">${p.playerName}</span>
-                  <span class="hover-time" style="color: ${textColor}; font-weight: bold; text-shadow: 0 0 4px ${textColor};">(${displayTime})</span>
-                </div>
-              </div>
-            `;
-          }
+ 
+             markersHtml += `
+               <div class="timeline-marker" style="position: absolute; left: ${safePct}%; top: 50%; transform: translate(-50%, -50%); width: 24px; height: 24px; z-index: 10;">
+                 <!-- Dot marker (Character head-icon bubble centered on timeline) -->
+                 <div class="timeline-dot" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid ${markerColor}; box-shadow: 0 0 8px ${markerColor}; z-index: 11; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                   <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${p.character}" />
+                 </div>
+                 <!-- Connector line coming out of the bubble -->
+                 <div class="timeline-connector" style="position: absolute; left: 11px; ${isAbove ? `bottom: 24px` : `top: 24px`}; width: 2px; height: ${offsetSize}px; background: ${markerColor}; opacity: 0.8; z-index: 9;"></div>
+                 <!-- Player details box -->
+                 <div class="timeline-player-info panel-beveled" style="position: absolute; left: 12px; ${isAbove ? `bottom: ${24 + offsetSize}px` : `top: ${24 + offsetSize}px`}; transform: translateX(-50%); text-align: center; white-space: nowrap; background: var(--color-bg-dark); border: 1px solid ${markerColor}; padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px; pointer-events: auto; user-select: none; z-index: 10;">
+                   <span style="font-weight: bold; color: #fff; text-shadow: 0 0 2px rgba(255,255,255,0.5);">${p.playerName}</span>
+                   <span class="hover-time" style="color: ${textColor}; font-weight: bold; text-shadow: 0 0 4px ${textColor};">(${displayTime})</span>
+                 </div>
+               </div>
+             `;
+           }
         });
       }
 
