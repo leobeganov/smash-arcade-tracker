@@ -314,6 +314,27 @@ const apiService = {
     });
     const rival = playersList.find(p => p.id === rivalId) || (rivalId ? { id: rivalId, name: rivalId.charAt(0).toUpperCase() + rivalId.slice(1) } : null);
 
+    // Find rival's most used fighter (their Signature Fighter)
+    let rivalMostUsedFighter = null;
+    if (rival) {
+      const rivalMatches = MATCHES.filter(m => m.winnerId === rival.id || m.loserId === rival.id);
+      const rivalFighterCounts = {};
+      rivalMatches.forEach(match => {
+        const isRivalWinner = match.winnerId === rival.id;
+        const fighterId = isRivalWinner ? match.winnerFighter : match.loserFighter;
+        rivalFighterCounts[fighterId] = (rivalFighterCounts[fighterId] || 0) + 1;
+      });
+      let rivalMostUsedFighterId = null;
+      let rivalMaxCount = 0;
+      Object.entries(rivalFighterCounts).forEach(([fighterId, count]) => {
+        if (count > rivalMaxCount) {
+          rivalMaxCount = count;
+          rivalMostUsedFighterId = fighterId;
+        }
+      });
+      rivalMostUsedFighter = FIGHTERS.find(f => f.id === rivalMostUsedFighterId);
+    }
+
     // Find most used fighter (our Signature Fighter)
     let mostUsedFighterId = null;
     let fighterCount = 0;
@@ -341,7 +362,16 @@ const apiService = {
       kdRatio: falls > 0 ? (KOs / falls).toFixed(2) : KOs.toFixed(2),
       avgDamageDealt: totalMatches > 0 ? Math.round(damageDealtSum / totalMatches) : 0,
       avgDamageTaken: totalMatches > 0 ? Math.round(damageTakenSum / totalMatches) : 0,
-      rival: rival ? { name: rival.name, id: rival.id, count: rivalCount } : null,
+      rival: rival ? { 
+        name: rival.name, 
+        id: rival.id, 
+        count: rivalCount,
+        mostUsedFighter: rivalMostUsedFighter ? {
+          name: rivalMostUsedFighter.name,
+          id: rivalMostUsedFighter.id,
+          img: rivalMostUsedFighter.img
+        } : null
+      } : null,
       mostUsedFighter: mostUsedFighter ? { name: mostUsedFighter.name, id: mostUsedFighter.id, img: mostUsedFighter.img, count: fighterCount } : null
     };
   },

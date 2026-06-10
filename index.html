@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Smashalytics - Super Smash Brothers Ultimate AI Screenshot Results Scanner & Retro Match Tracker">
   <title>SMASHALYTICS // ARCADE CABINET</title>
-  <link rel="stylesheet" href="index.css?v=2">
+  <link rel="stylesheet" href="index.css?v=9">
 </head>
 <body class="theme-storm">
 
@@ -105,14 +105,11 @@
     <main class="view-container" id="player-profile-view">
       <div class="profile-view-layout">
         
-        <!-- Sidebar profile box -->
         <div class="profile-sidebar">
           <div class="panel-beveled neon-magenta fighter-card-box">
             <img src="" alt="" class="fighter-card-img" id="player-profile-fighter-img">
             <h2 class="profile-title-name" id="player-profile-name">Bob</h2>
-            <div class="profile-tagline" id="player-profile-tagline">Combo King</div>
           </div>
-          <button class="btn-arcade cyan btn-back-home" style="width: 100%;">&lt; BACK SELECT</button>
         </div>
 
         <!-- Main stats panels -->
@@ -134,7 +131,7 @@
               <div class="stat-num text-glow-yellow" id="player-stat-winrate">-%</div>
             </div>
             <div class="stat-cell-retro">
-              <div class="stat-title">K/D Ratio</div>
+              <div class="stat-title">Knockout / Fall Ratio</div>
               <div class="stat-num text-glow-magenta" id="player-stat-kd">-</div>
             </div>
           </div>
@@ -154,7 +151,8 @@
             <div class="stat-cell-retro meta-card" id="player-nemesis-card" style="cursor: pointer;">
               <div class="stat-title">Arch Nemesis</div>
               <div class="meta-content-wrapper">
-                <div class="meta-details no-img">
+                <img src="" alt="" class="meta-avatar" id="player-nemesis-img">
+                <div class="meta-details">
                   <div class="meta-name text-glow-magenta" id="player-nemesis-name">-</div>
                   <div class="meta-sub" id="player-nemesis-count">- encounters</div>
                 </div>
@@ -173,14 +171,12 @@
     <main class="view-container" id="fighter-profile-view">
       <div class="fighter-view-layout">
         
-        <!-- Sidebar layout -->
         <div class="profile-sidebar">
           <div class="panel-beveled neon-cyan fighter-card-box">
             <img src="" alt="" class="fighter-card-img" id="fighter-profile-img">
             <h2 class="fighter-title-name text-glow-cyan" id="fighter-profile-name">Mario</h2>
             <p class="fighter-bio-text" id="fighter-profile-bio">Loading details...</p>
           </div>
-          <button class="btn-arcade magenta btn-back-home" style="width: 100%;">&lt; BACK SELECT</button>
         </div>
 
         <!-- Main stats columns -->
@@ -202,7 +198,7 @@
               <div class="stat-num text-glow-yellow" id="fighter-stat-winrate">-%</div>
             </div>
             <div class="stat-cell-retro">
-              <div class="stat-title">K/D Ratio</div>
+              <div class="stat-title">Knockout / Fall Ratio</div>
               <div class="stat-num text-glow-magenta" id="fighter-stat-kd">-</div>
             </div>
           </div>
@@ -265,7 +261,7 @@
         </div>
 
         <div class="back-button-footer">
-          <button class="btn-arcade cyan btn-back-home">&lt; HOME MARQUEE</button>
+          <button class="btn-arcade cyan btn-back-home">&lt; HOME</button>
         </div>
 
       </div>
@@ -554,13 +550,12 @@
     <div class="vs-stripe-curtain-top"></div>
     <div class="vs-stripe-curtain-bottom"></div>
   </div>
-
   <!-- Load mock database and SPA modules -->
-  <script src="mockData.js?v=2"></script>
-  <script src="database.js?v=2"></script>
-  <script src="apiService.js?v=2"></script>
-  <script src="gemini.js?v=2"></script>
-  <script src="charts.js?v=2"></script>
-  <script src="app.js?v=2"></script>
+  <script src="mockData.js?v=9"></script>
+  <script src="database.js?v=9"></script>
+  <script src="apiService.js?v=9"></script>
+  <script src="gemini.js?v=9"></script>
+  <script src="charts.js?v=9"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>

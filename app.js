@@ -164,7 +164,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Sidebar Portrait and Info
     document.getElementById("player-profile-fighter-img").src = stats.mostUsedFighter ? stats.mostUsedFighter.img : "assets/mario.png?v=5";
     document.getElementById("player-profile-name").textContent = stats.player.name;
-    document.getElementById("player-profile-tagline").textContent = stats.player.tagline;
 
     // Stat grids
     document.getElementById("player-stat-wins").textContent = stats.adjustedWins;
@@ -198,10 +197,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Render Arch Nemesis
     const nemesisCard = document.getElementById("player-nemesis-card");
+    const nemesisImg = document.getElementById("player-nemesis-img");
     const nemesisName = document.getElementById("player-nemesis-name");
     const nemesisCount = document.getElementById("player-nemesis-count");
 
     if (stats.rival) {
+      if (stats.rival.mostUsedFighter) {
+        nemesisImg.src = stats.rival.mostUsedFighter.img;
+        nemesisImg.style.display = "block";
+      } else {
+        nemesisImg.style.display = "none";
+      }
       nemesisName.textContent = stats.rival.name;
       nemesisCount.textContent = `${stats.rival.count} encounters`;
       nemesisCard.onclick = () => {
@@ -209,6 +215,7 @@ document.addEventListener("DOMContentLoaded", () => {
       };
       nemesisCard.style.cursor = "pointer";
     } else {
+      nemesisImg.style.display = "none";
       nemesisName.textContent = "None";
       nemesisCount.textContent = "0 encounters";
       nemesisCard.onclick = null;
@@ -293,9 +300,9 @@ document.addEventListener("DOMContentLoaded", () => {
       { key: "rank", label: "Rank" },
       { key: "name", label: isFighterMode ? "Fighter" : "Player" },
       { key: "wins", label: "Rating" },
-      { key: "KOs", label: "KOs" },
-      { key: "winRate", label: "Win %" },
-      { key: "kd", label: "K/D" },
+      { key: "KOs", label: "Knockouts" },
+      { key: "winRate", label: "Win Percentage" },
+      { key: "kd", label: "Knockout / Fall Ratio" },
       { key: "detailLabel", label: isFighterMode ? "Top Player" : "Signature" }
     ];
 
