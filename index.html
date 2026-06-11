@@ -442,23 +442,38 @@
 
           <!-- Numerical stats grid -->
           <div class="stats-grid-container">
-            <div class="stat-cell-retro">
-              <div class="stat-title" id="fighter-stat-wins-title">Rating</div>
+            <div class="stat-cell-retro" id="fighter-games-cell">
+              <div class="stat-title">Matches Played</div>
+              <div class="stat-num text-glow-cyan" id="fighter-stat-games">-</div>
+            </div>
+            <div class="stat-cell-retro" id="fighter-wins-cell">
+              <div class="stat-title">Wins</div>
               <div class="stat-num text-glow-yellow" id="fighter-stat-wins">-</div>
               <div class="stat-sub-label" id="fighter-stat-wins-raw">-</div>
             </div>
-            <div class="stat-cell-retro">
-              <div class="stat-title">Fighter Losses</div>
+            <div class="stat-cell-retro" id="fighter-losses-cell">
+              <div class="stat-title">Losses</div>
               <div class="stat-num text-glow-magenta" id="fighter-stat-losses">-</div>
             </div>
-            <div class="stat-cell-retro" id="fighter-winrate-cell" style="cursor: pointer;">
+            <div class="stat-cell-retro" id="fighter-winrate-cell">
               <div class="stat-title">Win Rate</div>
               <div class="stat-num text-glow-yellow" id="fighter-stat-winrate">-%</div>
-              <div style="font-size: 8px; color: var(--color-neon-yellow); font-family: var(--font-arcade); margin-top: 5px; opacity: 0.8; letter-spacing: 0.5px;">(SEE WON MATCHES)</div>
             </div>
-            <div class="stat-cell-retro">
+            <div class="stat-cell-retro" id="fighter-kd-cell">
               <div class="stat-title">Knockout / Fall Ratio</div>
               <div class="stat-num text-glow-magenta" id="fighter-stat-kd">-</div>
+            </div>
+            <div class="stat-cell-retro" id="fighter-kos-cell">
+              <div class="stat-title">Knockouts</div>
+              <div class="stat-num text-glow-cyan" id="fighter-stat-kos">-</div>
+            </div>
+            <div class="stat-cell-retro" id="fighter-falls-cell">
+              <div class="stat-title">Falls</div>
+              <div class="stat-num text-glow-magenta" id="fighter-stat-falls">-</div>
+            </div>
+            <div class="stat-cell-retro" id="fighter-sds-cell">
+              <div class="stat-title">Self-Destructs</div>
+              <div class="stat-num text-glow-yellow" id="fighter-stat-sds">-</div>
             </div>
           </div>
 

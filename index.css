@@ -933,8 +933,8 @@ body {
 
 /* Sidebar Stats Shifting and Adaptive Formatting */
 #fighter-profile-view .profile-sidebar .stats-grid-container {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 15px;
   width: 100%;
 }

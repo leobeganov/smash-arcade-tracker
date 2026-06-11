@@ -1161,11 +1161,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Stat grids
-    document.getElementById("fighter-stat-wins").textContent = stats.adjustedWins;
-    document.getElementById("fighter-stat-wins-raw").textContent = `${stats.wins} / ${stats.totalMatches} WINS`;
+    document.getElementById("fighter-stat-games").textContent = stats.totalMatches;
+    document.getElementById("fighter-stat-wins").textContent = stats.wins;
+    document.getElementById("fighter-stat-wins-raw").textContent = `RATING: ${stats.adjustedWins}`;
     document.getElementById("fighter-stat-losses").textContent = stats.losses;
     document.getElementById("fighter-stat-winrate").textContent = `${stats.winRate}%`;
     document.getElementById("fighter-stat-kd").textContent = stats.kdRatio;
+    document.getElementById("fighter-stat-kos").textContent = stats.KOs;
+    document.getElementById("fighter-stat-falls").textContent = stats.falls;
+    document.getElementById("fighter-stat-sds").textContent = stats.sds;
 
     // Render Nemesis Fighter
     const nemesisCard = document.getElementById("fighter-nemesis-card");
