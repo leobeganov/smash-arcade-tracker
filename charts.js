@@ -163,7 +163,7 @@ const Charts = {
    * Renders a Horizontal Grouped Stacked Bar Chart for Player Placements.
    * Compares gold/silver/bronze distribution across players.
    */
-  renderPlayerPlacements(containerId, playersData) {
+  renderPlayerPlacements(containerId, playersData, limit = 5) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
@@ -172,10 +172,10 @@ const Charts = {
       return;
     }
 
-    // Sort by win rate (descending) and games (descending), limit to top 5 players
+    // Sort by win rate (descending) and games (descending), limit to configured player count
     const topPlayers = [...playersData]
       .sort((a, b) => b.winRate - a.winRate || b.games - a.games)
-      .slice(0, 5);
+      .slice(0, limit);
 
     let html = '<div class="bar-chart-container">';
 

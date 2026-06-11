@@ -833,22 +833,24 @@
         </div>
 
         <div class="telemetry-kpis-grid">
+          <!-- Top Left -->
           <div class="panel-beveled neon-cyan tel-kpi-card">
             <div class="kpi-title">TOTAL MATCHES</div>
             <div class="kpi-value text-glow-cyan" id="tel-kpi-matches">0</div>
           </div>
+          <!-- Top Right -->
+          <div class="panel-beveled neon-magenta tel-kpi-card">
+            <div class="kpi-title">DOMINANT FIGHTER</div>
+            <div class="kpi-value text-glow-magenta" id="tel-kpi-character">N/A</div>
+          </div>
+          <!-- Bottom Left -->
           <div class="panel-beveled neon-yellow tel-kpi-card" style="padding: 15px 20px; min-height: 140px; display: flex; flex-direction: column; justify-content: space-between;">
             <div class="kpi-title" style="margin-bottom: 5px;">WIN RATE PERFORMANCE</div>
             <div class="chart-content" id="win-rate-gauges-container" style="display: flex; justify-content: space-around; width: 100%; min-height: 95px;">
               <!-- Injected SVGs of Glowing Win Rate Gauges -->
             </div>
           </div>
-          <div class="panel-beveled neon-magenta tel-kpi-card">
-            <div class="kpi-title">DOMINANT FIGHTER</div>
-            <div class="kpi-value text-glow-magenta" id="tel-kpi-character">N/A</div>
-          </div>
-
-          <!-- Dominant Team Panel -->
+          <!-- Bottom Right -->
           <div class="panel-beveled neon-cyan tel-kpi-card" id="dominant-team-box" style="padding: 15px 15px; min-height: 140px; display: flex; flex-direction: column; justify-content: space-between; align-items: stretch; text-align: left;">
             <div>
               <div class="kpi-title text-glow-cyan" style="margin-bottom: 4px; font-size: 9.5px; text-align: center; letter-spacing: 0.5px; font-family: var(--font-arcade);">MOST VICTORIOUS TEAM COMBINATION</div>
@@ -868,6 +870,11 @@
               <div id="outcomes-stacked-bar-container" style="width:100%; height:100%; min-height:220px;">
                 <!-- Stacked Bar Chart SVG -->
               </div>
+            </div>
+            <div class="show-more-placements-wrapper" style="display: flex; justify-content: center; width: 100%; margin-top: 20px;">
+              <button class="btn-arcade yellow" id="btn-show-more-placements" style="font-size: 10px; padding: 10px 20px; font-family: var(--font-arcade); font-weight: bold; display: none;">
+                SHOW MORE
+              </button>
             </div>
           </div>
 
