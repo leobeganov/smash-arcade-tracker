@@ -82,6 +82,7 @@ body {
 /* --- Scrollbar Customization --- */
 ::-webkit-scrollbar {
   width: 10px;
+  height: 10px;
 }
 ::-webkit-scrollbar-track {
   background: var(--bg-obsidian);
@@ -104,6 +105,7 @@ body {
   padding: 20px;
   box-shadow: 0 10px 0 #000;
   position: relative;
+  box-sizing: border-box;
 }
 
 .panel-beveled.neon-cyan {
@@ -333,9 +335,9 @@ body {
   justify-content: flex-start; /* Stacks elements sequentially from the top */
   flex-grow: 1;            /* Span full remaining height */
   width: 100%;
-  gap: 55px;               /* Generous spacing to support vertical rhythm */
+  gap: 24px;               /* Compact spacing to maximize above-the-fold content */
   padding-top: 10px;       /* Sleek breathing room at the top */
-  padding-bottom: 80px;    /* Comfortably push bottom of list above the viewport border when scrolled */
+  padding-bottom: 60px;    /* Comfortably push bottom of list above the viewport border when scrolled */
 }
 
 .podium-champions-title-container {
@@ -361,7 +363,7 @@ body {
   align-items: center;
   width: 100%;
   max-width: 1125px;
-  padding: 15px 10px;
+  padding: 6px 10px;
   margin-left: -10px;
   border-bottom: none;
   position: sticky;
@@ -435,8 +437,9 @@ body {
   align-items: flex-end;
   width: 100%;
   max-width: 1125px; /* Scaled from 900px */
-  height: 625px;     /* Scaled from 500px */
+  height: 480px;     /* Redesigned to fit completely within desktop viewports */
   position: relative;
+  margin-top: 40px;  /* Ensure the gold crown on first place has plenty of headroom and does not get cropped under the sticky header */
 }
 
 .podium-column {
@@ -454,7 +457,7 @@ body {
   display: flex;
   justify-content: center;
   position: relative;
-  height: 350px;     /* Scaled from 280px */
+  height: 250px;     /* Scaled down to prevent overflow stretching */
   margin-bottom: -19px; /* Sit flat on top of the 3D elliptical cap top plate */
   z-index: 3;
 }
@@ -787,8 +790,40 @@ body {
 
 #player-profile-view .stats-grid-container {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 20px;
+}
+
+#player-profile-view #player-games-cell {
+  grid-column: span 2;
+}
+
+#player-profile-view #player-wins-cell {
+  grid-column: span 2;
+}
+
+#player-profile-view #player-losses-cell {
+  grid-column: span 2;
+}
+
+#player-profile-view #player-winrate-cell {
+  grid-column: span 3;
+}
+
+#player-profile-view #player-kd-cell {
+  grid-column: span 3;
+}
+
+#player-profile-view #player-kos-cell {
+  grid-column: span 2;
+}
+
+#player-profile-view #player-falls-cell {
+  grid-column: span 2;
+}
+
+#player-profile-view #player-sds-cell {
+  grid-column: span 2;
 }
 
 #player-profile-view .stat-cell-retro {
@@ -824,6 +859,22 @@ body {
   font-family: var(--font-arcade);
   font-size: var(--font-size-xxl);
   line-height: 1;
+}
+
+#player-profile-view .stat-cell-retro .stat-action-link {
+  font-family: var(--font-arcade);
+  font-size: 8px;
+  margin-top: 10px;
+  opacity: 0.7;
+  letter-spacing: 0.5px;
+  transition: opacity 0.2s ease, transform 0.2s ease, text-shadow 0.2s ease;
+  text-decoration: none;
+}
+
+#player-profile-view .stat-cell-retro:hover .stat-action-link {
+  opacity: 1;
+  text-decoration: underline;
+  transform: scale(1.05);
 }
 
 
@@ -881,14 +932,17 @@ body {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Sidebar Stats Shifting and Adaptive Formatting */
 #fighter-profile-view .profile-sidebar .stats-grid-container {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 15px;
   width: 100%;
+  box-sizing: border-box;
 }
 
 #fighter-profile-view .profile-sidebar .profile-meta-row {
@@ -896,12 +950,13 @@ body {
   flex-direction: column;
   gap: 15px;
   width: 100%;
+  box-sizing: border-box;
 }
 
 #fighter-profile-view .profile-sidebar .stat-cell-retro {
   background: rgba(0, 10, 20, 0.45);
   border: 1px solid var(--color-neon-cyan);
-  padding: 18px 20px;
+  padding: 15px 12px !important; /* Slightly more compact padding to prevent column stretching */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -911,8 +966,24 @@ body {
   box-sizing: border-box;
 }
 
+#fighter-profile-view .profile-sidebar .stat-cell-retro .stat-title {
+  font-size: 11px !important;
+  margin-bottom: 8px !important;
+  letter-spacing: 0.5px !important;
+}
+
+#fighter-profile-view .profile-sidebar .stat-cell-retro .stat-num {
+  font-size: 22px !important;
+}
+
+#fighter-profile-view .profile-sidebar .stat-cell-retro .stat-sub-label {
+  font-size: 11px !important;
+}
+
 #fighter-profile-view .profile-sidebar .meta-card {
   padding: 15px 20px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 /* Nintendo Switch Controller Button Badges */
@@ -1179,7 +1250,9 @@ body {
 #fighter-profile-view .stats-grid-container {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  gap: 15px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 #fighter-profile-view .stat-cell-retro {
@@ -1361,6 +1434,25 @@ body {
 }
 
 .retro-dropdown-select option {
+  background-color: var(--color-bg-dark);
+  color: #fff;
+  font-family: var(--font-stats);
+  font-size: var(--font-size-xs);
+}
+
+/* Magenta version of retro dropdown select */
+.retro-dropdown-select.magenta-theme {
+  border-color: var(--color-neon-magenta);
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23ff007f' height='10' viewBox='0 0 24 24' width='10' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+  box-shadow: 0 0 5px rgba(255, 0, 127, 0.15);
+}
+
+.retro-dropdown-select.magenta-theme:hover, .retro-dropdown-select.magenta-theme:focus {
+  border-color: var(--color-neon-magenta);
+  box-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
+}
+
+.retro-dropdown-select.magenta-theme option {
   background-color: var(--color-bg-dark);
   color: #fff;
   font-family: var(--font-stats);
@@ -1902,6 +1994,25 @@ body.theme-retro .btn-arcade {
   transform: translateX(3px);
 }
 
+#nav-tab-fighters {
+  border: 3px outset rgba(255, 230, 0, 0.4);
+  color: #a3a6b5;
+  box-shadow: inset 0 0 5px rgba(255, 230, 0, 0.1);
+}
+
+#nav-tab-fighters .btn-nav-decor {
+  color: var(--color-neon-yellow);
+}
+
+#nav-tab-fighters:hover,
+#nav-tab-fighters.active {
+  border: 3px outset var(--color-neon-yellow);
+  background-color: rgba(255, 230, 0, 0.1);
+  color: #fff;
+  box-shadow: 0 0 15px rgba(255, 230, 0, 0.4), inset 0 0 10px rgba(255, 230, 0, 0.2);
+  text-shadow: 0 0 8px rgba(255, 230, 0, 0.8);
+}
+
 #nav-tab-leaderboard {
   border: 3px outset rgba(0, 240, 255, 0.4);
   color: #a3a6b5;
@@ -1921,18 +2032,18 @@ body.theme-retro .btn-arcade {
   text-shadow: 0 0 8px rgba(0, 240, 255, 0.8);
 }
 
-#nav-tab-telemetry {
+#nav-tab-insights {
   border: 3px outset rgba(255, 0, 127, 0.4);
   color: #a3a6b5;
   box-shadow: inset 0 0 5px rgba(255, 0, 127, 0.1);
 }
 
-#nav-tab-telemetry .btn-nav-decor {
+#nav-tab-insights .btn-nav-decor {
   color: var(--color-neon-magenta);
 }
 
-#nav-tab-telemetry:hover,
-#nav-tab-telemetry.active {
+#nav-tab-insights:hover,
+#nav-tab-insights.active {
   border: 3px outset var(--color-neon-magenta);
   background-color: rgba(255, 0, 127, 0.1);
   color: #fff;
@@ -2344,8 +2455,9 @@ body.theme-retro .btn-arcade {
 }
 
 .match-card-players-grid.large-lobby {
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
 }
+
 
 .history-player-row {
   display: flex;
@@ -2418,7 +2530,7 @@ body.theme-retro .btn-arcade {
 
 .history-p-stats-badges {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 6px;
   width: 100%;
 }
@@ -2516,7 +2628,7 @@ body.theme-retro .btn-arcade {
 
 .telemetry-kpis-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
   width: 100%;
 }
@@ -2979,6 +3091,112 @@ body.theme-retro .btn-arcade {
   }
 }
 
+/* ==========================================================
+   INSIGHTS VIEW STYLES & INTERACTIVE GLOW EFFECTS
+   ========================================================== */
+
+/* --- Insights Page - Vertical Bar Hover & Tooltip Animations --- */
+.v-bar-col .fighter-hover-tooltip {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.25s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.25s cubic-bezier(0.165, 0.84, 0.44, 1), visibility 0.25s ease !important;
+}
+
+.v-bar-col:hover .fighter-hover-tooltip {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateX(-50%) translateY(0) !important;
+}
+
+.v-bar-col:hover .v-bar-icon-bubble {
+  transform: scale(1.15) !important;
+  box-shadow: 0 0 15px var(--color-neon-magenta) !important;
+  border-color: #fff !important;
+}
+
+.v-bar-col:hover .v-bar-track {
+  filter: brightness(1.2);
+  box-shadow: 0 0 15px var(--color-neon-magenta) !important;
+}
+
+.v-bar-char-name {
+  font-size: 8px;
+  text-transform: uppercase;
+  margin-top: 5px;
+  color: #8a8d9a;
+  max-width: 44px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  display: block;
+  flex-shrink: 0;
+  transition: color 0.25s ease, text-shadow 0.25s ease;
+}
+
+.v-bar-col:hover .v-bar-char-name {
+  color: #fff !important;
+  text-shadow: 0 0 4px var(--color-neon-magenta);
+}
+
+/* --- Insights Page - Timeline Marker Hover & Premium Animation --- */
+.timeline-marker {
+  transition: transform 0.25s cubic-bezier(0.165, 0.84, 0.44, 1), z-index 0.2s ease;
+}
+
+.timeline-marker:hover {
+  transform: translate(-50%, -50%) scale(1.25) !important;
+  z-index: 999 !important;
+}
+
+.timeline-marker:hover .timeline-dot {
+  box-shadow: 0 0 18px currentColor, inset 0 0 8px rgba(255, 255, 255, 0.2) !important;
+  border-color: #fff !important;
+}
+
+.timeline-marker:hover .timeline-connector {
+  opacity: 1 !important;
+  width: 3px !important;
+}
+
+.timeline-marker:hover .timeline-player-info {
+  filter: brightness(1.15);
+  box-shadow: 0 0 12px currentColor !important;
+  transform: translateX(-50%) scale(1.05) !important;
+}
+
+/* --- Insights Page - Timeframe Filter Toolbar Styles --- */
+#insights-timeframe-filters .toggle-btn {
+  font-family: var(--font-arcade);
+  letter-spacing: 0.5px;
+  font-size: 10px;
+  padding: 0 12px;
+  height: 30px;
+  transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+#insights-timeframe-filters .toggle-btn.active {
+  color: var(--color-neon-yellow);
+  background-color: rgba(255, 230, 0, 0.12);
+  text-shadow: 0 0 5px rgba(255, 230, 0, 0.5);
+  font-weight: bold;
+}
+
+/* --- Insights Page - Player Combat Outcomes Progress Bar Animation --- */
+.player-combat-row {
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.player-combat-row:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+  transform: translateX(4px);
+}
+
+.combat-progress-fill {
+  transition: width 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
 /* --- Spec Config (Settings) Tab --- */
 .cabinet-spec-panel {
   display: flex;
@@ -3066,6 +3284,16 @@ body.theme-retro .btn-arcade {
   cursor: pointer;
   user-select: none;
   transition: all 0.15s ease;
+}
+
+/* Home Page specific filter layout adjustments */
+#multi-select-style-container .retro-multi-select-btn,
+#multi-select-players-container .retro-multi-select-btn {
+  min-width: 160px; /* Reduced from 220px to make them shorter */
+}
+
+#podium-timeframe-filters .toggle-btn {
+  padding: 0 24px; /* Increased from 16px to make the date picker longer */
 }
 
 .dropdown-caret {
@@ -3288,7 +3516,7 @@ body.theme-retro .btn-arcade {
   display: flex !important;
   gap: 30px;
   align-items: stretch;
-  padding: 40px 15px 30px 15px;
+  padding: 20px 15px;
   margin-top: 20px;
   border-top: 1px solid var(--color-border-dark);
   overflow: visible;
@@ -3300,6 +3528,7 @@ body.theme-retro .btn-arcade {
   display: flex;
   align-items: center;
   position: relative;
+  padding: 0 50px; /* Resizes track from edges so markers and labels always stay inside the main box */
 }
 
 .timeline-track-container {
@@ -3587,5 +3816,1186 @@ body.theme-retro .btn-arcade {
 .theme-swatch span {
   font-family: var(--font-arcade);
   font-size: var(--font-size-xs);
+}
+
+
+/* ========================================== */
+/* FIGHTERS LIBRARY STYLE SUITE */
+/* ========================================== */
+.fighters-view-layout {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+}
+
+.fighters-library-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 25px;
+  margin-top: 10px;
+}
+
+.fighter-library-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 380px;
+  background: rgba(12, 13, 18, 0.7);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.fighter-library-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  border-color: var(--color-neon-cyan);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.35);
+}
+
+/* Watermark Backdrop behind the portrait */
+.card-series-backdrop {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 260px;
+  height: 260px;
+  opacity: 0.08;
+  pointer-events: none;
+  filter: invert(1);
+  z-index: 1;
+  transition: opacity 0.3s ease;
+}
+
+.fighter-library-card:hover .card-series-backdrop {
+  opacity: 0.16;
+}
+
+/* Portrait Image */
+.card-portrait-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(0, 240, 255, 0.03) 0%, rgba(0, 0, 0, 0) 100%);
+  z-index: 2;
+}
+
+.card-portrait-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: auto;
+  transition: transform 0.4s ease;
+}
+
+.fighter-library-card:hover .card-portrait-img {
+  transform: scale(1.05);
+}
+
+/* Variant Switcher Panel */
+.card-variant-selector {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(0deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 15px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  z-index: 10;
+}
+
+.fighter-library-card:hover .card-variant-selector,
+.fighter-library-card:focus-within .card-variant-selector {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card-variant-arrow-btn {
+  background: rgba(12, 13, 18, 0.9);
+  border: 1px solid var(--color-neon-yellow);
+  color: var(--color-neon-yellow);
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  box-shadow: 0 0 6px rgba(255, 230, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.card-variant-arrow-btn:hover {
+  background: var(--color-neon-yellow);
+  color: #000;
+  box-shadow: 0 0 12px var(--color-neon-yellow);
+}
+
+.card-variant-name-badge {
+  font-family: var(--font-stats);
+  font-size: 10px;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 0 4px rgba(255,255,255,0.5);
+  background: rgba(12, 13, 18, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 3px 8px;
+  border-radius: 4px;
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Info Area */
+.card-info-footer {
+  position: relative;
+  background: #0d0f14;
+  border-top: 1px solid rgba(0, 240, 255, 0.15);
+  padding: 14px 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 5;
+}
+
+.card-fighter-name {
+  font-family: var(--font-arcade);
+  font-size: 14px;
+  margin: 0;
+  letter-spacing: 1.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #fff;
+}
+
+.card-series-badge {
+  align-self: flex-start;
+  font-family: var(--font-stats);
+  font-size: 8px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--color-neon-yellow);
+  border: 1px solid rgba(255, 230, 0, 0.3);
+  background: rgba(255, 230, 0, 0.04);
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-shadow: 0 0 4px rgba(255, 230, 0, 0.2);
+}
+
+#fighters-search-box {
+  padding-left: 35px !important;
+}
+
+/* Custom Retro Modal Overlay */
+.retro-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(6, 4, 12, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000; /* On top of everything */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.retro-modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.retro-modal-content {
+  width: 90%;
+  max-width: 500px;
+  background-color: var(--color-bg-dark) !important;
+  border-radius: 4px;
+  box-shadow: 0 0 30px rgba(255, 230, 0, 0.4), 0 15px 0 #000 !important;
+  transform: scale(0.9);
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.retro-modal-overlay.active .retro-modal-content {
+  transform: scale(1);
+}
+
+/* Yellow Retro Arcade Button */
+.btn-arcade.yellow {
+  border-color: var(--color-neon-yellow);
+  box-shadow: 0 0 10px rgba(255, 230, 0, 0.4);
+}
+.btn-arcade.yellow:hover {
+  background-color: var(--color-neon-yellow);
+  box-shadow: 0 0 15px rgba(255, 230, 0, 0.8);
+  color: #000;
+}
+
+
+/* ==========================================================
+   MOBILE & TABLET RESPONSIVE SUITE (UP TO 768px)
+   ========================================================== */
+@media (max-width: 768px) {
+  /* 1. Core Container Adjustments */
+  #app-container {
+    padding: 12px 16px;
+  }
+
+  /* 2. Main Header & Navigation Stacking */
+  .main-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .logo-container {
+    justify-content: center;
+    flex: none;
+  }
+
+  .centered-search {
+    max-width: 100%;
+    flex-grow: 1;
+  }
+
+  .header-nav-buttons {
+    justify-content: center;
+    flex: none;
+    width: 100%;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .btn-nav {
+    height: 38px;
+    padding: 0 12px;
+    font-size: 11px;
+    justify-content: center;
+  }
+
+  .btn-nav-decor {
+    display: none; /* Hide the arrow decor on mobile to keep it super clean */
+  }
+
+  /* 3. Welcome / New Player Accordion */
+  .home-welcome-panel {
+    margin-bottom: -5px !important;
+  }
+  
+  #welcome-panel-toggle {
+    padding: 12px 18px !important;
+  }
+
+  #welcome-panel-content {
+    padding: 0 18px !important;
+  }
+
+  /* 4. Home Filters and Dropdowns Row */
+  .podium-header-row {
+    padding: 10px;
+    margin-left: 0;
+    top: 0;
+  }
+
+  .podium-filters-group {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .retro-multi-select-container,
+  .podium-filter-wrapper,
+  .retro-multi-select-btn {
+    width: 100%;
+  }
+
+  .retro-multi-select-btn {
+    min-width: 100%;
+  }
+
+  .toggle-switch-beveled {
+    width: 100%;
+  }
+
+  .toggle-switch-beveled .toggle-btn {
+    flex: 1;
+    padding: 0 8px;
+    font-size: 10px;
+  }
+
+  /* 5. Olympic 3D Podium proportional scaling */
+  .podium-stage {
+    height: 400px;
+    margin-top: 30px;
+    margin-bottom: 10px;
+    gap: 10px;
+  }
+
+  .podium-column {
+    width: 32%;
+  }
+
+  .podium-fighter-container {
+    height: 220px;
+    margin-bottom: -10px;
+  }
+
+  .podium-fighter-container::after {
+    width: 100px;
+    height: 12px;
+  }
+
+  .podium-column.tier-1 .podium-fighter-container::before {
+    top: -28px;
+    font-size: var(--font-size-xl);
+  }
+
+  .tier-1 .podium-block {
+    height: 140px;
+  }
+
+  .tier-2 .podium-block {
+    height: 110px;
+  }
+
+  .tier-3 .podium-block {
+    height: 85px;
+  }
+
+  .podium-num {
+    font-size: var(--font-size-xl);
+    transform: translateY(6px);
+  }
+
+  .podium-floating-info {
+    margin-top: 10px;
+  }
+
+  .podium-player-name {
+    font-size: 10px;
+    letter-spacing: 0.5px;
+  }
+
+  .podium-combo-stat {
+    font-size: var(--font-size-xs);
+  }
+
+  /* 6. Profile layouts (Players & Fighters sidebars) */
+  #player-profile-view .profile-view-layout,
+  #fighter-profile-view .fighter-view-layout {
+    grid-template-columns: 1fr;
+    gap: 25px;
+    padding: 10px 0;
+  }
+
+  #fighter-profile-view .profile-sidebar {
+    gap: 15px;
+  }
+
+  /* 7. Moves Library Table transformation into custom cards */
+  .moves-table-retro,
+  .moves-table-retro thead,
+  .moves-table-retro tbody,
+  .moves-table-retro tr,
+  .moves-table-retro th,
+  .moves-table-retro td {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .moves-table-retro thead {
+    display: none; /* Hide standard headers */
+  }
+
+  .moves-table-retro tr.category-header-row td {
+    border-left: 4px solid var(--color-neon-cyan);
+    background: rgba(0, 240, 255, 0.12);
+    font-size: 11px;
+    padding: 10px 12px;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    text-shadow: 0 0 5px rgba(255, 230, 0, 0.4);
+  }
+
+  .moves-table-retro tr.move-row {
+    border: 1px solid rgba(0, 240, 255, 0.15);
+    background: rgba(13, 15, 20, 0.65);
+    margin-bottom: 15px;
+    border-radius: 6px;
+    padding: 8px 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  }
+
+  .moves-table-retro tr.move-row td {
+    border-bottom: none;
+    padding: 8px 0;
+  }
+
+  .moves-table-retro tr.move-row td:not(:last-child) {
+    border-bottom: 1px dashed rgba(0, 240, 255, 0.1);
+  }
+
+  .moves-table-retro tr.move-row td::before {
+    content: attr(data-label);
+    display: block;
+    font-family: var(--font-arcade);
+    font-size: 9px;
+    color: var(--color-neon-cyan);
+    margin-bottom: 5px;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 3px rgba(0, 240, 255, 0.3);
+  }
+
+  /* 8. Profile Grids Stacking */
+  #player-profile-view .profile-timeframe-row {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 12px !important;
+    margin-bottom: 20px !important;
+  }
+
+  #player-profile-view .profile-timeframe-row .timeframe-filter-wrapper,
+  #player-profile-view .profile-timeframe-row .matchtype-filter-wrapper,
+  #player-profile-view .profile-timeframe-row .fighter-filter-wrapper {
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  #player-profile-view .profile-timeframe-row .fighter-filter-wrapper select {
+    width: 100% !important;
+  }
+
+  #player-profile-view .profile-timeframe-row .mode-toggle-label {
+    text-align: center;
+  }
+
+  #player-profile-view .stats-grid-container {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+
+  #player-profile-view .stats-grid-container > div {
+    grid-column: span 1 !important;
+  }
+
+  #player-profile-view .stat-cell-retro {
+    padding: 15px 10px;
+  }
+
+  #player-profile-view .stat-cell-retro .stat-title {
+    font-size: 9px;
+    margin-bottom: 6px;
+  }
+
+  #player-profile-view .stat-cell-retro .stat-num {
+    font-size: var(--font-size-md);
+  }
+
+  .profile-meta-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  #fighter-profile-view .profile-sidebar .meta-card {
+    grid-column: span 1 !important;
+  }
+
+  /* 9. Fighters Library view search controls & grids */
+  .fighters-controls-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px !important;
+    padding: 15px !important;
+  }
+
+  .fighters-control-item {
+    max-width: 100% !important;
+  }
+
+  /* 10. Floating settings icon adjustments */
+  .floating-settings-container {
+    bottom: 15px;
+    right: 15px;
+    z-index: 1000;
+  }
+
+  .btn-settings-cog {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* 11. Custom modal overlays */
+  .retro-modal-content {
+    width: 95%;
+    padding: 15px !important;
+  }
+
+  /* 12. Leaderboard Container and Form Actions */
+  .leaderboard-control-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+    padding: 15px 0;
+  }
+
+  .leaderboard-table-container {
+    padding: 10px;
+    border-width: 4px;
+  }
+
+  .leaderboard-table th, 
+  .leaderboard-table td {
+    padding: 10px 8px;
+    font-size: 11px;
+  }
+
+  .form-actions-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .form-actions-row .btn-arcade {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+  }
+
+  /* 13. Settings Layout and Grid Overrides */
+  .form-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* 14. Match Insights Page Mobile Compatibility */
+  .insights-header-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 15px !important;
+    text-align: center;
+  }
+
+  .insights-header-row .insights-title-col {
+    text-align: center;
+  }
+
+  .insights-header-row > div:last-child {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    gap: 12px !important;
+  }
+
+  .matchtype-filter-wrapper {
+    width: 100% !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+
+  #insights-matchtype-filters,
+  #insights-timeframe-filters {
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+
+  #insights-matchtype-filters .toggle-btn,
+  #insights-timeframe-filters .toggle-btn {
+    flex: 1 !important;
+    font-size: 9.5px !important;
+    padding: 0 4px !important;
+  }
+
+  .telemetry-view-layout {
+    gap: 25px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .telemetry-grid {
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .tel-chart-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .chart-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .tel-kpi-card {
+    height: auto !important;
+    min-height: auto !important;
+    padding: 20px 15px !important;
+  }
+
+  .bar-chart-row {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    align-items: stretch !important;
+    padding: 12px 14px !important;
+  }
+
+  .bar-row-label {
+    text-align: left !important;
+    font-size: 11px !important;
+  }
+
+  #outcomes-stacked-bar-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box !important;
+  }
+
+  #outcomes-stacked-bar-container .bar-chart-container {
+    min-width: 480px !important;
+  }
+
+  #most-played-fighters-container,
+  #most-popular-fighters-container {
+    justify-content: flex-start !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    gap: 12px !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    -webkit-overflow-scrolling: touch;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Explicitly style horizontal scrollbars on mobile so they are visible and match the theme */
+  #outcomes-stacked-bar-container::-webkit-scrollbar,
+  #most-played-fighters-container::-webkit-scrollbar,
+  #most-popular-fighters-container::-webkit-scrollbar,
+  .timeline-section-wrapper::-webkit-scrollbar {
+    height: 6px !important;
+    display: block !important;
+  }
+
+  #outcomes-stacked-bar-container::-webkit-scrollbar-track,
+  #most-played-fighters-container::-webkit-scrollbar-track,
+  #most-popular-fighters-container::-webkit-scrollbar-track,
+  .timeline-section-wrapper::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border-radius: 3px !important;
+  }
+
+  #outcomes-stacked-bar-container::-webkit-scrollbar-thumb,
+  #most-played-fighters-container::-webkit-scrollbar-thumb,
+  #most-popular-fighters-container::-webkit-scrollbar-thumb,
+  .timeline-section-wrapper::-webkit-scrollbar-thumb {
+    background: var(--color-neon-magenta) !important;
+    border-radius: 3px !important;
+    border: none !important;
+    box-shadow: 0 0 5px var(--color-neon-magenta) !important;
+  }
+
+  #outcomes-stacked-bar-container::-webkit-scrollbar-thumb:hover,
+  #most-played-fighters-container::-webkit-scrollbar-thumb:hover,
+  #most-popular-fighters-container::-webkit-scrollbar-thumb:hover,
+  .timeline-section-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #ff3399 !important;
+  }
+
+  .v-bar-col {
+    width: 40px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .v-bar-track {
+    width: 16px !important;
+  }
+
+  .v-bar-icon-bubble {
+    width: 26px !important;
+    height: 26px !important;
+    margin-top: 6px !important;
+  }
+
+  .v-bar-char-name {
+    font-size: 8px !important;
+    max-width: 40px !important;
+  }
+
+  .v-bar-value {
+    font-size: 10px !important;
+    margin-bottom: 4px !important;
+  }
+
+  /* Compacting Win Rate Performance Gauges for standard mobile/tablet screens */
+  .gauges-grid {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 10px !important;
+    justify-content: space-around !important;
+  }
+
+  .gauge-card {
+    min-width: 0 !important;
+    flex: 1 1 0 !important;
+    padding: 8px 4px !important;
+    gap: 8px !important;
+  }
+
+  .gauge-svg-wrapper {
+    width: 100% !important;
+    max-width: 85px !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1 !important;
+  }
+
+  .gauge-text {
+    font-size: 9px !important;
+  }
+
+  .gauge-number {
+    font-size: 12px !important;
+  }
+
+  .gauge-name {
+    font-size: 10px !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .gauge-gp {
+    font-size: 8px !important;
+    white-space: nowrap !important;
+  }
+
+  .timeline-section-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding-bottom: 25px !important;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box !important;
+  }
+
+  .average-timeline-card {
+    min-width: 650px !important;
+    margin-right: 20px !important;
+  }
+
+  /* Prevent overlapping labels on daily activity graph */
+  .hour-label:nth-of-type(even) {
+    display: none !important;
+  }
+
+  /* Disable hover tooltips on mobile/touch viewports to prevent overflow clipping */
+  .fighter-hover-tooltip {
+    display: none !important;
+  }
+
+  /* Stack and stretch average timeline controls uniformly */
+  .timeline-filter-controls > div {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  #btn-clear-timeline-filters {
+    width: 100% !important;
+  }
+}
+
+/* ==========================================================
+   SMALL PHONE RESPONSIVE SUITE (UP TO 480px)
+   ========================================================== */
+@media (max-width: 480px) {
+  /* 1. Olympic 3D Podium proportional scaling on small screens */
+  .podium-stage {
+    height: 300px;
+    margin-top: 25px;
+  }
+
+  .podium-fighter-container {
+    height: 140px;
+    margin-bottom: -5px;
+  }
+
+  .podium-fighter-container::after {
+    width: 70px;
+    height: 8px;
+  }
+
+  .podium-column.tier-1 .podium-fighter-container::before {
+    top: -24px;
+    font-size: var(--font-size-md);
+  }
+
+  .tier-1 .podium-block {
+    height: 100px;
+  }
+
+  .tier-2 .podium-block {
+    height: 80px;
+  }
+
+  .tier-3 .podium-block {
+    height: 60px;
+  }
+
+  .podium-num {
+    font-size: var(--font-size-sm);
+    transform: translateY(4px);
+  }
+
+  .podium-player-name {
+    font-size: 8px;
+    letter-spacing: 0;
+  }
+
+  .podium-combo-stat {
+    font-size: 9px;
+  }
+
+  /* 2. Fighters Grid Selector 2-Columns Layout */
+  .fighters-library-grid {
+    grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .fighter-library-card {
+    height: 240px !important;
+  }
+
+  .card-portrait-wrapper {
+    background: linear-gradient(180deg, rgba(0, 240, 255, 0.05) 0%, rgba(0,0,0,0) 100%);
+  }
+
+  .card-info-footer {
+    padding: 8px 10px !important;
+  }
+
+  .card-fighter-name {
+    font-size: 10px !important;
+    letter-spacing: 0.5px !important;
+  }
+
+  .card-series-badge {
+    font-size: 7px !important;
+    padding: 1px 4px !important;
+  }
+
+  /* 3. Match History Items compacting */
+  .match-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .match-card-meta {
+    font-size: 10px;
+  }
+
+  .match-card-players-grid {
+    grid-template-columns: 1fr !important; /* Stack players as full-width rows under 480px */
+  }
+
+  .history-player-row {
+    padding: 8px 10px;
+  }
+
+  /* 4. Timeline Drawer overlay resizing */
+  .timeline-label {
+    font-size: 7px !important;
+    top: -18px !important;
+  }
+
+  .timeline-player-info {
+    font-size: 8px !important;
+    padding: 2px 4px !important;
+  }
+
+  /* 5. Telemetry chart stack adjustments */
+  .gauges-grid {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 4px !important;
+    justify-content: space-around !important;
+  }
+
+  /* 6. Win Rate Gauges size & layout compression for tiny screens */
+  .gauge-card {
+    min-width: 0 !important;
+    flex: 1 1 0 !important;
+    padding: 4px 2px !important;
+    gap: 4px !important;
+  }
+  .gauge-svg-wrapper {
+    width: 100% !important;
+    max-width: 70px !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1 !important;
+  }
+  .gauge-text {
+    font-size: 7.5px !important;
+  }
+  .gauge-number {
+    font-size: 10px !important;
+  }
+  .gauge-label {
+    font-size: 5.5px !important;
+    margin-top: 1px !important;
+  }
+  .gauge-name {
+    font-size: 8.5px !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  .gauge-gp {
+    font-size: 7px !important;
+  }
+
+
+  .kpi-value {
+    font-size: var(--font-size-xl) !important;
+  }
+  #dominant-team-container div {
+    white-space: normal !important;
+  }
+  #dominant-team-container .player-link {
+    font-size: 11px !important;
+  }
+
+  /* Optimize bar stats summary for small mobile screens */
+  .bar-stats-summary {
+    font-size: 10px !important;
+    gap: 8px 12px !important;
+  }
+}
+
+/* ==========================================================
+   PREMIUM RETRO SECTION LOADER OVERLAY & SPINNING LED ICONS
+   ========================================================== */
+.section-loading-container {
+  position: relative !important;
+}
+
+.section-loader-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(12, 13, 18, 0.7); /* Match --color-bg-dark translucent */
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease-in-out;
+}
+
+.section-loader-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Premium Standard Loading Spinner (Glow Neon Style) */
+.standard-spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid rgba(0, 240, 255, 0.1);
+  border-top: 4px solid var(--color-neon-cyan);
+  border-radius: 50%;
+  animation: section-spin 0.8s linear infinite;
+  filter: drop-shadow(0 0 8px var(--color-neon-cyan));
+  box-sizing: border-box;
+}
+
+.standard-spinner.cyan {
+  border-color: rgba(0, 240, 255, 0.1);
+  border-top-color: var(--color-neon-cyan);
+  filter: drop-shadow(0 0 8px var(--color-neon-cyan));
+}
+
+.standard-spinner.magenta {
+  border-color: rgba(255, 0, 127, 0.1);
+  border-top-color: var(--color-neon-magenta);
+  filter: drop-shadow(0 0 8px var(--color-neon-magenta));
+}
+
+.standard-spinner.yellow {
+  border-color: rgba(255, 230, 0, 0.1);
+  border-top-color: var(--color-neon-yellow);
+  filter: drop-shadow(0 0 8px var(--color-neon-yellow));
+}
+
+@keyframes section-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+/* ==========================================================
+   DESKTOP ONLY MOBILE SYNC QR PANEL STYLING
+   ========================================================== */
+.home-top-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  width: 100%;
+  max-width: 1125px;
+  box-sizing: border-box;
+  margin-bottom: -4px;
+}
+
+.home-welcome-panel {
+  flex: 1 1 63%;
+  width: auto !important;
+  max-width: none !important;
+}
+
+.home-qr-panel {
+  flex: 0 0 35%;
+  display: flex;
+  flex-direction: column;
+  min-width: 290px;
+}
+
+/* Responsive breakpoint matching original stylesheet layout rules */
+@media (max-width: 850px) {
+  .home-top-row {
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: -20px;
+  }
+  
+  .home-welcome-panel {
+    flex: none;
+    width: 100% !important;
+  }
+  
+  .home-qr-panel {
+    display: none !important; /* Hide QR completely on mobile devices */
+  }
+}
+
+/* --- MAGENTA RETRO MULTI-SELECT OVERRIDES --- */
+.retro-multi-select-btn.magenta-theme:hover,
+.retro-multi-select-btn.magenta-theme.active-selection {
+  border-color: var(--color-neon-magenta) !important;
+  box-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
+}
+
+.retro-multi-select-btn.magenta-theme.active-selection {
+  background-color: rgba(255, 0, 127, 0.1) !important;
+}
+
+.retro-multi-select-dropdown.magenta-theme {
+  border-color: var(--color-neon-magenta) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.95), 0 0 15px rgba(255, 0, 127, 0.35);
+}
+
+.retro-multi-select-dropdown.magenta-theme::-webkit-scrollbar-thumb {
+  background: var(--color-neon-magenta) !important;
+}
+
+.retro-multi-select-dropdown.magenta-theme .retro-multi-option-row:hover {
+  background: rgba(255, 0, 127, 0.12) !important;
+}
+
+.retro-multi-select-dropdown.magenta-theme .retro-multi-option-row:hover .retro-checkbox-box {
+  border-color: var(--color-neon-magenta) !important;
+}
+
+.retro-multi-select-dropdown.magenta-theme .retro-checkbox-input:checked ~ .retro-checkbox-box {
+  background-color: var(--color-neon-magenta) !important;
+  border-color: var(--color-neon-magenta) !important;
+  box-shadow: 0 0 6px var(--color-neon-magenta) !important;
+}
+
+/* Custom responsive wrap for home page filter row on medium/shorter screens */
+@media (max-width: 1125px) and (min-width: 769px) {
+  .podium-filters-group {
+    display: grid !important;
+    grid-template-columns: repeat(6, auto) !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 12px 15px !important;
+    width: 100% !important;
+  }
+
+  .podium-filters-group > .podium-filter-wrapper {
+    grid-row: 1 !important;
+    grid-column: span 3 !important;
+    justify-self: end !important;
+  }
+
+  .podium-filters-group > #multi-select-style-container {
+    grid-row: 1 !important;
+    grid-column: span 3 !important;
+    justify-self: start !important;
+  }
+
+  .podium-filters-group > #multi-select-players-container {
+    grid-row: 2 !important;
+    grid-column: span 2 !important;
+    justify-self: end !important;
+  }
+
+  .podium-filters-group > #multi-select-fighters-container {
+    grid-row: 2 !important;
+    grid-column: span 2 !important;
+    justify-self: center !important;
+  }
+
+  .podium-filters-group > #btn-clear-all-filters {
+    grid-row: 2 !important;
+    grid-column: span 2 !important;
+    justify-self: start !important;
+  }
 }
 

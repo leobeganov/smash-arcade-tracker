@@ -53,10 +53,11 @@ function getPlayersList(matches) {
 }
 
 // Dynamically resolve details for any fighter in Smash Ultimate
-function getFighterDetails(fighterNameOrId) {
-  if (!fighterNameOrId) {
+function getFighterDetails(fighterNameOrIdRaw) {
+  if (!fighterNameOrIdRaw) {
     return { id: "unknown", name: "Unknown", img: "assets/mario.png?v=5", bio: "A mysterious newcomer." };
   }
+  const fighterNameOrId = decodeURIComponent(fighterNameOrIdRaw);
 
   // Search roster_slots data first
   if (Array.isArray(rosterData) && rosterData.length > 0) {
@@ -167,19 +168,38 @@ const apiService = {
       matches = matches.filter(m => m.players && m.players.some(p => p.character.toLowerCase().trim() === wfLower && p.placement === 1));
     }
 
-    // Apply player selection filtering (if any specified)
-    if (selectedPlayers && selectedPlayers.length > 0) {
-      const lowerPlayers = selectedPlayers.map(p => p.toLowerCase().trim());
-      matches = matches.filter(m => m.players && m.players.some(p => lowerPlayers.includes(p.playerName.toLowerCase().trim())));
-    }
+    // Apply player and fighter selection filtering (using joint AND logic if both are active)
+    const hasPlayersFilter = selectedPlayers && selectedPlayers.length > 0;
+    const hasFightersFilter = selectedFighters && selectedFighters.length > 0;
 
-    // Apply fighter selection filtering (if any specified)
-    if (selectedFighters && selectedFighters.length > 0) {
-      const lowerFighters = selectedFighters.map(f => f.toLowerCase().trim());
-      matches = matches.filter(m => m.players && m.players.some(p => {
-        const fighterObj = getFighterDetails(p.character);
-        return lowerFighters.includes(p.character.toLowerCase().trim()) || lowerFighters.includes(fighterObj.id.toLowerCase().trim());
-      }));
+    if (hasPlayersFilter || hasFightersFilter) {
+      const lowerPlayers = hasPlayersFilter ? selectedPlayers.map(p => p.toLowerCase().trim()) : [];
+      const lowerFighters = hasFightersFilter ? selectedFighters.map(f => f.toLowerCase().trim()) : [];
+
+      matches = matches.filter(m => {
+        if (!m.players) return false;
+
+        if (hasPlayersFilter && hasFightersFilter) {
+          // Joint AND: some player must match both the player filter AND the fighter filter in this match
+          return m.players.some(p => {
+            const playerMatch = lowerPlayers.includes(p.playerName.toLowerCase().trim());
+            const fighterObj = getFighterDetails(p.character);
+            const fighterMatch = lowerFighters.includes(p.character.toLowerCase().trim()) || 
+                                 (fighterObj && lowerFighters.includes(fighterObj.id.toLowerCase().trim()));
+            return playerMatch && fighterMatch;
+          });
+        } else if (hasPlayersFilter) {
+          // Player filter only
+          return m.players.some(p => lowerPlayers.includes(p.playerName.toLowerCase().trim()));
+        } else {
+          // Fighter filter only
+          return m.players.some(p => {
+            const fighterObj = getFighterDetails(p.character);
+            return lowerFighters.includes(p.character.toLowerCase().trim()) || 
+                   (fighterObj && lowerFighters.includes(fighterObj.id.toLowerCase().trim()));
+          });
+        }
+      });
     }
 
     const playersList = getPlayersList(allMatches);
@@ -188,19 +208,32 @@ const apiService = {
     matches.forEach(match => {
       if (!match.players) return;
       match.players.forEach(p => {
-        // If a player filter is active, only aggregate for the searched players
-        if (selectedPlayers && selectedPlayers.length > 0) {
-          const isSelected = selectedPlayers.some(sp => sp.toLowerCase().trim() === p.playerName.toLowerCase().trim());
-          if (!isSelected) return;
-        }
-        // If a fighter filter is active, only aggregate for the searched fighters
-        if (selectedFighters && selectedFighters.length > 0) {
+        const hasPlayers = selectedPlayers && selectedPlayers.length > 0;
+        const hasFighters = selectedFighters && selectedFighters.length > 0;
+
+        if (hasPlayers && hasFighters) {
+          // Joint AND: only aggregate stats for the selected player if they played one of the selected fighters
+          const isPlayerSelected = selectedPlayers.some(sp => sp.toLowerCase().trim() === p.playerName.toLowerCase().trim());
           const fighterObj = getFighterDetails(p.character);
-          const isSelected = selectedFighters.some(sf => 
+          const isFighterSelected = selectedFighters.some(sf => 
             sf.toLowerCase().trim() === p.character.toLowerCase().trim() ||
-            sf.toLowerCase().trim() === fighterObj.id.toLowerCase().trim()
+            (fighterObj && sf.toLowerCase().trim() === fighterObj.id.toLowerCase().trim())
           );
-          if (!isSelected) return;
+          if (!isPlayerSelected || !isFighterSelected) return;
+        } else {
+          // Single filter active
+          if (hasPlayers) {
+            const isSelected = selectedPlayers.some(sp => sp.toLowerCase().trim() === p.playerName.toLowerCase().trim());
+            if (!isSelected) return;
+          }
+          if (hasFighters) {
+            const fighterObj = getFighterDetails(p.character);
+            const isSelected = selectedFighters.some(sf => 
+              sf.toLowerCase().trim() === p.character.toLowerCase().trim() ||
+              (fighterObj && sf.toLowerCase().trim() === fighterObj.id.toLowerCase().trim())
+            );
+            if (!isSelected) return;
+          }
         }
 
         const playerName = p.playerName;
@@ -345,16 +378,20 @@ const apiService = {
   },
 
   // 3. Get Player Profile Stats
-  async getPlayerProfile(playerId, customMatches = null) {
+  async getPlayerProfile(playerIdRaw, customMatches = null) {
     await initRoster();
     await apiDelay(250);
 
     if (!window.Database) return null;
 
-    const matches = customMatches || await window.Database.getMatchesAsync();
-    const playersList = getPlayersList(matches);
+    const playerId = decodeURIComponent(playerIdRaw);
+
+    const allMatches = await window.Database.getMatchesAsync();
+    const playersList = getPlayersList(allMatches);
     const player = playersList.find(p => p.id === playerId || p.name.toLowerCase() === playerId.toLowerCase());
     if (!player) return null;
+
+    const matches = customMatches || allMatches;
     const playerMatches = matches.filter(m => 
       m.players && m.players.some(p => p.playerName.toLowerCase() === player.name.toLowerCase())
     );
@@ -363,6 +400,7 @@ const apiService = {
     let wins = 0;
     let falls = 0;
     let KOs = 0;
+    let sds = 0;
     let damageDealtSum = 0;
     let damageTakenSum = 0;
 
@@ -378,6 +416,7 @@ const apiService = {
 
       falls += Math.abs(pRec.falls || 0);
       KOs += (pRec.kos || 0);
+      sds += Math.abs(pRec.sds || 0);
       damageDealtSum += (pRec.damageDealt || 0);
       damageTakenSum += (pRec.damageTaken || 0);
 
@@ -454,6 +493,7 @@ const apiService = {
       adjustedWins: parseFloat(adjustedWins.toFixed(2)),
       falls,
       KOs,
+      sds,
       winRate: totalMatches > 0 ? ((wins / totalMatches) * 100).toFixed(1) : "0.0",
       kdRatio: falls > 0 ? (KOs / falls).toFixed(2) : KOs.toFixed(2),
       avgDamageDealt: totalMatches > 0 ? Math.round(damageDealtSum / totalMatches) : 0,
@@ -474,12 +514,13 @@ const apiService = {
   },
 
   // 4. Get Fighter Profile Stats
-  async getFighterProfile(fighterId, customMatches = null) {
+  async getFighterProfile(fighterIdRaw, customMatches = null) {
     await initRoster();
     await apiDelay(250);
 
     if (!window.Database) return null;
 
+    const fighterId = decodeURIComponent(fighterIdRaw);
     const fighter = getFighterDetails(fighterId);
     if (!fighter) return null;
 
@@ -503,6 +544,7 @@ const apiService = {
     let wins = 0;
     let falls = 0;
     let KOs = 0;
+    let sds = 0;
     let damageDealtSum = 0;
     let damageTakenSum = 0;
 
@@ -515,6 +557,7 @@ const apiService = {
 
       falls += Math.abs(playerRec.falls || 0);
       KOs += (playerRec.kos || 0);
+      sds += Math.abs(playerRec.sds || 0);
       damageDealtSum += (playerRec.damageDealt || 0);
       damageTakenSum += (playerRec.damageTaken || 0);
 
@@ -544,7 +587,7 @@ const apiService = {
     });
     const nemesisFighter = nemesisFighterId ? getFighterDetails(nemesisFighterId) : null;
 
-    // Find top 3 players who use this fighter most
+    // Find top 5 players who use this fighter most
     const topPlayers = Object.entries(playerUsage)
       .map(([pId, count]) => {
         const player = playersList.find(p => p.id === pId) || { 
@@ -555,7 +598,7 @@ const apiService = {
         return { player, count };
       })
       .sort((a, b) => b.count - a.count)
-      .slice(0, 3);
+      .slice(0, 5);
 
     const adjustedWins = totalMatches > 0
       ? Math.pow(wins, 2.5) / Math.pow(totalMatches, 1.5)
@@ -569,6 +612,7 @@ const apiService = {
       adjustedWins: parseFloat(adjustedWins.toFixed(2)),
       falls,
       KOs,
+      sds,
       winRate: totalMatches > 0 ? ((wins / totalMatches) * 100).toFixed(1) : "0.0",
       kdRatio: falls > 0 ? (KOs / falls).toFixed(2) : KOs.toFixed(2),
       avgDamageDealt: totalMatches > 0 ? Math.round(damageDealtSum / totalMatches) : 0,
@@ -651,7 +695,9 @@ const apiService = {
           detailId: stats.mostUsedFighter ? stats.mostUsedFighter.id : null,
           detailType: "fighter",
           detailImg: stats.mostUsedFighter ? stats.mostUsedFighter.img : null,
-          detailIcon: stats.mostUsedFighter ? stats.mostUsedFighter.icon : null
+          detailIcon: stats.mostUsedFighter ? stats.mostUsedFighter.icon : null,
+          losses: stats.losses,
+          sds: stats.sds
         });
       }
     } else {
@@ -694,13 +740,18 @@ const apiService = {
           kd: parseFloat(stats.kdRatio),
           detailLabel: topPlayerRecord ? topPlayerRecord.player.name : "None",
           detailId: topPlayerRecord ? topPlayerRecord.player.id : null,
-          detailType: "player"
+          detailType: "player",
+          losses: stats.losses,
+          sds: stats.sds
         });
       }
     }
 
     // Determine actual sorting field
-    const sortField = sortBy === "wins" ? "adjustedWins" : sortBy;
+    let sortField = sortBy === "wins" ? "adjustedWins" : sortBy;
+    if (sortField === "pureWins") {
+      sortField = "wins";
+    }
 
     // Sort records dynamically
     records.sort((a, b) => {
@@ -726,6 +777,12 @@ const apiService = {
     const baseFighters = ["Mario", "Link", "Samus", "Fox", "Pikachu", "Donkey Kong"];
     const rosterNames = Array.isArray(rosterData) ? rosterData.map(r => r.name) : [];
     return Array.from(new Set([...baseFighters, ...rosterNames])).sort();
+  },
+
+  // Get all full fighter records from roster_slots.json
+  async getFullRoster() {
+    await initRoster();
+    return rosterData;
   },
 
   // Get all stage names for dropdown lists

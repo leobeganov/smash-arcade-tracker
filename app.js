@@ -5,6 +5,19 @@
 document.addEventListener("DOMContentLoaded", () => {
   const api = window.apiService;
 
+  // Self-healing fallback in case of browser script caching
+  if (api && typeof api.getFullRoster !== "function") {
+    api.getFullRoster = async function() {
+      try {
+        const res = await fetch('assets/roster_slots.json');
+        return await res.json();
+      } catch (e) {
+        console.error("Self-healing getFullRoster fallback failed:", e);
+        return [];
+      }
+    };
+  }
+
   // --- Global State ---
   let currentLeaderboardMode = "players"; // "players" or "fighters"
   let currentSortBy = "wins";
@@ -14,25 +27,44 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentPodiumTimeframe = "7days";
   let currentLeaderboardTimeframe = "alltime";
   let currentPlayerTimeframe = "alltime";
+  let currentPlayerMatchType = "all";
+  let currentPlayerFighterFilters = [];
   let currentFighterTimeframe = "alltime";
+  let currentInsightsTimeframe = "alltime";
+  let currentInsightsMatchType = "all";
+  let currentInsightsPlacementLimit = 5;
   let currentFighterId = null;
+  let currentProfilePlayerId = null;
   let currentVariantIndex = 0;
   let currentFighterStats = null;
   let selectedSearchPlayers = [];
   let selectedSearchFighters = [];
   let selectedSearchWinnerPlayer = null;
   let selectedSearchWinnerFighter = null;
+  let selectedSearchLoserPlayer = null;
+  let selectedSearchLoserFighter = null;
   let isSearchDropdownsInitialized = false;
   let shouldScrollToMatchList = false;
+  let skipClearFiltersOnHome = false;
+
+  // --- Fighters Library State ---
+  let fightersSearchQuery = "";
+  let timelineSelectedPlayers = [];
+  let timelineSelectedFighters = [];
+  let fightersSelectedSeries = [];
+  let fightersSortBy = "alpha"; // "alpha" or "mostplayed"
+  const cardVariantIndices = {}; // Track active variant index per fighter slug/ID
+  let isFightersControlsInitialized = false;
 
   // --- DOM Elements ---
   const views = {
     home: document.getElementById("home-view"),
     player: document.getElementById("player-profile-view"),
     fighter: document.getElementById("fighter-profile-view"),
+    fighters: document.getElementById("fighters-view"),
     leaderboard: document.getElementById("leaderboard-view"),
     scanner: document.getElementById("scanner-view"),
-    telemetry: document.getElementById("telemetry-view"),
+    insights: document.getElementById("insights-view"),
     settings: document.getElementById("settings-view")
   };
 
@@ -55,25 +87,174 @@ document.addEventListener("DOMContentLoaded", () => {
     vsOverlay.classList.remove("active");
   }
 
+  // --- Section Loader Utilities ---
+  function showSectionLoader(elementOrId, themeClass = "cyan") {
+    const el = typeof elementOrId === "string" ? document.getElementById(elementOrId) : elementOrId;
+    if (!el) return;
+
+    el.classList.add("section-loading-container");
+
+    let overlay = el.querySelector(":scope > .section-loader-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.className = "section-loader-overlay";
+      overlay.innerHTML = `<div class="standard-spinner ${themeClass}"></div>`;
+      el.appendChild(overlay);
+    } else {
+      const spinner = overlay.querySelector(".standard-spinner");
+      if (spinner) {
+        spinner.className = `standard-spinner ${themeClass}`;
+      }
+    }
+
+    overlay.offsetHeight; // trigger reflow
+    overlay.classList.add("active");
+  }
+
+  function hideSectionLoader(elementOrId) {
+    const el = typeof elementOrId === "string" ? document.getElementById(elementOrId) : elementOrId;
+    if (!el) return;
+
+    const overlay = el.querySelector(":scope > .section-loader-overlay");
+    if (overlay) {
+      overlay.classList.remove("active");
+    }
+  }
+
+  function clearAllHomeFilters() {
+    // 1. Reset to 30 days
+    currentPodiumTimeframe = "30days";
+
+    // 2. Reset all games (style select)
+    const podiumStyleSelect = document.getElementById("podium-style-select");
+    if (podiumStyleSelect) {
+      podiumStyleSelect.value = "all";
+    }
+    
+    const styleContainer = document.getElementById("multi-select-style-container");
+    if (styleContainer) {
+      const btn = styleContainer.querySelector(".retro-multi-select-btn");
+      const selectedTextEl = btn ? btn.querySelector(".selected-text") : null;
+      if (selectedTextEl) selectedTextEl.textContent = "ALL GAMES";
+      if (btn) btn.classList.remove("active-selection");
+
+      const rows = styleContainer.querySelectorAll(".retro-multi-option-row");
+      rows.forEach(r => {
+        const val = r.getAttribute("data-value");
+        if (val === "all") {
+          r.classList.add("active-selection");
+          const chk = r.querySelector(".style-checkbox");
+          if (chk) chk.checked = true;
+        } else {
+          r.classList.remove("active-selection");
+          const chk = r.querySelector(".style-checkbox");
+          if (chk) chk.checked = false;
+        }
+      });
+    }
+
+    // 3. Reset all players & fighters
+    selectedSearchPlayers.length = 0;
+    selectedSearchFighters.length = 0;
+
+    // 4. Wipe winner/loser filters ("wins only" / "losses only" sections)
+    selectedSearchWinnerPlayer = null;
+    selectedSearchWinnerFighter = null;
+    selectedSearchLoserPlayer = null;
+    selectedSearchLoserFighter = null;
+
+    // 5. Force search multi-select dropdowns & sync state to re-initialize next time renderHomeMatchesList runs
+    isSearchDropdownsInitialized = false;
+  }
+
+  function clearAllLeaderboardFilters() {
+    // 1. Reset state variables
+    currentLeaderboardMode = "players";
+    currentLeaderboardTimeframe = "alltime";
+    currentSortBy = "wins";
+
+    // 2. Reset toggle buttons active classes
+    const togglePlayers = document.getElementById("toggle-btn-players");
+    const toggleFighters = document.getElementById("toggle-btn-fighters");
+    if (togglePlayers) togglePlayers.classList.add("active");
+    if (toggleFighters) toggleFighters.classList.remove("active");
+
+    const leaderboardTimeframeFilters = document.getElementById("leaderboard-timeframe-filters");
+    if (leaderboardTimeframeFilters) {
+      leaderboardTimeframeFilters.querySelectorAll(".toggle-btn").forEach(b => {
+        if (b.getAttribute("data-timeframe") === "alltime") {
+          b.classList.add("active");
+        } else {
+          b.classList.remove("active");
+        }
+      });
+    }
+
+    // 3. Reset all games style select hidden input
+    const leaderboardStyleSelect = document.getElementById("leaderboard-style-select");
+    if (leaderboardStyleSelect) {
+      leaderboardStyleSelect.value = "all";
+    }
+
+    // 4. Reset custom select dropdown UI
+    const styleContainer = document.getElementById("leaderboard-multi-select-style-container");
+    if (styleContainer) {
+      const btn = styleContainer.querySelector(".retro-multi-select-btn");
+      const selectedTextEl = btn ? btn.querySelector(".selected-text") : null;
+      if (selectedTextEl) selectedTextEl.textContent = "ALL GAMES";
+      if (btn) btn.classList.remove("active-selection");
+
+      const dropdown = styleContainer.querySelector(".retro-multi-select-dropdown");
+      if (dropdown) dropdown.classList.add("dropdown-hidden");
+
+      const rows = styleContainer.querySelectorAll(".retro-multi-option-row");
+      rows.forEach(r => {
+        const val = r.getAttribute("data-value");
+        if (val === "all") {
+          r.classList.add("active-selection");
+          const chk = r.querySelector(".leaderboard-style-checkbox");
+          if (chk) chk.checked = true;
+        } else {
+          r.classList.remove("active-selection");
+          const chk = r.querySelector(".leaderboard-style-checkbox");
+          if (chk) chk.checked = false;
+        }
+      });
+    }
+  }
+
+  function clearAllFightersFilters() {
+    fightersSearchQuery = "";
+    fightersSelectedSeries = [];
+    fightersSortBy = "alpha";
+    isFightersControlsInitialized = false;
+  }
+
+
+
+
   // ==========================================
   // Client Router
   // ==========================================
   async function router() {
     const hash = window.location.hash || "#home";
-    const [route, id] = hash.slice(1).split("/");
+    const [routeRaw, idRaw] = hash.slice(1).split("/");
+    const route = routeRaw ? decodeURIComponent(routeRaw) : "";
+    const id = idRaw ? decodeURIComponent(idRaw) : "";
 
     closeSearch();
 
     let target = "home";
     if (route === "player" && id) target = "player";
     else if (route === "fighter" && id) target = "fighter";
+    else if (route === "fighters") target = "fighters";
     else if (route === "leaderboard") target = "leaderboard";
     else if (route === "scanner") target = "scanner";
-    else if (route === "telemetry") target = "telemetry";
+    else if (route === "insights") target = "insights";
     else if (route === "settings") target = "settings";
 
     // Update active state in nav tabs
-    const navTabs = ["home", "leaderboard", "scanner", "telemetry", "settings"];
+    const navTabs = ["home", "fighters", "leaderboard", "scanner", "insights", "settings"];
     navTabs.forEach(tab => {
       const el = document.getElementById(`nav-tab-${tab}`);
       if (el) {
@@ -97,22 +278,36 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
+    // Reset scroll position to top of page
+    window.scrollTo(0, 0);
+
     // Render corresponding view data
     if (target === "home") {
+      if (!skipClearFiltersOnHome) {
+        clearAllHomeFilters();
+      }
+      skipClearFiltersOnHome = false; // Reset flag for subsequent navigations
       isSearchDropdownsInitialized = false;
       await renderHome();
     } else if (target === "player") {
       currentPlayerTimeframe = "alltime";
+      currentPlayerMatchType = "all";
+      currentPlayerFighterFilters = [];
       await renderPlayerProfile(id);
     } else if (target === "fighter") {
       currentFighterTimeframe = "alltime";
       await renderFighterProfile(id);
+    } else if (target === "fighters") {
+      clearAllFightersFilters();
+      await renderFightersLibrary();
     } else if (target === "leaderboard") {
+      clearAllLeaderboardFilters();
       await renderLeaderboard();
     } else if (target === "scanner") {
       await renderScanner();
-    } else if (target === "telemetry") {
-      await renderTelemetry();
+    } else if (target === "insights") {
+      currentInsightsPlacementLimit = 5;
+      await renderInsights();
     } else if (target === "settings") {
       await renderSettings();
     }
@@ -123,6 +318,26 @@ document.addEventListener("DOMContentLoaded", () => {
   // Bind router and trigger initial routing
   window.addEventListener("hashchange", router);
   router();
+
+  const leaderboardNavTab = document.getElementById("nav-tab-leaderboard");
+  if (leaderboardNavTab) {
+    leaderboardNavTab.addEventListener("click", () => {
+      if (window.location.hash === "#leaderboard") {
+        clearAllLeaderboardFilters();
+        renderLeaderboard();
+      }
+    });
+  }
+
+  const fightersNavTab = document.getElementById("nav-tab-fighters");
+  if (fightersNavTab) {
+    fightersNavTab.addEventListener("click", () => {
+      if (window.location.hash === "#fighters") {
+        clearAllFightersFilters();
+        renderFightersLibrary();
+      }
+    });
+  }
 
   // Dynamic bidirectional hover highlighting between timeline and player rows
   const historyMatchesListEl = document.getElementById("history-matches-list");
@@ -210,15 +425,88 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function initQrCode() {
+    const qrImg = document.getElementById("qr-code-img");
+    if (!qrImg) return;
+
+    const targetUrl = "https://smash-arcade-tracker.vercel.app/";
+    // Set the QR image source using the free, fast qrserver API
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&color=000000&bgcolor=ffffff&data=${encodeURIComponent(targetUrl)}`;
+  }
+
+
+  function updateClearFiltersButtonState() {
+    const btn = document.getElementById("btn-clear-all-filters");
+    if (!btn) return;
+
+    const styleSelect = document.getElementById("podium-style-select");
+    const isStyleCleared = !styleSelect || styleSelect.value === "all";
+    const isTimeframeCleared = currentPodiumTimeframe === "30days";
+    const isPlayersCleared = selectedSearchPlayers.length === 0;
+    const isFightersCleared = selectedSearchFighters.length === 0;
+    const isWinnerCleared = !selectedSearchWinnerPlayer && !selectedSearchWinnerFighter && !selectedSearchLoserPlayer && !selectedSearchLoserFighter;
+
+    const isAlreadyCleared = isStyleCleared && isTimeframeCleared && isPlayersCleared && isFightersCleared && isWinnerCleared;
+
+    if (isAlreadyCleared) {
+      btn.disabled = true;
+      btn.style.opacity = "0.3";
+      btn.style.cursor = "not-allowed";
+      btn.style.pointerEvents = "none";
+      btn.style.textShadow = "none";
+      btn.style.boxShadow = "none";
+    } else {
+      btn.disabled = false;
+      btn.style.opacity = "1";
+      btn.style.cursor = "pointer";
+      btn.style.pointerEvents = "auto";
+      btn.style.textShadow = "0 0 5px rgba(255, 0, 127, 0.5)";
+      btn.style.boxShadow = "";
+    }
+  }
+
 
   // ==========================================
   // 3. Render Home (The Main Stage)
   // ==========================================
   async function renderHome() {
-    const loader = document.getElementById("podium-loader");
-    if (loader) {
-      loader.style.display = "inline-flex";
+    // Update Clear Filters button active state
+    updateClearFiltersButtonState();
+
+    // Sync dynamic QR code link
+    initQrCode();
+
+    // Dynamically update total player count inside the welcome accordion
+    try {
+      const matches = await window.Database.getMatchesAsync();
+      const playersSet = new Set();
+      if (matches && Array.isArray(matches)) {
+        matches.forEach(m => {
+          if (m.players && Array.isArray(m.players)) {
+            m.players.forEach(p => {
+              if (p.playerName) {
+                const name = p.playerName.trim();
+                if (name) {
+                  playersSet.add(name.toLowerCase());
+                }
+              }
+            });
+          }
+        });
+      }
+      const welcomeCountEl = document.getElementById("welcome-ferocian-count");
+      if (welcomeCountEl) {
+        welcomeCountEl.textContent = playersSet.size;
+      }
+    } catch (err) {
+      console.error("Error setting welcome player count:", err);
     }
+
+    const podiumStage = document.querySelector(".podium-stage");
+    const matchesList = document.getElementById("history-matches-list");
+    showSectionLoader(podiumStage, "yellow");
+    showSectionLoader(matchesList, "cyan");
+
     const startTime = Date.now();
 
     // Gather selected styles
@@ -332,26 +620,47 @@ document.addEventListener("DOMContentLoaded", () => {
         bronzeInfo.style.cursor = "default";
       }
     }
-    // Winner Filter Badge UI
+    // Winner/Loser Filter Badge UI
     const badgeContainer = document.getElementById("winner-filter-container");
     const badgeName = document.getElementById("winner-filter-name");
+    const badgeLabel = document.getElementById("winner-filter-label");
+    const badgeIcon = document.getElementById("winner-filter-icon");
     const badgeClearBtn = document.getElementById("btn-clear-winner-filter");
 
     if (badgeContainer && badgeName) {
       if (selectedSearchWinnerPlayer || selectedSearchWinnerFighter) {
         badgeName.textContent = (selectedSearchWinnerPlayer || selectedSearchWinnerFighter).toUpperCase();
-        badgeContainer.style.display = "flex";
-        if (badgeClearBtn) {
-          badgeClearBtn.onclick = () => {
-            selectedSearchWinnerPlayer = null;
-            selectedSearchWinnerFighter = null;
-            badgeContainer.style.display = "none";
-            isSearchDropdownsInitialized = false; // force dropdown re-initialization
-            renderHome();
-          };
+        if (badgeLabel) badgeLabel.innerHTML = `ONLY SHOWING MATCHES WON BY: <span id="winner-filter-name" class="text-glow-yellow" style="font-weight: bold;">${(selectedSearchWinnerPlayer || selectedSearchWinnerFighter).toUpperCase()}</span>`;
+        if (badgeIcon) {
+          badgeIcon.textContent = "🏆";
+          badgeIcon.style.color = "var(--color-neon-yellow)";
+          badgeIcon.style.textShadow = "0 0 4px var(--color-neon-yellow)";
         }
+        badgeContainer.style.display = "flex";
+      } else if (selectedSearchLoserPlayer || selectedSearchLoserFighter) {
+        const name = (selectedSearchLoserPlayer || selectedSearchLoserFighter).toUpperCase();
+        badgeName.textContent = name;
+        if (badgeLabel) badgeLabel.innerHTML = `ONLY SHOWING MATCHES LOST BY: <span id="winner-filter-name" class="text-glow-magenta" style="font-weight: bold;">${name}</span>`;
+        if (badgeIcon) {
+          badgeIcon.textContent = "💀";
+          badgeIcon.style.color = "var(--color-neon-magenta)";
+          badgeIcon.style.textShadow = "0 0 4px var(--color-neon-magenta)";
+        }
+        badgeContainer.style.display = "flex";
       } else {
         badgeContainer.style.display = "none";
+      }
+
+      if (badgeClearBtn) {
+        badgeClearBtn.onclick = () => {
+          selectedSearchWinnerPlayer = null;
+          selectedSearchWinnerFighter = null;
+          selectedSearchLoserPlayer = null;
+          selectedSearchLoserFighter = null;
+          badgeContainer.style.display = "none";
+          isSearchDropdownsInitialized = false; // force dropdown re-initialization
+          renderHome();
+        };
       }
     }
 
@@ -393,16 +702,21 @@ document.addEventListener("DOMContentLoaded", () => {
     if (elapsed < 250) {
       await new Promise(resolve => setTimeout(resolve, 250 - elapsed));
     }
-    if (loader) {
-      loader.style.display = "none";
-    }
+    
+    hideSectionLoader(podiumStage);
+    hideSectionLoader(matchesList);
   }
 
 
   // ==========================================
   // 4. Render Player Profile
   // ==========================================
-  async function renderPlayerProfile(playerId) {
+  async function renderPlayerProfile(playerIdRaw) {
+    const playerId = decodeURIComponent(playerIdRaw);
+    const profileContent = document.querySelector("#player-profile-view .profile-content-area");
+    showSectionLoader(profileContent, "magenta");
+    const startTime = Date.now();
+
     // Sync timeframe filter toggle buttons
     const ptf = document.getElementById("player-timeframe-filters");
     if (ptf) {
@@ -414,6 +728,24 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
     }
+
+    // Sync match type filter toggle buttons
+    const pmf = document.getElementById("player-matchtype-filters");
+    if (pmf) {
+      pmf.querySelectorAll(".toggle-btn").forEach(btn => {
+        if (btn.getAttribute("data-matchtype") === currentPlayerMatchType) {
+          btn.classList.add("active");
+        } else {
+          btn.classList.remove("active");
+        }
+      });
+    }
+
+    // Sync fighter filter multi-select dropdown
+    const roster = await api.getAllFighters();
+    setupRetroMultiSelect("player-profile-multi-select-fighters-container", roster, currentPlayerFighterFilters, () => {
+      renderPlayerProfile(playerId);
+    });
 
     // Fetch and filter matches dynamically
     let matches = await window.Database.getMatchesAsync();
@@ -430,19 +762,146 @@ document.addEventListener("DOMContentLoaded", () => {
       matches = matches.filter(m => m.timestamp >= thirtyDaysAgo);
     }
 
+    // Filter matches by match type
+    if (currentPlayerMatchType !== 'all') {
+      matches = matches.filter(m => {
+        const is1v1 = (m.gameMode && m.gameMode.toLowerCase() === '1v1') || 
+                      (m.gameStyle && m.gameStyle.toLowerCase() === '1v1') || 
+                      (m.players && m.players.length === 2);
+        if (is1v1) {
+          return currentPlayerMatchType === '1v1';
+        }
+        const isTeams = m.gameStyle && m.gameStyle.toLowerCase() === 'teams';
+        if (isTeams) {
+          return currentPlayerMatchType === 'teams';
+        }
+        // Otherwise Free-for-all
+        return currentPlayerMatchType === 'free-for-all' || currentPlayerMatchType === 'ffa';
+      });
+    }
+
+    // Determine the real player name from the playerId
+    let playerName = playerId; // fallback
+    const allMatchesForPlayerName = await window.Database.getMatchesAsync();
+    for (const m of allMatchesForPlayerName) {
+      if (m.players) {
+        const p = m.players.find(p => p.playerName.toLowerCase() === playerId.toLowerCase() || p.playerName.toLowerCase().replace(/\s+/g, '-') === playerId.toLowerCase());
+        if (p) {
+          playerName = p.playerName;
+          break;
+        }
+      }
+    }
+
+    // Filter matches by selected fighters (multi-select)
+    if (currentPlayerFighterFilters && currentPlayerFighterFilters.length > 0) {
+      const lowerFighters = currentPlayerFighterFilters.map(f => f.toLowerCase().trim());
+      matches = matches.filter(m => {
+        if (!m.players) return false;
+        const pRec = m.players.find(p => p.playerName.toLowerCase() === playerName.toLowerCase());
+        if (!pRec) return false;
+        const fDetails = window.apiService.getFighterDetails(pRec.character);
+        return lowerFighters.includes(pRec.character.toLowerCase().trim()) || lowerFighters.includes(fDetails.id.toLowerCase().trim());
+      });
+    }
+
     const stats = await api.getPlayerProfile(playerId, matches);
-    if (!stats) return;
+    if (!stats) {
+      hideSectionLoader(profileContent);
+      return;
+    }
 
     // Sidebar Portrait and Info
-    document.getElementById("player-profile-fighter-img").src = stats.mostUsedFighter ? stats.mostUsedFighter.img : "assets/mario.png?v=5";
+    const fighterImgEl = document.getElementById("player-profile-fighter-img");
+    if (stats.mostUsedFighter) {
+      fighterImgEl.src = stats.mostUsedFighter.img;
+      fighterImgEl.style.opacity = "1.0";
+      fighterImgEl.style.filter = "none";
+    } else {
+      fighterImgEl.src = "assets/mario.png?v=5";
+      if (stats.totalMatches === 0) {
+        fighterImgEl.style.opacity = "0.35";
+        fighterImgEl.style.filter = "grayscale(1)";
+      } else {
+        fighterImgEl.style.opacity = "1.0";
+        fighterImgEl.style.filter = "none";
+      }
+    }
     document.getElementById("player-profile-name").textContent = stats.player.name;
 
-    // Stat grids
-    document.getElementById("player-stat-wins").textContent = stats.adjustedWins;
-    document.getElementById("player-stat-wins-raw").textContent = `${stats.wins} / ${stats.totalMatches} WINS`;
+    // Profile metadata panel initialization & Last Played calculation
+    const isNewPlayer = (playerId.toLowerCase() !== (currentProfilePlayerId || "").toLowerCase());
+    currentProfilePlayerId = playerId;
+
+    if (isNewPlayer) {
+      const profileNameInput = document.getElementById("profile-input-name");
+      const profileSlackInput = document.getElementById("profile-input-slack");
+      const profileTeamInput = document.getElementById("profile-input-team");
+      if (profileNameInput) profileNameInput.value = stats.player.name;
+
+      const playerKey = playerId.toLowerCase().replace(/\s+/g, '-');
+      const savedSlack = localStorage.getItem(`profile_slack_${playerKey}`);
+      const savedTeam = localStorage.getItem(`profile_team_${playerKey}`);
+
+      if (profileSlackInput) {
+        if (savedSlack !== null) {
+          profileSlackInput.value = savedSlack;
+        } else if (playerKey === "matt") {
+          profileSlackInput.value = "@Matthew Long";
+        } else {
+          profileSlackInput.value = "";
+        }
+
+        if (!profileSlackInput.dataset.listenerAdded) {
+          profileSlackInput.addEventListener("input", (e) => {
+            const currentKey = currentProfilePlayerId.toLowerCase().replace(/\s+/g, '-');
+            localStorage.setItem(`profile_slack_${currentKey}`, e.target.value);
+          });
+          profileSlackInput.dataset.listenerAdded = "true";
+        }
+      }
+
+      if (profileTeamInput) {
+        if (savedTeam !== null) {
+          profileTeamInput.value = savedTeam;
+        } else if (playerKey === "matt") {
+          profileTeamInput.value = "Team Folk";
+        } else {
+          profileTeamInput.value = "";
+        }
+
+        if (!profileTeamInput.dataset.listenerAdded) {
+          profileTeamInput.addEventListener("input", (e) => {
+            const currentKey = currentProfilePlayerId.toLowerCase().replace(/\s+/g, '-');
+            localStorage.setItem(`profile_team_${currentKey}`, e.target.value);
+          });
+          profileTeamInput.dataset.listenerAdded = "true";
+        }
+      }
+    }
+
+    const playerAllMatches = allMatchesForPlayerName.filter(m => m.players && m.players.some(p => p.playerName.toLowerCase() === playerName.toLowerCase()));
+    let lastPlayedStr = "Never";
+    if (playerAllMatches.length > 0) {
+      playerAllMatches.sort((a, b) => b.timestamp - a.timestamp);
+      const latestMatch = playerAllMatches[0];
+      lastPlayedStr = `${new Date(latestMatch.timestamp).toLocaleDateString()} ${new Date(latestMatch.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+    }
+    const lastPlayedEl = document.getElementById("profile-text-lastplayed");
+    if (lastPlayedEl) {
+      lastPlayedEl.textContent = lastPlayedStr;
+    }
+    document.getElementById("player-stat-games").textContent = stats.totalMatches;
+    document.getElementById("player-stat-wins").textContent = stats.wins;
+    document.getElementById("player-stat-wins-raw").textContent = `RATING: ${stats.adjustedWins}`;
     document.getElementById("player-stat-losses").textContent = stats.losses;
     document.getElementById("player-stat-winrate").textContent = `${stats.winRate}%`;
     document.getElementById("player-stat-kd").textContent = stats.kdRatio;
+    
+    // Physical metrics
+    document.getElementById("player-stat-kos").textContent = stats.KOs;
+    document.getElementById("player-stat-falls").textContent = stats.falls;
+    document.getElementById("player-stat-sds").textContent = stats.sds !== undefined ? stats.sds : 0;
 
     // Render Signature Fighter
     const sigCard = document.getElementById("player-sig-card");
@@ -494,35 +953,109 @@ document.addEventListener("DOMContentLoaded", () => {
       nemesisCard.style.cursor = "default";
     }
 
-    // See all matches button integration
-    const btnSeeMatches = document.getElementById("btn-player-see-matches");
-    if (btnSeeMatches) {
-      btnSeeMatches.onclick = () => {
+    // Helper to sync player matchtype selection with the home page style select dropdown
+    function syncHomePageStyleWithPlayerFilter() {
+      const hiddenInput = document.getElementById("podium-style-select");
+      if (hiddenInput) {
+        hiddenInput.value = currentPlayerMatchType;
+      }
+      const container = document.getElementById("multi-select-style-container");
+      if (container) {
+        const btn = container.querySelector(".retro-multi-select-btn");
+        if (btn) {
+          const selectedTextEl = btn.querySelector(".selected-text");
+          const dropdown = container.querySelector(".retro-multi-select-dropdown");
+          if (dropdown) {
+            const rows = dropdown.querySelectorAll(".retro-multi-option-row");
+            rows.forEach(r => {
+              const val = r.getAttribute("data-value");
+              if (val === currentPlayerMatchType) {
+                r.classList.add("active-selection");
+                const chk = r.querySelector(".style-checkbox");
+                if (chk) chk.checked = true;
+                
+                if (val === "all") {
+                  if (selectedTextEl) selectedTextEl.textContent = "ALL GAMES";
+                  btn.classList.remove("active-selection");
+                } else {
+                  if (selectedTextEl) selectedTextEl.textContent = r.querySelector(".option-label").textContent;
+                  btn.classList.add("active-selection");
+                }
+              } else {
+                r.classList.remove("active-selection");
+                const chk = r.querySelector(".style-checkbox");
+                if (chk) chk.checked = false;
+              }
+            });
+          }
+        }
+      }
+    }
+
+
+
+    // Games Played cell click-through integration
+    const gamesCell = document.getElementById("player-games-cell");
+    if (gamesCell) {
+      gamesCell.onclick = () => {
         selectedSearchPlayers = [stats.player.name];
-        selectedSearchFighters = [];
+        selectedSearchFighters = currentPlayerFighterFilters ? [...currentPlayerFighterFilters] : [];
         selectedSearchWinnerPlayer = null;
         selectedSearchWinnerFighter = null;
-        currentPodiumTimeframe = "30days";
+        selectedSearchLoserPlayer = null;
+        selectedSearchLoserFighter = null;
+        currentPodiumTimeframe = (currentPlayerTimeframe === "alltime") ? "30days" : currentPlayerTimeframe;
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
+        syncHomePageStyleWithPlayerFilter();
+        skipClearFiltersOnHome = true;
         window.location.hash = "#home";
       };
     }
 
-    // Win rate cell click-through integration
-    const winrateCell = document.getElementById("player-winrate-cell");
-    if (winrateCell) {
-      winrateCell.onclick = () => {
+    // Wins cell click-through integration
+    const winsCell = document.getElementById("player-wins-cell");
+    if (winsCell) {
+      winsCell.onclick = () => {
         selectedSearchPlayers = [stats.player.name];
-        selectedSearchFighters = [];
+        selectedSearchFighters = currentPlayerFighterFilters ? [...currentPlayerFighterFilters] : [];
         selectedSearchWinnerPlayer = stats.player.name;
         selectedSearchWinnerFighter = null;
-        currentPodiumTimeframe = "30days";
+        selectedSearchLoserPlayer = null;
+        selectedSearchLoserFighter = null;
+        currentPodiumTimeframe = (currentPlayerTimeframe === "alltime") ? "30days" : currentPlayerTimeframe;
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
+        syncHomePageStyleWithPlayerFilter();
+        skipClearFiltersOnHome = true;
         window.location.hash = "#home";
       };
     }
+
+    // Losses cell click-through integration
+    const lossesCell = document.getElementById("player-losses-cell");
+    if (lossesCell) {
+      lossesCell.onclick = () => {
+        selectedSearchPlayers = [stats.player.name];
+        selectedSearchFighters = currentPlayerFighterFilters ? [...currentPlayerFighterFilters] : [];
+        selectedSearchWinnerPlayer = null;
+        selectedSearchWinnerFighter = null;
+        selectedSearchLoserPlayer = stats.player.name;
+        selectedSearchLoserFighter = null;
+        currentPodiumTimeframe = (currentPlayerTimeframe === "alltime") ? "30days" : currentPlayerTimeframe;
+        shouldScrollToMatchList = true;
+        isSearchDropdownsInitialized = false; // force dropdown re-initialization
+        syncHomePageStyleWithPlayerFilter();
+        skipClearFiltersOnHome = true;
+        window.location.hash = "#home";
+      };
+    }
+    // Enforce smooth minimum display delay of 250ms
+    const elapsed = Date.now() - startTime;
+    if (elapsed < 250) {
+      await new Promise(resolve => setTimeout(resolve, 250 - elapsed));
+    }
+    hideSectionLoader(profileContent);
   }  // Helper to update active variant display
   function updateVariantDisplayGlobal() {
     if (!currentFighterStats) return;
@@ -764,7 +1297,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // ==========================================
   // 5. Render Fighter Profile
   // ==========================================
-  async function renderFighterProfile(fighterId) {
+  async function renderFighterProfile(fighterIdRaw) {
+    const fighterId = decodeURIComponent(fighterIdRaw);
+    const profileSidebar = document.querySelector("#fighter-profile-view .profile-sidebar");
+    showSectionLoader(profileSidebar, "cyan");
+    const startTime = Date.now();
+
     // Sync timeframe filter toggle buttons
     const ftf = document.getElementById("fighter-timeframe-filters");
     if (ftf) {
@@ -793,7 +1331,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const stats = await api.getFighterProfile(fighterId, matches);
-    if (!stats) return;
+    if (!stats) {
+      hideSectionLoader(profileSidebar);
+      return;
+    }
 
     // Track active IDs and assign global stats for variants
     if (currentFighterId !== fighterId) {
@@ -862,11 +1403,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Stat grids
-    document.getElementById("fighter-stat-wins").textContent = stats.adjustedWins;
-    document.getElementById("fighter-stat-wins-raw").textContent = `${stats.wins} / ${stats.totalMatches} WINS`;
+    document.getElementById("fighter-stat-games").textContent = stats.totalMatches;
+    document.getElementById("fighter-stat-wins").textContent = stats.wins;
+    document.getElementById("fighter-stat-wins-raw").textContent = `RATING: ${stats.adjustedWins}`;
     document.getElementById("fighter-stat-losses").textContent = stats.losses;
     document.getElementById("fighter-stat-winrate").textContent = `${stats.winRate}%`;
     document.getElementById("fighter-stat-kd").textContent = stats.kdRatio;
+    document.getElementById("fighter-stat-kos").textContent = stats.KOs;
+    document.getElementById("fighter-stat-falls").textContent = stats.falls;
+    document.getElementById("fighter-stat-sds").textContent = stats.sds;
 
     // Render Nemesis Fighter
     const nemesisCard = document.getElementById("fighter-nemesis-card");
@@ -896,7 +1441,7 @@ document.addEventListener("DOMContentLoaded", () => {
     topPlayersContainer.innerHTML = "";
 
     if (stats.topPlayers && stats.topPlayers.length > 0) {
-      stats.topPlayers.forEach((tp, i) => {
+      stats.topPlayers.slice(0, 5).forEach((tp, i) => {
         const item = document.createElement("div");
         item.className = "top-player-item";
         item.innerHTML = `
@@ -1002,15 +1547,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         moveRow.innerHTML = `
-          <td>
+          <td data-label="INPUT COMMAND">
             <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
               ${buttonsHtml}
             </div>
           </td>
-          <td>
+          <td data-label="MOVE NAME">
             <span class="move-name-text text-glow-cyan" style="font-family: var(--font-header); font-size: 13px; color: #fff; text-shadow: 0 0 5px rgba(0, 240, 255, 0.4); text-transform: uppercase;">${m.name}</span>
           </td>
-          <td>
+          <td data-label="EFFECT & TACTICAL ADVICE">
             <div style="display: flex; flex-direction: column; text-align: left;">
               <p class="move-desc" style="font-family: monospace; font-size: 12px; color: #c4c6d0; opacity: 0.95; margin: 0; line-height: 1.5;">${m.description}</p>
               ${subtipsHtml}
@@ -1028,17 +1573,56 @@ document.addEventListener("DOMContentLoaded", () => {
       movesContainer.innerHTML = `<div style="font-family: var(--font-stats); opacity: 0.6; font-size: 13px; text-align: center; padding: 20px;">NO MOVES REGISTERED FOR THIS FIGHTER</div>`;
     }
 
-    // See all matches button integration
-    const btnSeeMatches = document.getElementById("btn-fighter-see-matches");
-    if (btnSeeMatches) {
-      btnSeeMatches.onclick = () => {
+    // Games Played cell click-through integration
+    const gamesCell = document.getElementById("fighter-games-cell");
+    if (gamesCell) {
+      gamesCell.onclick = () => {
         selectedSearchFighters = [stats.fighter.name];
         selectedSearchPlayers = [];
         selectedSearchWinnerPlayer = null;
         selectedSearchWinnerFighter = null;
-        currentPodiumTimeframe = "30days";
+        selectedSearchLoserPlayer = null;
+        selectedSearchLoserFighter = null;
+        currentPodiumTimeframe = (currentFighterTimeframe === "alltime") ? "30days" : currentFighterTimeframe;
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
+        skipClearFiltersOnHome = true;
+        window.location.hash = "#home";
+      };
+    }
+
+    // Wins cell click-through integration
+    const winsCell = document.getElementById("fighter-wins-cell");
+    if (winsCell) {
+      winsCell.onclick = () => {
+        selectedSearchFighters = [stats.fighter.name];
+        selectedSearchPlayers = [];
+        selectedSearchWinnerPlayer = null;
+        selectedSearchWinnerFighter = stats.fighter.name;
+        selectedSearchLoserPlayer = null;
+        selectedSearchLoserFighter = null;
+        currentPodiumTimeframe = (currentFighterTimeframe === "alltime") ? "30days" : currentFighterTimeframe;
+        shouldScrollToMatchList = true;
+        isSearchDropdownsInitialized = false; // force dropdown re-initialization
+        skipClearFiltersOnHome = true;
+        window.location.hash = "#home";
+      };
+    }
+
+    // Losses cell click-through integration
+    const lossesCell = document.getElementById("fighter-losses-cell");
+    if (lossesCell) {
+      lossesCell.onclick = () => {
+        selectedSearchFighters = [stats.fighter.name];
+        selectedSearchPlayers = [];
+        selectedSearchWinnerPlayer = null;
+        selectedSearchWinnerFighter = null;
+        selectedSearchLoserPlayer = null;
+        selectedSearchLoserFighter = stats.fighter.name;
+        currentPodiumTimeframe = (currentFighterTimeframe === "alltime") ? "30days" : currentFighterTimeframe;
+        shouldScrollToMatchList = true;
+        isSearchDropdownsInitialized = false; // force dropdown re-initialization
+        skipClearFiltersOnHome = true;
         window.location.hash = "#home";
       };
     }
@@ -1051,12 +1635,39 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedSearchPlayers = [];
         selectedSearchWinnerPlayer = null;
         selectedSearchWinnerFighter = stats.fighter.name;
-        currentPodiumTimeframe = "30days";
+        selectedSearchLoserPlayer = null;
+        selectedSearchLoserFighter = null;
+        currentPodiumTimeframe = (currentFighterTimeframe === "alltime") ? "30days" : currentFighterTimeframe;
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
+        skipClearFiltersOnHome = true;
         window.location.hash = "#home";
       };
     }
+
+    // Knockout / Fall ratio cell click-through integration
+    const kdCell = document.getElementById("fighter-kd-cell");
+    if (kdCell) {
+      kdCell.onclick = () => {
+        selectedSearchFighters = [stats.fighter.name];
+        selectedSearchPlayers = [];
+        selectedSearchWinnerPlayer = null;
+        selectedSearchWinnerFighter = null;
+        selectedSearchLoserPlayer = null;
+        selectedSearchLoserFighter = null;
+        currentPodiumTimeframe = (currentFighterTimeframe === "alltime") ? "30days" : currentFighterTimeframe;
+        shouldScrollToMatchList = true;
+        isSearchDropdownsInitialized = false; // force dropdown re-initialization
+        skipClearFiltersOnHome = true;
+        window.location.hash = "#home";
+      };
+    }
+    // Enforce smooth minimum display delay of 250ms
+    const elapsed = Date.now() - startTime;
+    if (elapsed < 250) {
+      await new Promise(resolve => setTimeout(resolve, 250 - elapsed));
+    }
+    hideSectionLoader(profileSidebar);
   }
 
 
@@ -1064,10 +1675,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // 6. Render Global Leaderboard
   // ==========================================
   async function renderLeaderboard() {
-    const loader = document.getElementById("leaderboard-loader");
-    if (loader) {
-      loader.style.display = "inline-flex";
-    }
+    const leaderboardContainer = document.querySelector(".leaderboard-table-container");
+    showSectionLoader(leaderboardContainer, "yellow");
     const startTime = Date.now();
 
     const isFighterMode = currentLeaderboardMode === "fighters";
@@ -1082,10 +1691,15 @@ document.addEventListener("DOMContentLoaded", () => {
       { key: "rank", label: "Rank" },
       { key: "name", label: isFighterMode ? "Fighter" : "Player" },
       { key: "wins", label: "Rating" },
+      { key: "detailLabel", label: isFighterMode ? "Top Player" : "Signature fighter" },
+      { key: "winRate", label: "Win rate" },
+      { key: "totalGames", label: "Matches played" },
+      { key: "pureWins", label: "Wins" },
+      { key: "losses", label: "Losses" },
+      { key: "kd", label: "Knockout / fall ratio" },
       { key: "KOs", label: "Knockouts" },
-      { key: "winRate", label: "Win Percentage" },
-      { key: "kd", label: "Knockout / Fall Ratio" },
-      { key: "detailLabel", label: isFighterMode ? "Top Player" : "Signature" }
+      { key: "falls", label: "Falls" },
+      { key: "sds", label: "Self-Destructs" }
     ];
 
     headers.forEach(h => {
@@ -1137,13 +1751,18 @@ document.addEventListener("DOMContentLoaded", () => {
       tr.innerHTML = `
         <td class="rank-cell">#${rec.rank}</td>
         <td class="name-cell text-glow-cyan" onclick="window.location.hash = '${mainLink}'">${rec.name}</td>
-        <td class="numeric-cell text-glow-yellow">${rec.adjustedWins} <span style="font-size: var(--font-size-sm); opacity: 0.6; font-family: var(--font-stats);">(${rec.wins}/${rec.totalGames})</span></td>
-        <td class="numeric-cell">${rec.KOs}</td>
-        <td class="numeric-cell">${rec.winRate}%</td>
-        <td class="numeric-cell text-glow-magenta">${rec.kd}</td>
+        <td class="numeric-cell text-glow-yellow">${rec.adjustedWins}</td>
         <td class="name-cell text-glow-yellow" onclick="window.location.hash = '${detailLink}'">
           ${detailContent}
         </td>
+        <td class="numeric-cell">${rec.winRate}%</td>
+        <td class="numeric-cell">${rec.totalGames}</td>
+        <td class="numeric-cell">${rec.wins}</td>
+        <td class="numeric-cell">${rec.losses}</td>
+        <td class="numeric-cell text-glow-magenta">${rec.kd}</td>
+        <td class="numeric-cell">${rec.KOs}</td>
+        <td class="numeric-cell">${rec.falls}</td>
+        <td class="numeric-cell">${rec.sds}</td>
       `;
 
       rowsBody.appendChild(tr);
@@ -1154,9 +1773,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (elapsed < 250) {
       await new Promise(resolve => setTimeout(resolve, 250 - elapsed));
     }
-    if (loader) {
-      loader.style.display = "none";
-    }
+    hideSectionLoader(leaderboardContainer);
   }
 
 
@@ -1377,16 +1994,37 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // 3. Search Filters (Player and Character - Multi-select)
-    if (selectedSearchPlayers && selectedSearchPlayers.length > 0) {
-      const lowerPlayers = selectedSearchPlayers.map(p => p.toLowerCase().trim());
-      matches = matches.filter(m => m.players && m.players.some(p => lowerPlayers.includes(p.playerName.toLowerCase().trim())));
-    }
-    if (selectedSearchFighters && selectedSearchFighters.length > 0) {
-      const lowerFighters = selectedSearchFighters.map(f => f.toLowerCase().trim());
-      matches = matches.filter(m => m.players && m.players.some(p => {
-        const fighterObj = api.getFighterDetails(p.character);
-        return lowerFighters.includes(p.character.toLowerCase().trim()) || lowerFighters.includes(fighterObj.id.toLowerCase().trim());
-      }));
+    const hasPlayersFilter = selectedSearchPlayers && selectedSearchPlayers.length > 0;
+    const hasFightersFilter = selectedSearchFighters && selectedSearchFighters.length > 0;
+
+    if (hasPlayersFilter || hasFightersFilter) {
+      const lowerPlayers = hasPlayersFilter ? selectedSearchPlayers.map(p => p.toLowerCase().trim()) : [];
+      const lowerFighters = hasFightersFilter ? selectedSearchFighters.map(f => f.toLowerCase().trim()) : [];
+
+      matches = matches.filter(m => {
+        if (!m.players) return false;
+
+        if (hasPlayersFilter && hasFightersFilter) {
+          // Joint AND: some player must match both the player filter AND the character filter in this match
+          return m.players.some(p => {
+            const playerMatch = lowerPlayers.includes(p.playerName.toLowerCase().trim());
+            const fighterObj = api.getFighterDetails(p.character);
+            const fighterMatch = lowerFighters.includes(p.character.toLowerCase().trim()) || 
+                                 (fighterObj && lowerFighters.includes(fighterObj.id.toLowerCase().trim()));
+            return playerMatch && fighterMatch;
+          });
+        } else if (hasPlayersFilter) {
+          // Player filter only
+          return m.players.some(p => lowerPlayers.includes(p.playerName.toLowerCase().trim()));
+        } else {
+          // Fighter filter only
+          return m.players.some(p => {
+            const fighterObj = api.getFighterDetails(p.character);
+            return lowerFighters.includes(p.character.toLowerCase().trim()) || 
+                   (fighterObj && lowerFighters.includes(fighterObj.id.toLowerCase().trim()));
+          });
+        }
+      });
     }
 
     if (selectedSearchWinnerPlayer) {
@@ -1396,6 +2034,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (selectedSearchWinnerFighter) {
       const wfLower = selectedSearchWinnerFighter.toLowerCase().trim();
       matches = matches.filter(m => m.players && m.players.some(p => p.character.toLowerCase().trim() === wfLower && p.placement === 1));
+    }
+    if (selectedSearchLoserPlayer) {
+      const lpLower = selectedSearchLoserPlayer.toLowerCase().trim();
+      matches = matches.filter(m => m.players && m.players.some(p => p.playerName.toLowerCase().trim() === lpLower && p.placement !== 1));
+    }
+    if (selectedSearchLoserFighter) {
+      const lfLower = selectedSearchLoserFighter.toLowerCase().trim();
+      matches = matches.filter(m => m.players && m.players.some(p => p.character.toLowerCase().trim() === lfLower && p.placement !== 1));
     }
 
     const container = document.getElementById("history-matches-list");
@@ -1419,6 +2065,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Generate markers for the timeline with collision avoidance (separated by above/below direction to avoid double-height lines for simultaneous opposite knockouts)
       const staggerCounts = { above: {}, below: {} };
+      let maxStaggerAbove = -1;
+      let maxStaggerBelow = -1;
       let markersHtml = "";
       let winnersHtml = "";
       let markerIdx = 0;
@@ -1432,10 +2080,19 @@ document.addEventListener("DOMContentLoaded", () => {
           const iconUrl = fighterObj.icon || 'assets/mario.png';
 
           const isPlayerFiltered = (selectedSearchPlayers && selectedSearchPlayers.some(sp => sp.toLowerCase() === p.playerName.toLowerCase())) || 
-                                   (selectedSearchWinnerPlayer && selectedSearchWinnerPlayer.toLowerCase() === p.playerName.toLowerCase());
+                                   (selectedSearchWinnerPlayer && selectedSearchWinnerPlayer.toLowerCase() === p.playerName.toLowerCase()) ||
+                                   (selectedSearchLoserPlayer && selectedSearchLoserPlayer.toLowerCase() === p.playerName.toLowerCase());
           const isFighterFiltered = (selectedSearchFighters && selectedSearchFighters.some(sf => sf.toLowerCase() === p.character.toLowerCase())) || 
-                                    (selectedSearchWinnerFighter && selectedSearchWinnerFighter.toLowerCase() === p.character.toLowerCase());
-          const isFilteredMatch = isPlayerFiltered || isFighterFiltered;
+                                    (selectedSearchWinnerFighter && selectedSearchWinnerFighter.toLowerCase() === p.character.toLowerCase()) ||
+                                    (selectedSearchLoserFighter && selectedSearchLoserFighter.toLowerCase() === p.character.toLowerCase());
+          
+          let isFilteredMatch = false;
+          if (hasPlayersFilter && hasFightersFilter) {
+            isFilteredMatch = (selectedSearchPlayers.some(sp => sp.toLowerCase() === p.playerName.toLowerCase()) &&
+                               selectedSearchFighters.some(sf => sf.toLowerCase() === p.character.toLowerCase()));
+          } else {
+            isFilteredMatch = isPlayerFiltered || isFighterFiltered;
+          }
           const filterClass = isFilteredMatch ? 'filter-highlighted' : '';
 
           if (hasNoKnockoutTime) {
@@ -1443,11 +2100,11 @@ document.addEventListener("DOMContentLoaded", () => {
               winnersHtml += `
                 <div class="winner-sidebar-row" data-player-name="${p.playerName.toLowerCase()}" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
                   <!-- Dot marker (Character head-icon bubble in gold) -->
-                  <div class="winner-icon-bubble" style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid var(--color-neon-yellow); box-shadow: 0 0 8px var(--color-neon-yellow); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+                  <div class="winner-icon-bubble" style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid var(--color-neon-yellow); box-shadow: 0 0 8px var(--color-neon-yellow); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onclick="window.location.hash = '#player/${p.playerName.toLowerCase().replace(/\s+/g, '-')}'" onmouseover="this.style.transform='scale(1.15)'; this.style.boxShadow='0 0 14px var(--color-neon-yellow)';" onmouseout="this.style.transform=''; this.style.boxShadow='';" >
                     <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${p.character}" />
                   </div>
                   <!-- Name/Details in a panel-beveled gold border box -->
-                  <div class="panel-beveled winner-name-box ${filterClass}" style="white-space: nowrap; background: var(--color-bg-dark); border: 1px solid var(--color-neon-yellow); padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px;">
+                  <div class="panel-beveled winner-name-box ${filterClass}" style="white-space: nowrap; background: var(--color-bg-dark); border: 1px solid var(--color-neon-yellow); padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s;" onclick="window.location.hash = '#player/${p.playerName.toLowerCase().replace(/\s+/g, '-')}'" onmouseover="this.style.borderColor='#fff'; this.style.boxShadow='0 0 12px var(--color-neon-yellow)';" onmouseout="this.style.borderColor=''; this.style.boxShadow='';" >
                     <span style="font-weight: bold; color: #fff; text-shadow: 0 0 2px rgba(255,255,255,0.5);">${p.playerName} 🏆</span>
                   </div>
                 </div>
@@ -1456,11 +2113,11 @@ document.addEventListener("DOMContentLoaded", () => {
               winnersHtml += `
                 <div class="winner-sidebar-row sudden-death-row" data-player-name="${p.playerName.toLowerCase()}" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; opacity: 0.65;">
                   <!-- Dot marker (Character head-icon bubble in grey) -->
-                  <div class="winner-icon-bubble sudden-death-icon" style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid #555; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; filter: grayscale(0.8);">
+                  <div class="winner-icon-bubble sudden-death-icon" style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid #555; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; filter: grayscale(0.8); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;" onclick="window.location.hash = '#player/${p.playerName.toLowerCase().replace(/\s+/g, '-')}'" onmouseover="this.style.transform='scale(1.15)'; this.style.boxShadow='0 0 14px #aaa'; this.style.filter='grayscale(0)';" onmouseout="this.style.transform=''; this.style.boxShadow=''; this.style.filter='grayscale(0.8)';" >
                     <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${p.character}" />
                   </div>
                   <!-- Name/Details in a panel-beveled grey border box -->
-                  <div class="panel-beveled winner-name-box sudden-death-name-box ${filterClass}" style="white-space: nowrap; background: var(--color-bg-dark); border: 1px solid #444; padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); border-radius: 4px; display: flex; flex-direction: column; gap: 1px; box-shadow: 0 0 4px rgba(0,0,0,0.5);">
+                  <div class="panel-beveled winner-name-box sudden-death-name-box ${filterClass}" style="white-space: nowrap; background: var(--color-bg-dark); border: 1px solid #444; padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); border-radius: 4px; display: flex; flex-direction: column; gap: 1px; box-shadow: 0 0 4px rgba(0,0,0,0.5); cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s;" onclick="window.location.hash = '#player/${p.playerName.toLowerCase().replace(/\s+/g, '-')}'" onmouseover="this.style.borderColor='#fff'; this.style.boxShadow='0 0 12px #aaa';" onmouseout="this.style.borderColor=''; this.style.boxShadow='';" >
                     <span style="font-weight: bold; color: #aaa;">${p.playerName}</span>
                     <span style="font-size: 8px; color: #777; font-weight: bold; letter-spacing: 0.5px; line-height: 1;">SUDDEN DEATH</span>
                   </div>
@@ -1481,8 +2138,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             const staggerIndex = staggerCounts[sideKey][pctKey]++;
             
-            const markerColor = 'var(--color-neon-magenta)';
-            const textColor = 'var(--color-neon-magenta)';
+            if (isAbove) {
+              maxStaggerAbove = Math.max(maxStaggerAbove, staggerIndex);
+            } else {
+              maxStaggerBelow = Math.max(maxStaggerBelow, staggerIndex);
+            }
+            
+            const markerColor = isWinner ? 'var(--color-neon-yellow)' : 'var(--color-neon-magenta)';
+            const textColor = isWinner ? 'var(--color-neon-yellow)' : 'var(--color-neon-magenta)';
             
             const offsetSize = 15 + staggerIndex * 30;
             const displayTime = p.outAt || "5:00";
@@ -1490,14 +2153,14 @@ document.addEventListener("DOMContentLoaded", () => {
              markersHtml += `
                <div class="timeline-marker" data-player-name="${p.playerName.toLowerCase()}" style="position: absolute; left: ${safePct}%; top: 50%; transform: translate(-50%, -50%); width: 24px; height: 24px; z-index: 10;">
                  <!-- Dot marker (Character head-icon bubble centered on timeline) -->
-                 <div class="timeline-dot" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid ${markerColor}; box-shadow: 0 0 8px ${markerColor}; z-index: 11; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                 <div class="timeline-dot" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid ${markerColor}; box-shadow: 0 0 8px ${markerColor}; z-index: 11; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onclick="window.location.hash = '#player/${p.playerName.toLowerCase().replace(/\s+/g, '-')}'" onmouseover="this.style.transform='scale(1.15)'; this.style.boxShadow='0 0 14px ${markerColor}';" onmouseout="this.style.transform=''; this.style.boxShadow='';" >
                    <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${p.character}" />
                  </div>
                  <!-- Connector line coming out of the bubble -->
                  <div class="timeline-connector" style="position: absolute; left: 11px; ${isAbove ? `bottom: 24px` : `top: 24px`}; width: 2px; height: ${offsetSize}px; background: ${markerColor}; opacity: 0.8; z-index: 9;"></div>
                  <!-- Player details box -->
-                 <div class="timeline-player-info panel-beveled ${filterClass}" style="position: absolute; left: 12px; ${isAbove ? `bottom: ${24 + offsetSize}px` : `top: ${24 + offsetSize}px`}; transform: translateX(-50%); text-align: center; white-space: nowrap; background: var(--color-bg-dark); border: 1px solid ${markerColor}; padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px; pointer-events: auto; user-select: none; z-index: 10;">
-                   <span style="font-weight: bold; color: #fff; text-shadow: 0 0 2px rgba(255,255,255,0.5);">${p.playerName}</span>
+                 <div class="timeline-player-info panel-beveled ${filterClass}" style="position: absolute; left: 12px; ${isAbove ? `bottom: ${24 + offsetSize}px` : `top: ${24 + offsetSize}px`}; transform: translateX(-50%); text-align: center; white-space: nowrap; background: var(--color-bg-dark); border: 1px solid ${markerColor}; padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px; pointer-events: auto; user-select: none; z-index: 10; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s;" onclick="window.location.hash = '#player/${p.playerName.toLowerCase().replace(/\s+/g, '-')}'" onmouseover="this.style.borderColor='#fff'; this.style.boxShadow='0 0 12px ${markerColor}';" onmouseout="this.style.borderColor=''; this.style.boxShadow='';" >
+                   <span style="font-weight: bold; color: #fff; text-shadow: 0 0 2px rgba(255,255,255,0.5);">${p.playerName}${isWinner ? ' 🏆' : ''}</span>
                    <span class="hover-time" style="color: ${textColor}; font-weight: bold; text-shadow: 0 0 4px ${textColor};">(${displayTime})</span>
                  </div>
                </div>
@@ -1505,6 +2168,9 @@ document.addEventListener("DOMContentLoaded", () => {
            }
         });
       }
+
+      const pTop = maxStaggerAbove >= 0 ? Math.max(50, 75 + maxStaggerAbove * 30) : 50;
+      const pBottom = maxStaggerBelow >= 0 ? Math.max(40, 75 + maxStaggerBelow * 30) : 40;
 
       card.innerHTML = `
         <div class="match-card-header">
@@ -1517,17 +2183,26 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="match-card-meta">${new Date(m.timestamp).toLocaleDateString()} ${new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
         </div>
         <div class="match-card-players-grid ${m.players && m.players.length > 4 ? 'large-lobby' : ''}">
-          ${m.players.map(p => {
+          ${[...m.players].sort((a, b) => (a.placement || Number.MAX_SAFE_INTEGER) - (b.placement || Number.MAX_SAFE_INTEGER)).map(p => {
             const hasTeamColor = m.gameStyle && m.gameStyle.toLowerCase() === 'teams' && p.teamColor && p.teamColor.toLowerCase() !== 'none';
             const teamClass = hasTeamColor ? `team-${p.teamColor.toLowerCase()}` : '';
             const fighterObj = api.getFighterDetails(p.character) || {};
             const iconUrl = fighterObj.icon || 'assets/mario.png';
 
             const isPlayerFiltered = (selectedSearchPlayers && selectedSearchPlayers.some(sp => sp.toLowerCase() === p.playerName.toLowerCase())) || 
-                                     (selectedSearchWinnerPlayer && selectedSearchWinnerPlayer.toLowerCase() === p.playerName.toLowerCase());
+                                     (selectedSearchWinnerPlayer && selectedSearchWinnerPlayer.toLowerCase() === p.playerName.toLowerCase()) ||
+                                     (selectedSearchLoserPlayer && selectedSearchLoserPlayer.toLowerCase() === p.playerName.toLowerCase());
             const isFighterFiltered = (selectedSearchFighters && selectedSearchFighters.some(sf => sf.toLowerCase() === p.character.toLowerCase())) || 
-                                      (selectedSearchWinnerFighter && selectedSearchWinnerFighter.toLowerCase() === p.character.toLowerCase());
-            const isFilteredMatch = isPlayerFiltered || isFighterFiltered;
+                                      (selectedSearchWinnerFighter && selectedSearchWinnerFighter.toLowerCase() === p.character.toLowerCase()) ||
+                                      (selectedSearchLoserFighter && selectedSearchLoserFighter.toLowerCase() === p.character.toLowerCase());
+            
+            let isFilteredMatch = false;
+            if (hasPlayersFilter && hasFightersFilter) {
+              isFilteredMatch = (selectedSearchPlayers.some(sp => sp.toLowerCase() === p.playerName.toLowerCase()) &&
+                                 selectedSearchFighters.some(sf => sf.toLowerCase() === p.character.toLowerCase()));
+            } else {
+              isFilteredMatch = isPlayerFiltered || isFighterFiltered;
+            }
             const filterClass = isFilteredMatch ? 'filter-highlighted' : '';
 
             return `
@@ -1552,7 +2227,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <button class="delete-match-btn" data-id="${m.id}" title="Delete Record">🗑️</button>
         <div class="match-timeline-drawer" id="timeline-drawer-${m.id}">
           <!-- Timeline Track Column -->
-          <div class="timeline-track-column">
+          <div class="timeline-track-column" style="padding-top: ${pTop}px; padding-bottom: ${pBottom}px;">
             <div class="timeline-track-container">
               <div class="timeline-track-glow"></div>
               <div class="timeline-label start">0:00 (START)</div>
@@ -1575,22 +2250,772 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+  // --- Insights Filter Helper ---
+  async function getInsightsFilteredMatches() {
+    let matches = await window.Database.getMatchesAsync();
+    const now = Date.now();
+    if (currentInsightsTimeframe === 'today') {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      matches = matches.filter(m => m.timestamp >= todayStart.getTime());
+    } else if (currentInsightsTimeframe === '7days') {
+      const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
+      matches = matches.filter(m => m.timestamp >= sevenDaysAgo);
+    } else if (currentInsightsTimeframe === '30days') {
+      const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
+      matches = matches.filter(m => m.timestamp >= thirtyDaysAgo);
+    }
+
+    if (currentInsightsMatchType !== 'all') {
+      matches = matches.filter(m => {
+        const style = (m.gameStyle || m.matchType || "").toLowerCase().trim();
+        if (style === '1v1') {
+          return currentInsightsMatchType === '1v1';
+        }
+        if (style === 'teams' || style === 'team') {
+          return currentInsightsMatchType === 'teams';
+        }
+        return currentInsightsMatchType === 'free-for-all' || currentInsightsMatchType === 'ffa';
+      });
+    }
+    return matches;
+  }
+
   // ==========================================
-  // Telemetry Dashboard View Controllers
+  // Insights Dashboard View Controllers
   // ==========================================
-  async function renderTelemetry() {
-    const stats = await window.Database.getStatsAsync();
+  async function renderInsights() {
+    currentInsightsPlacementLimit = 5;
+    const telemetryLayout = document.querySelector("#insights-view .telemetry-view-layout");
+    showSectionLoader(telemetryLayout, "cyan");
+    const startTime = Date.now();
+
+    // Ensure roster slots data is fully initialized for synchronous details queries
+    await api.getFullRoster();
+
+    // Sync timeframe filter toggle buttons
+    const timeframeFilters = document.getElementById("insights-timeframe-filters");
+    if (timeframeFilters) {
+      timeframeFilters.querySelectorAll(".toggle-btn").forEach(btn => {
+        if (btn.getAttribute("data-timeframe") === currentInsightsTimeframe) {
+          btn.classList.add("active");
+        } else {
+          btn.classList.remove("active");
+        }
+      });
+    }
+
+    // Sync match type filter toggle buttons
+    const matchtypeFilters = document.getElementById("insights-matchtype-filters");
+    if (matchtypeFilters) {
+      matchtypeFilters.querySelectorAll(".toggle-btn").forEach(btn => {
+        if (btn.getAttribute("data-matchtype") === currentInsightsMatchType) {
+          btn.classList.add("active");
+        } else {
+          btn.classList.remove("active");
+        }
+      });
+    }
+
+    // Fetch and filter matches dynamically
+    const matches = await getInsightsFilteredMatches();
+
+    // Request stats based on pre-filtered matches
+    const stats = await window.Database.getStatsAsync({ matches });
 
     // Populate KPI panels
     document.getElementById("tel-kpi-matches").textContent = stats.totalMatches;
-    document.getElementById("tel-kpi-player").textContent = stats.topPlayer;
-    document.getElementById("tel-kpi-character").textContent = stats.dominantCharacter;
+    
+    const kpiPlayerEl = document.getElementById("tel-kpi-player");
+    if (kpiPlayerEl) {
+      kpiPlayerEl.textContent = stats.topPlayer;
+      if (stats.topPlayer && stats.topPlayer !== "N/A") {
+        kpiPlayerEl.style.cursor = "pointer";
+        kpiPlayerEl.style.transition = "color 0.2s, text-shadow 0.2s";
+        kpiPlayerEl.onclick = () => {
+          window.location.hash = `#player/${stats.topPlayer.toLowerCase().replace(/\s+/g, '-')}`;
+        };
+        kpiPlayerEl.onmouseover = () => {
+          kpiPlayerEl.style.color = "var(--color-neon-yellow)";
+          kpiPlayerEl.style.textShadow = "0 0 10px var(--color-neon-yellow)";
+        };
+        kpiPlayerEl.onmouseout = () => {
+          kpiPlayerEl.style.color = "";
+          kpiPlayerEl.style.textShadow = "";
+        };
+      } else {
+        kpiPlayerEl.style.cursor = "";
+        kpiPlayerEl.onclick = null;
+        kpiPlayerEl.onmouseover = null;
+        kpiPlayerEl.onmouseout = null;
+      }
+    }
+
+    const kpiCharEl = document.getElementById("tel-kpi-character");
+    kpiCharEl.textContent = stats.dominantCharacter;
+    if (stats.dominantCharacter && stats.dominantCharacter !== "N/A") {
+      kpiCharEl.style.cursor = "pointer";
+      kpiCharEl.style.transition = "color 0.2s, text-shadow 0.2s";
+      kpiCharEl.onclick = () => {
+        window.location.hash = `#fighter/${stats.dominantCharacter.toLowerCase().replace(/\s+/g, '-')}`;
+      };
+      kpiCharEl.onmouseover = () => {
+        kpiCharEl.style.color = "var(--color-neon-magenta)";
+        kpiCharEl.style.textShadow = "0 0 10px var(--color-neon-magenta)";
+      };
+      kpiCharEl.onmouseout = () => {
+        kpiCharEl.style.color = "";
+        kpiCharEl.style.textShadow = "";
+      };
+    } else {
+      kpiCharEl.style.cursor = "";
+      kpiCharEl.onclick = null;
+      kpiCharEl.onmouseover = null;
+      kpiCharEl.onmouseout = null;
+    }
 
     // Trigger SVG Renderings
     if (window.Charts) {
       window.Charts.renderWinRateGauge("win-rate-gauges-container", stats.players);
-      window.Charts.renderCharacterDonut("popularity-donut-chart-container", stats.characters);
-      window.Charts.renderPlayerPlacements("outcomes-stacked-bar-container", stats.players);
+      window.Charts.renderPlayerPlacements("outcomes-stacked-bar-container", stats.players, currentInsightsPlacementLimit);
+      window.Charts.renderDailyPeakTimeline("daily-peak-timeline-container", matches);
+    }
+
+    // Show more placements button
+    const btnShowMorePlacements = document.getElementById("btn-show-more-placements");
+    if (btnShowMorePlacements) {
+      console.log("[ShowMore Placements] stats.players:", stats.players ? stats.players.length : 0, "limit:", currentInsightsPlacementLimit);
+      if (stats.players && stats.players.length > currentInsightsPlacementLimit) {
+        btnShowMorePlacements.style.display = "inline-block";
+        btnShowMorePlacements.onclick = (e) => {
+          if (e) e.preventDefault();
+          currentInsightsPlacementLimit += 5;
+          console.log("[ShowMore Placements] Button clicked! Increasing limit to:", currentInsightsPlacementLimit);
+          console.log("[ShowMore Placements] Full players list:", stats.players);
+          try {
+            if (window.Charts) {
+              window.Charts.renderPlayerPlacements("outcomes-stacked-bar-container", stats.players, currentInsightsPlacementLimit);
+            }
+          } catch (err) {
+            console.error("[ShowMore Placements] Error rendering placements:", err);
+          }
+          if (stats.players.length <= currentInsightsPlacementLimit) {
+            console.log("[ShowMore Placements] Reached the end of players list. Hiding button.");
+            btnShowMorePlacements.style.display = "none";
+          }
+        };
+      } else {
+        console.log("[ShowMore Placements] stats.players length <= limit. Hiding button.");
+        btnShowMorePlacements.style.display = "none";
+      }
+    }
+
+    // Trigger custom html/css dynamic renderings
+    renderMostPlayedFighters("most-played-fighters-container", stats.characters, matches);
+    renderFightersByPlayers("most-popular-fighters-container", stats.characters, matches);
+    renderDominantTeamBox(matches);
+    // Initialize timeline multi-select filters dynamically
+    const allStats = await window.Database.getStatsAsync();
+    const playerNames = allStats.players.map(p => p.name).sort();
+    const fightersList = await api.getAllFighters();
+
+    setupRetroMultiSelect("timeline-multi-select-players-container", playerNames, timelineSelectedPlayers, () => {
+      renderAverageKOTimeline("player-average-timeline-markers", matches, "players", timelineSelectedPlayers, timelineSelectedFighters);
+      renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", timelineSelectedPlayers, timelineSelectedFighters);
+    });
+
+    setupRetroMultiSelect("timeline-multi-select-fighters-container", fightersList, timelineSelectedFighters, () => {
+      renderAverageKOTimeline("player-average-timeline-markers", matches, "players", timelineSelectedPlayers, timelineSelectedFighters);
+      renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", timelineSelectedPlayers, timelineSelectedFighters);
+    });
+
+    // Handle RESET button click
+    const btnClearTimelineFilters = document.getElementById("btn-clear-timeline-filters");
+    if (btnClearTimelineFilters) {
+      btnClearTimelineFilters.onclick = () => {
+        timelineSelectedPlayers.length = 0;
+        timelineSelectedFighters.length = 0;
+        
+        setupRetroMultiSelect("timeline-multi-select-players-container", playerNames, timelineSelectedPlayers, () => {
+          renderAverageKOTimeline("player-average-timeline-markers", matches, "players", timelineSelectedPlayers, timelineSelectedFighters);
+          renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", timelineSelectedPlayers, timelineSelectedFighters);
+        });
+        setupRetroMultiSelect("timeline-multi-select-fighters-container", fightersList, timelineSelectedFighters, () => {
+          renderAverageKOTimeline("player-average-timeline-markers", matches, "players", timelineSelectedPlayers, timelineSelectedFighters);
+          renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", timelineSelectedPlayers, timelineSelectedFighters);
+        });
+
+        renderAverageKOTimeline("player-average-timeline-markers", matches, "players", timelineSelectedPlayers, timelineSelectedFighters);
+        renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", timelineSelectedPlayers, timelineSelectedFighters);
+      };
+    }
+
+    renderAverageKOTimeline("player-average-timeline-markers", matches, "players", timelineSelectedPlayers, timelineSelectedFighters);
+    renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", timelineSelectedPlayers, timelineSelectedFighters);
+
+    const elapsed = Date.now() - startTime;
+    if (elapsed < 250) {
+      await new Promise(resolve => setTimeout(resolve, 250 - elapsed));
+    }
+    hideSectionLoader(telemetryLayout);
+  }
+
+  function renderDominantTeamBox(matches) {
+    const box = document.getElementById("dominant-team-box");
+    const container = document.getElementById("dominant-team-container");
+    if (!box || !container) return;
+
+    // Verify if we should display/calculate the team wins (Teams filter or All match types)
+    const isTeamFilterSelected = (currentInsightsMatchType === "all" || currentInsightsMatchType === "teams");
+    if (!isTeamFilterSelected) {
+      container.innerHTML = `
+        <div class="chart-empty" style="font-family: var(--font-arcade); font-size: 10px; opacity: 0.6; text-transform: uppercase; text-align: center; line-height: 1.4;">
+          There are no matches found.
+        </div>
+      `;
+      return;
+    }
+
+    // Track duo wins: Key is alphabetically sorted names e.g. "Jack & Polo", value is number of wins
+    const winCounts = {};
+
+    matches.forEach(m => {
+      const style = (m.gameStyle || m.matchType || "").toLowerCase().trim();
+      if (style === 'teams' || style === 'team') {
+        // Group players with placement === 1 by their teamColor
+        const winningPlayersByTeam = {};
+        let hasTeamColors = false;
+
+        if (m.players) {
+          m.players.forEach(p => {
+            if (p.placement === 1) {
+              const color = (p.teamColor || "").trim();
+              if (color && color.toLowerCase() !== 'none') {
+                hasTeamColors = true;
+                if (!winningPlayersByTeam[color]) {
+                  winningPlayersByTeam[color] = [];
+                }
+                winningPlayersByTeam[color].push(p.playerName);
+              }
+            }
+          });
+        }
+
+        if (!hasTeamColors) {
+          // If no team colors are set (e.g. they are all "None"), treat all winning players as on the same team
+          const winners = m.players ? m.players.filter(p => p.placement === 1).map(p => p.playerName) : [];
+          if (winners.length >= 2) {
+            winners.sort();
+            for (let i = 0; i < winners.length; i++) {
+              for (let j = i + 1; j < winners.length; j++) {
+                const duoKey = `${winners[i]} & ${winners[j]}`;
+                winCounts[duoKey] = (winCounts[duoKey] || 0) + 1;
+              }
+            }
+          }
+        } else {
+          // Iterate over each winning team
+          for (const color in winningPlayersByTeam) {
+            const teamPlayers = winningPlayersByTeam[color];
+            if (teamPlayers.length >= 2) {
+              teamPlayers.sort();
+              for (let i = 0; i < teamPlayers.length; i++) {
+                for (let j = i + 1; j < teamPlayers.length; j++) {
+                  const duoKey = `${teamPlayers[i]} & ${teamPlayers[j]}`;
+                  winCounts[duoKey] = (winCounts[duoKey] || 0) + 1;
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Find the duo with the highest win count
+    let bestDuo = null;
+    let maxWins = 0;
+
+    for (const duo in winCounts) {
+      if (winCounts[duo] > maxWins) {
+        maxWins = winCounts[duo];
+        bestDuo = duo;
+      }
+    }
+
+    if (!bestDuo || maxWins === 0) {
+      container.innerHTML = `
+        <div class="chart-empty" style="font-family: var(--font-arcade); font-size: 10px; opacity: 0.6; text-transform: uppercase; text-align: center; line-height: 1.4;">
+          There are no matches found.
+        </div>
+      `;
+      return;
+    }
+
+    // Split the duo back into individual player names for rendering and linking
+    const players = bestDuo.split(" & ");
+    const player1 = players[0];
+    const player2 = players[1];
+
+    // Build the redirect hashes
+    const p1Hash = `#player/${player1.toLowerCase().replace(/\s+/g, '-')}`;
+    const p2Hash = `#player/${player2.toLowerCase().replace(/\s+/g, '-')}`;
+
+    // Render beautiful neon style co-victory content
+    container.innerHTML = `
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; width: 100%; text-align: center;">
+        <div style="display: flex; align-items: center; gap: 8px; justify-content: center;">
+          <span style="font-size: 20px; text-shadow: 0 0 10px var(--color-neon-cyan); animation: pulse 2s infinite; display: inline-block;">👥</span>
+          <div style="font-family: var(--font-arcade); font-size: 13px; letter-spacing: 0.5px; white-space: nowrap;">
+            <span class="player-link text-glow-cyan" style="color: var(--color-neon-cyan); cursor: pointer; transition: color 0.2s, text-shadow 0.2s;" 
+                  onclick="window.location.hash = '${p1Hash}'"
+                  onmouseover="this.style.color='var(--color-neon-yellow)'; this.style.textShadow='0 0 8px var(--color-neon-yellow)';"
+                  onmouseout="this.style.color='var(--color-neon-cyan)'; this.style.textShadow='0 0 5px var(--color-neon-cyan)';">${player1.toUpperCase()}</span>
+            <span style="color: #8a8d9a; font-size: 11px; margin: 0 3px;">&amp;</span>
+            <span class="player-link text-glow-cyan" style="color: var(--color-neon-cyan); cursor: pointer; transition: color 0.2s, text-shadow 0.2s;" 
+                  onclick="window.location.hash = '${p2Hash}'"
+                  onmouseover="this.style.color='var(--color-neon-yellow)'; this.style.textShadow='0 0 8px var(--color-neon-yellow)';"
+                  onmouseout="this.style.color='var(--color-neon-cyan)'; this.style.textShadow='0 0 5px var(--color-neon-cyan)';">${player2.toUpperCase()}</span>
+          </div>
+        </div>
+        <div class="panel-beveled neon-yellow" style="padding: 4px 10px; font-family: var(--font-arcade); font-size: 9px; color: var(--color-neon-yellow); text-shadow: 0 0 5px var(--color-neon-yellow); border: 1px solid var(--color-neon-yellow); background: rgba(255, 230, 0, 0.05); min-height: auto; border-radius: 4px; box-shadow: 0 0 8px rgba(255, 230, 0, 0.2); white-space: nowrap; margin-top: 2px;">
+          ${maxWins} ${maxWins === 1 ? 'VICTORY' : 'VICTORIES'}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderMostPlayedFighters(containerId, characters, matches) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    // Filter characters with count > 0 and sort desc
+    const playedChars = characters.filter(c => c.games > 0);
+
+    if (playedChars.length === 0) {
+      container.innerHTML = `<div class="chart-empty" style="font-family: var(--font-arcade); font-size: 13px; opacity: 0.6; width: 100%; text-align: center; line-height: 100px;">NO ENCOUNTERS RECORDED</div>`;
+      return;
+    }
+
+    // Limit to top 10 most played characters
+    const topChars = playedChars.slice(0, 10);
+    const maxPlays = Math.max(...topChars.map(c => c.games), 1);
+
+    let html = "";
+    topChars.forEach(c => {
+      // Compute player breakdowns
+      const playerMap = {};
+      matches.forEach(m => {
+        if (m.players) {
+          m.players.forEach(p => {
+            if (p.character === c.name) {
+              if (!playerMap[p.playerName]) {
+                playerMap[p.playerName] = { games: 0, wins: 0, losses: 0 };
+              }
+              playerMap[p.playerName].games++;
+              if (p.placement === 1) {
+                playerMap[p.playerName].wins++;
+              } else {
+                playerMap[p.playerName].losses++;
+              }
+            }
+          });
+        }
+      });
+
+      const pct = (c.games / maxPlays) * 100;
+      const details = api.getFighterDetails(c.name) || {};
+      const iconUrl = details.icon || 'assets/mario.png';
+
+      // Build tooltip list
+      const tooltipRows = Object.entries(playerMap)
+        .sort((a, b) => b[1].games - a[1].games)
+        .map(([name, pStats]) => `
+          <div class="tooltip-player-row" style="display: flex; justify-content: space-between; gap: 15px; font-size: 9px; border-bottom: 1px dashed rgba(255,255,255,0.08); padding: 4px 0;">
+            <span class="tooltip-p-name" style="color: #fff; font-weight: bold; cursor: pointer; transition: color 0.2s, text-shadow 0.2s;" onclick="window.location.hash = '#player/${name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.color='var(--color-neon-cyan)'; this.style.textShadow='0 0 6px var(--color-neon-cyan)';" onmouseout="this.style.color='#fff'; this.style.textShadow='';">${name}</span>
+            <span class="tooltip-p-stats" style="color: #ccc;">${pStats.games} plays <span style="color: var(--color-neon-yellow); font-weight: bold;">(${pStats.wins}W / ${pStats.losses}L)</span></span>
+          </div>
+        `).join('');
+
+      html += `
+        <div class="v-bar-col" style="display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; position: relative; width: 45px; overflow: visible;">
+          
+          <!-- Custom Retro Beveled Tooltip (CSS Hover Driven) -->
+          <div class="fighter-hover-tooltip panel-beveled neon-magenta" style="position: absolute; bottom: 65px; left: 50%; transform: translateX(-50%) translateY(10px); width: 200px; background: rgba(15, 17, 22, 0.95); border: 1px solid var(--color-neon-magenta); border-radius: 6px; box-shadow: 0 0 15px rgba(255,0,127,0.5); padding: 12px; box-sizing: border-box; display: flex; flex-direction: column; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease; z-index: 100;">
+            <div class="tooltip-header font-arcade text-glow-magenta" style="font-size: 11px; margin-bottom: 6px; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,0,127,0.3); padding-bottom: 6px;">${c.name.toUpperCase()}</div>
+            <div class="tooltip-subheader font-stats" style="font-size: 10px; margin-bottom: 8px; color: #8a8d9a;">TOTAL PICKS: <strong style="color: #fff;">${c.games}</strong></div>
+            <div class="tooltip-players-list" style="display: flex; flex-direction: column; gap: 2px;">
+              ${tooltipRows}
+            </div>
+          </div>
+          
+          <!-- Value Label -->
+          <span class="v-bar-value font-stats text-glow-cyan" style="font-size: 11px; margin-bottom: 6px; font-weight: bold; color: #fff; z-index: 2;">${c.games}</span>
+          
+          <!-- Animated vertical bar track -->
+          <div class="v-bar-track" style="width: 18px; height: calc(${pct}% - 35px); min-height: 4px; background: linear-gradient(180deg, var(--color-neon-magenta) 0%, rgba(255,0,127,0.2) 100%); border: 1px solid var(--color-neon-magenta); box-shadow: 0 0 10px rgba(255,0,127,0.3); border-radius: 4px 4px 0 0; cursor: pointer; transition: height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);" onclick="window.location.hash = '#fighter/${c.name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.boxShadow='0 0 15px var(--color-neon-magenta)';" onmouseout="this.style.boxShadow='';" ></div>
+          
+          <!-- Head icon bubble centered underneath -->
+          <div class="v-bar-icon-bubble" style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--color-neon-magenta); background: var(--color-bg-dark); box-shadow: 0 0 8px rgba(255,0,127,0.4); display: flex; align-items: center; justify-content: center; overflow: hidden; margin-top: 8px; flex-shrink: 0; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onclick="window.location.hash = '#fighter/${c.name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.transform='scale(1.15)'; this.style.boxShadow='0 0 12px var(--color-neon-magenta)';" onmouseout="this.style.transform=''; this.style.boxShadow='';" >
+            <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${c.name}">
+          </div>
+          
+          <!-- Character name centered underneath -->
+          <span class="v-bar-char-name font-stats" style="cursor: pointer; transition: color 0.2s, text-shadow 0.2s;" onclick="window.location.hash = '#fighter/${c.name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.color='var(--color-neon-magenta)'; this.style.textShadow='0 0 6px var(--color-neon-magenta)';" onmouseout="this.style.color=''; this.style.textShadow='';" >${c.name}</span>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  function renderFightersByPlayers(containerId, characters, matches) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    // Map each character to their unique player stats
+    const charPlayersList = characters.map(c => {
+      const playerMap = {};
+      matches.forEach(m => {
+        if (m.players) {
+          m.players.forEach(p => {
+            if (p.character === c.name) {
+              if (!playerMap[p.playerName]) {
+                playerMap[p.playerName] = { games: 0, wins: 0, losses: 0 };
+              }
+              playerMap[p.playerName].games++;
+              if (p.placement === 1) {
+                playerMap[p.playerName].wins++;
+              } else {
+                playerMap[p.playerName].losses++;
+              }
+            }
+          });
+        }
+      });
+      const uniquePlayersCount = Object.keys(playerMap).length;
+      return {
+        ...c,
+        uniquePlayersCount,
+        playerMap
+      };
+    }).filter(c => c.uniquePlayersCount > 0)
+      .sort((a, b) => b.uniquePlayersCount - a.uniquePlayersCount || b.games - a.games);
+
+    if (charPlayersList.length === 0) {
+      container.innerHTML = `<div class="chart-empty" style="font-family: var(--font-arcade); font-size: 13px; opacity: 0.6; width: 100%; text-align: center; line-height: 100px;">NO ENCOUNTERS RECORDED</div>`;
+      return;
+    }
+
+    // Limit to top 10 characters played by the most unique people
+    const topChars = charPlayersList.slice(0, 10);
+    const maxPlayersCount = Math.max(...topChars.map(c => c.uniquePlayersCount), 1);
+
+    let html = "";
+    topChars.forEach(c => {
+      const pct = (c.uniquePlayersCount / maxPlayersCount) * 100;
+      const details = api.getFighterDetails(c.name) || {};
+      const iconUrl = details.icon || 'assets/mario.png';
+
+      // Build tooltip list sorted by playcount under this character
+      const tooltipRows = Object.entries(c.playerMap)
+        .sort((a, b) => b[1].games - a[1].games)
+        .map(([name, pStats]) => `
+          <div class="tooltip-player-row" style="display: flex; justify-content: space-between; gap: 15px; font-size: 9px; border-bottom: 1px dashed rgba(255,255,255,0.08); padding: 4px 0;">
+            <span class="tooltip-p-name" style="color: #fff; font-weight: bold; cursor: pointer; transition: color 0.2s, text-shadow 0.2s;" onclick="window.location.hash = '#player/${name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.color='var(--color-neon-cyan)'; this.style.textShadow='0 0 6px var(--color-neon-cyan)';" onmouseout="this.style.color='#fff'; this.style.textShadow='';">${name}</span>
+            <span class="tooltip-p-stats" style="color: #ccc;">${pStats.games} plays <span style="color: var(--color-neon-yellow); font-weight: bold;">(${pStats.wins}W / ${pStats.losses}L)</span></span>
+          </div>
+        `).join('');
+
+      html += `
+        <div class="v-bar-col" style="display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; position: relative; width: 45px; overflow: visible;">
+          
+          <!-- Custom Retro Beveled Tooltip (CSS Hover Driven) -->
+          <div class="fighter-hover-tooltip panel-beveled neon-yellow" style="position: absolute; bottom: 65px; left: 50%; transform: translateX(-50%) translateY(10px); width: 200px; background: rgba(15, 17, 22, 0.95); border: 1px solid var(--color-neon-yellow); border-radius: 6px; box-shadow: 0 0 15px rgba(255,230,0,0.5); padding: 12px; box-sizing: border-box; display: flex; flex-direction: column; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease; z-index: 100;">
+            <div class="tooltip-header font-arcade text-glow-yellow" style="font-size: 11px; margin-bottom: 6px; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,230,0,0.3); padding-bottom: 6px;">${c.name.toUpperCase()}</div>
+            <div class="tooltip-subheader font-stats" style="font-size: 10px; margin-bottom: 8px; color: #8a8d9a;">UNIQUE PLAYERS: <strong style="color: #fff;">${c.uniquePlayersCount}</strong></div>
+            <div class="tooltip-players-list" style="display: flex; flex-direction: column; gap: 2px;">
+              ${tooltipRows}
+            </div>
+          </div>
+          
+          <!-- Value Label -->
+          <span class="v-bar-value font-stats text-glow-yellow" style="font-size: 11px; margin-bottom: 6px; font-weight: bold; color: #fff; z-index: 2;">${c.uniquePlayersCount}</span>
+          
+          <!-- Animated vertical bar track -->
+          <div class="v-bar-track" style="width: 18px; height: calc(${pct}% - 35px); min-height: 4px; background: linear-gradient(180deg, var(--color-neon-yellow) 0%, rgba(255,230,0,0.2) 100%); border: 1px solid var(--color-neon-yellow); box-shadow: 0 0 10px rgba(255,230,0,0.3); border-radius: 4px 4px 0 0; cursor: pointer; transition: height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);" onclick="window.location.hash = '#fighter/${c.name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.boxShadow='0 0 15px var(--color-neon-yellow)';" onmouseout="this.style.boxShadow='';" ></div>
+          
+          <!-- Head icon bubble centered underneath -->
+          <div class="v-bar-icon-bubble" style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--color-neon-yellow); background: var(--color-bg-dark); box-shadow: 0 0 8px rgba(255,230,0,0.4); display: flex; align-items: center; justify-content: center; overflow: hidden; margin-top: 8px; flex-shrink: 0; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onclick="window.location.hash = '#fighter/${c.name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.transform='scale(1.15)'; this.style.boxShadow='0 0 12px var(--color-neon-yellow)';" onmouseout="this.style.transform=''; this.style.boxShadow='';" >
+            <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${c.name}">
+          </div>
+          
+          <!-- Character name centered underneath -->
+          <span class="v-bar-char-name font-stats" style="cursor: pointer; transition: color 0.2s, text-shadow 0.2s;" onclick="window.location.hash = '#fighter/${c.name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.color='var(--color-neon-yellow)'; this.style.textShadow='0 0 6px var(--color-neon-yellow)';" onmouseout="this.style.color=''; this.style.textShadow='';" >${c.name}</span>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  function renderPlayerCombatOutcomes(containerId, players) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    if (!players || players.length === 0) {
+      container.innerHTML = `<div class="chart-empty" style="font-family: var(--font-arcade); font-size: 13px; opacity: 0.6; width: 100%; text-align: center; line-height: 100px;">NO ENCOUNTERS RECORDED</div>`;
+      return;
+    }
+
+    // Sort by games descending (most active)
+    const activePlayers = [...players].sort((a, b) => b.games - a.games).slice(0, 5);
+    const maxVal = Math.max(...activePlayers.map(p => Math.max(p.kos || 0, p.falls || 0, p.sds || 0)), 1);
+
+    let html = "";
+    activePlayers.forEach(p => {
+      const koPct = ((p.kos || 0) / maxVal) * 100;
+      const fallPct = ((p.falls || 0) / maxVal) * 100;
+      const sdPct = ((p.sds || 0) / maxVal) * 100;
+
+      html += `
+        <div class="player-combat-row" style="display: flex; flex-direction: column; gap: 6px; border-bottom: 1px dashed rgba(255,255,255,0.08); padding-bottom: 12px; margin-bottom: 4px; overflow: visible;">
+          <div class="player-combat-name font-arcade text-glow-cyan" style="font-size: 11px; color: #fff; letter-spacing: 0.5px; text-shadow: 0 0 4px rgba(0,240,255,0.3); cursor: pointer; transition: color 0.2s, text-shadow 0.2s;" onclick="window.location.hash = '#player/${p.name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.color='var(--color-neon-cyan)'; this.style.textShadow='0 0 8px var(--color-neon-cyan)';" onmouseout="this.style.color=''; this.style.textShadow='';" >${p.name.toUpperCase()}</div>
+          
+          <div class="combat-bars-stack" style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
+            <!-- KOs Bar (Cyan) -->
+            <div class="combat-bar-item" style="display: flex; align-items: center; gap: 8px;">
+              <span class="combat-bar-label font-stats" style="width: 45px; font-size: 9px; color: var(--color-neon-cyan); font-weight: bold; letter-spacing: 0.5px;">KOS</span>
+              <div class="combat-progress-track" style="flex: 1; height: 6px; background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.15); border-radius: 3px; position: relative;">
+                <div class="combat-progress-fill" style="width: ${koPct}%; height: 100%; background: linear-gradient(90deg, rgba(0,240,255,0.4) 0%, var(--color-neon-cyan) 100%); box-shadow: 0 0 6px var(--color-neon-cyan); border-radius: 2px;"></div>
+              </div>
+              <span class="combat-bar-value font-stats" style="width: 25px; text-align: right; font-size: 10px; font-weight: bold; color: #fff;">${p.kos || 0}</span>
+            </div>
+            
+            <!-- Falls Bar (Magenta) -->
+            <div class="combat-bar-item" style="display: flex; align-items: center; gap: 8px;">
+              <span class="combat-bar-label font-stats" style="width: 45px; font-size: 9px; color: var(--color-neon-magenta); font-weight: bold; letter-spacing: 0.5px;">FALLS</span>
+              <div class="combat-progress-track" style="flex: 1; height: 6px; background: rgba(255, 0, 127, 0.05); border: 1px solid rgba(255, 0, 127, 0.15); border-radius: 3px; position: relative;">
+                <div class="combat-progress-fill" style="width: ${fallPct}%; height: 100%; background: linear-gradient(90deg, rgba(255,0,127,0.4) 0%, var(--color-neon-magenta) 100%); box-shadow: 0 0 6px var(--color-neon-magenta); border-radius: 2px;"></div>
+              </div>
+              <span class="combat-bar-value font-stats" style="width: 25px; text-align: right; font-size: 10px; font-weight: bold; color: #fff;">${p.falls || 0}</span>
+            </div>
+            
+            <!-- SDs Bar (Yellow) -->
+            <div class="combat-bar-item" style="display: flex; align-items: center; gap: 8px;">
+              <span class="combat-bar-label font-stats" style="width: 45px; font-size: 9px; color: var(--color-neon-yellow); font-weight: bold; letter-spacing: 0.5px;">SDS</span>
+              <div class="combat-progress-track" style="flex: 1; height: 6px; background: rgba(255, 230, 0, 0.05); border: 1px solid rgba(255, 230, 0, 0.15); border-radius: 3px; position: relative;">
+                <div class="combat-progress-fill" style="width: ${sdPct}%; height: 100%; background: linear-gradient(90deg, rgba(255,230,0,0.4) 0%, var(--color-neon-yellow) 100%); box-shadow: 0 0 6px var(--color-neon-yellow); border-radius: 2px;"></div>
+              </div>
+              <span class="combat-bar-value font-stats" style="width: 25px; text-align: right; font-size: 10px; font-weight: bold; color: #fff;">${p.sds || 0}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  function renderAverageKOTimeline(containerId, matches, mode, selectedPlayers = [], selectedFighters = []) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    if (!matches || matches.length === 0) {
+      container.innerHTML = "";
+      const trackColumn = container.closest('.timeline-track-column');
+      if (trackColumn) {
+        trackColumn.style.paddingTop = '50px';
+        trackColumn.style.paddingBottom = '40px';
+        trackColumn.style.height = 'auto';
+        trackColumn.style.marginTop = '0px';
+        trackColumn.style.marginBottom = '0px';
+      }
+      return;
+    }
+
+    const parseOutAtToSeconds = (outAtStr) => {
+      if (!outAtStr || outAtStr.trim() === '---') return null;
+      const parts = outAtStr.trim().split(':');
+      if (parts.length !== 2) return null;
+      const mins = parseInt(parts[0], 10);
+      const secs = parseInt(parts[1], 10);
+      if (isNaN(mins) || isNaN(secs)) return null;
+      return mins * 60 + secs;
+    };
+
+    const formatSecondsToMMSS = (totalSeconds) => {
+      const mins = Math.floor(totalSeconds / 60);
+      const secs = Math.round(totalSeconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    // Filter matches based on the selected players and fighters to affect the dataset being analyzed
+    let timelineMatches = [...matches];
+    const hasTimelinePlayers = Array.isArray(selectedPlayers) && selectedPlayers.length > 0;
+    const hasTimelineFighters = Array.isArray(selectedFighters) && selectedFighters.length > 0;
+
+    if (hasTimelinePlayers || hasTimelineFighters) {
+      const lowerPlayers = hasTimelinePlayers ? selectedPlayers.map(p => p.toLowerCase().trim()) : [];
+      const lowerFighters = hasTimelineFighters ? selectedFighters.map(f => f.toLowerCase().trim()) : [];
+
+      timelineMatches = timelineMatches.filter(m => {
+        if (!m.players) return false;
+
+        if (hasTimelinePlayers && hasTimelineFighters) {
+          // Joint AND: some player must match both the player filter AND the character filter in this match
+          return m.players.some(p => {
+            const playerMatch = lowerPlayers.includes(p.playerName.toLowerCase().trim());
+            const fighterMatch = lowerFighters.includes(p.character.toLowerCase().trim());
+            return playerMatch && fighterMatch;
+          });
+        } else if (hasTimelinePlayers) {
+          // Player filter only
+          return m.players.some(p => lowerPlayers.includes(p.playerName.toLowerCase().trim()));
+        } else {
+          // Fighter filter only
+          return m.players.some(p => lowerFighters.includes(p.character.toLowerCase().trim()));
+        }
+      });
+    }
+
+    const lowerSelectedPlayers = (selectedPlayers || []).map(p => p.toLowerCase().trim());
+    const lowerSelectedFighters = (selectedFighters || []).map(f => f.toLowerCase().trim());
+
+    const entities = {};
+    timelineMatches.forEach(m => {
+      if (m.players) {
+        m.players.forEach(p => {
+          const pNameLower = p.playerName.toLowerCase().trim();
+          const pCharLower = p.character.toLowerCase().trim();
+
+          // If we are looking at players
+          if (mode === "players") {
+            // If a fighter is selected, the player must have played one of the selected fighters in this match to be included
+            if (lowerSelectedFighters.length > 0 && !lowerSelectedFighters.includes(pCharLower)) {
+              return;
+            }
+            const key = p.playerName;
+            if (!entities[key]) {
+              entities[key] = { name: key, totalSecs: 0, count: 0, characters: {} };
+            }
+            const secs = parseOutAtToSeconds(p.outAt) ?? 300; // survivors set to 5:00 mark
+            entities[key].totalSecs += secs;
+            entities[key].count++;
+            entities[key].characters[p.character] = (entities[key].characters[p.character] || 0) + 1;
+          } 
+          // If we are looking at characters
+          else {
+            // If a player is selected, the character must have been played by one of the selected players in this match to be included
+            if (lowerSelectedPlayers.length > 0 && !lowerSelectedPlayers.includes(pNameLower)) {
+              return;
+            }
+            const key = p.character;
+            if (!entities[key]) {
+              entities[key] = { name: key, totalSecs: 0, count: 0 };
+            }
+            const secs = parseOutAtToSeconds(p.outAt) ?? 300; // survivors set to 5:00 mark
+            entities[key].totalSecs += secs;
+            entities[key].count++;
+          }
+        });
+      }
+    });
+
+    let filteredEntities = Object.values(entities).map(ent => {
+      const avgSecs = ent.totalSecs / ent.count;
+      let iconUrl = 'assets/mario.png';
+      if (mode === "players") {
+        let favoriteChar = null;
+        let maxCount = 0;
+        Object.entries(ent.characters).forEach(([char, count]) => {
+          if (count > maxCount) {
+            maxCount = count;
+            favoriteChar = char;
+          }
+        });
+        if (favoriteChar) {
+          const details = api.getFighterDetails(favoriteChar) || {};
+          iconUrl = details.icon || 'assets/mario.png';
+        }
+      } else {
+        const details = api.getFighterDetails(ent.name) || {};
+        iconUrl = details.icon || 'assets/mario.png';
+      }
+      return {
+        ...ent,
+        avgSecs,
+        displayTime: formatSecondsToMMSS(avgSecs),
+        iconUrl
+      };
+    }).sort((a, b) => a.avgSecs - b.avgSecs);
+
+    // If filter selection is specified, only show the selected ones on their respective timeline
+    if (mode === "players" && lowerSelectedPlayers.length > 0) {
+      filteredEntities = filteredEntities.filter(ent => lowerSelectedPlayers.includes(ent.name.toLowerCase().trim()));
+    } else if (mode === "characters" && lowerSelectedFighters.length > 0) {
+      filteredEntities = filteredEntities.filter(ent => lowerSelectedFighters.includes(ent.name.toLowerCase().trim()));
+    }
+
+    const placedMarkers = { above: [], below: [] };
+    let maxStaggerAbove = -1;
+    let maxStaggerBelow = -1;
+    let markersHtml = "";
+    let markerIdx = 0;
+
+    filteredEntities.forEach(ent => {
+      const pct = (ent.avgSecs / 300) * 100;
+      const safePct = Math.max(0, Math.min(100, pct));
+      
+      const isAbove = (markerIdx % 2 === 0);
+      markerIdx++;
+      
+      const sideKey = isAbove ? 'above' : 'below';
+      let staggerIndex = 0;
+      
+      while (placedMarkers[sideKey].some(m => Math.abs(m.pct - safePct) < 8 && m.stagger === staggerIndex)) {
+        staggerIndex++;
+      }
+      placedMarkers[sideKey].push({ pct: safePct, stagger: staggerIndex });
+      
+      if (isAbove) {
+        maxStaggerAbove = Math.max(maxStaggerAbove, staggerIndex);
+      } else {
+        maxStaggerBelow = Math.max(maxStaggerBelow, staggerIndex);
+      }
+      
+      // Use var(--color-neon-cyan) consistently across both timelines
+      const markerColor = 'var(--color-neon-cyan)';
+      const offsetSize = 15 + staggerIndex * 35; // staggers are spaced out vertically
+      
+      markersHtml += `
+        <div class="timeline-marker" style="position: absolute; left: ${safePct}%; top: 50%; transform: translate(-50%, -50%); width: 24px; height: 24px; z-index: ${10 + staggerIndex};">
+          <!-- Dot bubble (character icon) -->
+          <div class="timeline-dot" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid ${markerColor}; box-shadow: 0 0 8px ${markerColor}; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onclick="window.location.hash = '#${mode === 'players' ? 'player' : 'fighter'}/${ent.name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.transform='scale(1.15)'; this.style.boxShadow='0 0 14px ${markerColor}';" onmouseout="this.style.transform=''; this.style.boxShadow='';" >
+            <img src="${ent.iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${ent.name}">
+          </div>
+          <!-- Vertical connector line -->
+          <div class="timeline-connector" style="position: absolute; left: 11px; ${isAbove ? `bottom: 24px` : `top: 24px`}; width: 2px; height: ${offsetSize}px; background: ${markerColor}; opacity: 0.8; z-index: 9;"></div>
+          <!-- Label panel box -->
+          <div class="timeline-player-info panel-beveled" style="position: absolute; left: 12px; ${isAbove ? `bottom: ${24 + offsetSize}px` : `top: ${24 + offsetSize}px`}; transform: translateX(-50%); text-align: center; white-space: nowrap; background: var(--color-bg-dark); border: 1px solid ${markerColor}; padding: 3px 8px; font-size: 9px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px; pointer-events: auto; user-select: none; z-index: 10; cursor: pointer; transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;" onclick="window.location.hash = '#${mode === 'players' ? 'player' : 'fighter'}/${ent.name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.borderColor='#fff'; this.style.boxShadow='0 0 12px ${markerColor}';" onmouseout="this.style.borderColor=''; this.style.boxShadow='';" >
+            <span style="font-weight: bold; color: #fff; text-shadow: 0 0 2px rgba(255,255,255,0.5);">${ent.name}</span>
+            <span style="color: ${markerColor}; font-weight: bold; text-shadow: 0 0 4px ${markerColor};">(${ent.displayTime})</span>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = markersHtml;
+
+    // Dynamically adjust padding of the container's timeline-track-column to fit all markers
+    const trackColumn = container.closest('.timeline-track-column');
+    if (trackColumn) {
+      const pTop = maxStaggerAbove >= 0 ? Math.max(50, 75 + maxStaggerAbove * 35) : 50;
+      const pBottom = maxStaggerBelow >= 0 ? Math.max(40, 75 + maxStaggerBelow * 35) : 40;
+      trackColumn.style.paddingTop = `${pTop}px`;
+      trackColumn.style.paddingBottom = `${pBottom}px`;
+      trackColumn.style.height = 'auto';
+      trackColumn.style.marginTop = '0px';
+      trackColumn.style.marginBottom = '0px';
     }
   }
 
@@ -1728,14 +3153,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Logo home button clicks
   document.getElementById("nav-logo-home").onclick = () => {
-    window.location.hash = "#home";
+    if (window.location.hash === "#home" || window.location.hash === "") {
+      clearAllHomeFilters();
+      renderHome();
+    } else {
+      window.location.hash = "#home";
+    }
   };
 
   // "Back to Select Select" / Home clicks
   const backButtons = document.getElementsByClassName("btn-back-home");
   for (let i = 0; i < backButtons.length; i++) {
     backButtons[i].onclick = () => {
-      window.location.hash = "#home";
+      if (window.location.hash === "#home" || window.location.hash === "") {
+        clearAllHomeFilters();
+        renderHome();
+      } else {
+        window.location.hash = "#home";
+      }
     };
   }
 
@@ -1811,6 +3246,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Player Profile Match Type Toggles
+  const playerMatchtypeFilters = document.getElementById("player-matchtype-filters");
+  if (playerMatchtypeFilters) {
+    playerMatchtypeFilters.addEventListener("click", (e) => {
+      const btn = e.target.closest(".toggle-btn");
+      if (!btn) return;
+      
+      playerMatchtypeFilters.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      
+      currentPlayerMatchType = btn.getAttribute("data-matchtype");
+      const parts = window.location.hash.split("/");
+      if (parts[0] === "#player" && parts[1]) {
+        renderPlayerProfile(parts[1]);
+      }
+    });
+  }
+
+
+
   // Fighter Profile Timeframe Toggles
   const fighterTimeframeFilters = document.getElementById("fighter-timeframe-filters");
   if (fighterTimeframeFilters) {
@@ -1826,6 +3281,36 @@ document.addEventListener("DOMContentLoaded", () => {
       if (parts[0] === "#fighter" && parts[1]) {
         renderFighterProfile(parts[1]);
       }
+    });
+  }
+
+  // Insights Timeframe Toggles
+  const insightsTimeframeFilters = document.getElementById("insights-timeframe-filters");
+  if (insightsTimeframeFilters) {
+    insightsTimeframeFilters.addEventListener("click", (e) => {
+      const btn = e.target.closest(".toggle-btn");
+      if (!btn) return;
+      
+      insightsTimeframeFilters.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      
+      currentInsightsTimeframe = btn.getAttribute("data-timeframe");
+      renderInsights();
+    });
+  }
+
+  // Insights Match Type Toggles
+  const insightsMatchtypeFilters = document.getElementById("insights-matchtype-filters");
+  if (insightsMatchtypeFilters) {
+    insightsMatchtypeFilters.addEventListener("click", (e) => {
+      const btn = e.target.closest(".toggle-btn");
+      if (!btn) return;
+      
+      insightsMatchtypeFilters.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      
+      currentInsightsMatchType = btn.getAttribute("data-matchtype");
+      renderInsights();
     });
   }
 
@@ -2141,6 +3626,95 @@ document.addEventListener("DOMContentLoaded", () => {
 
     dropdown.innerHTML = "";
 
+    // 1. Create Search Box
+    const searchContainer = document.createElement("div");
+    searchContainer.className = "retro-multi-select-search-container";
+    searchContainer.style.cssText = `
+      position: sticky;
+      top: 0;
+      background: var(--color-bg-dark);
+      padding: 8px;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 10;
+      box-sizing: border-box;
+    `;
+    
+    if (dropdown.classList.contains("magenta-theme")) {
+      searchContainer.style.borderBottomColor = "rgba(255, 0, 127, 0.2)";
+    }
+
+    const searchInput = document.createElement("input");
+    searchInput.type = "text";
+    searchInput.className = "retro-multi-select-search-input";
+    searchInput.placeholder = "SEARCH...";
+    searchInput.style.cssText = `
+      background: rgba(12, 13, 18, 0.9);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      color: #fff;
+      font-family: var(--font-stats);
+      font-size: 10px;
+      letter-spacing: 1px;
+      padding: 6px 26px 6px 8px;
+      border-radius: 4px;
+      width: 100%;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    `;
+    
+    if (dropdown.classList.contains("magenta-theme")) {
+      searchInput.style.borderColor = "rgba(255, 0, 127, 0.35)";
+    }
+
+    searchInput.onfocus = () => {
+      if (dropdown.classList.contains("magenta-theme")) {
+        searchInput.style.borderColor = "var(--color-neon-magenta, #ff007f)";
+        searchInput.style.boxShadow = "0 0 8px rgba(255, 0, 127, 0.35)";
+      } else {
+        searchInput.style.borderColor = "var(--color-neon-cyan, #00f0ff)";
+        searchInput.style.boxShadow = "0 0 8px rgba(0, 240, 255, 0.35)";
+      }
+    };
+    searchInput.onblur = () => {
+      if (dropdown.classList.contains("magenta-theme")) {
+        searchInput.style.borderColor = "rgba(255, 0, 127, 0.35)";
+      } else {
+        searchInput.style.borderColor = "rgba(0, 240, 255, 0.35)";
+      }
+      searchInput.style.boxShadow = "none";
+    };
+
+    const clearBtn = document.createElement("button");
+    clearBtn.className = "retro-multi-select-search-clear";
+    clearBtn.innerHTML = "✕";
+    clearBtn.style.cssText = `
+      position: absolute;
+      right: 14px;
+      background: none;
+      border: none;
+      color: #a3a6b5;
+      cursor: pointer;
+      font-size: 11px;
+      display: none;
+      padding: 4px;
+      line-height: 1;
+      outline: none;
+      transition: color 0.2s ease;
+    `;
+    clearBtn.onmouseover = () => {
+      clearBtn.style.color = dropdown.classList.contains("magenta-theme") ? "var(--color-neon-magenta, #ff007f)" : "var(--color-neon-cyan, #00f0ff)";
+    };
+    clearBtn.onmouseout = () => {
+      clearBtn.style.color = "#a3a6b5";
+    };
+
+    searchContainer.appendChild(searchInput);
+    searchContainer.appendChild(clearBtn);
+    dropdown.appendChild(searchContainer);
+
     // "ALL" Option Row
     const allRow = document.createElement("div");
     allRow.className = "retro-multi-option-row all-option";
@@ -2157,10 +3731,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Other Options
     const itemCheckboxes = [];
+    const rowElements = [];
     options.forEach(optVal => {
       const isChecked = selectedValues.includes(optVal);
       const row = document.createElement("div");
       row.className = "retro-multi-option-row";
+      row.setAttribute("data-value", optVal);
       row.innerHTML = `
         <label class="retro-checkbox-wrapper">
           <input type="checkbox" class="retro-checkbox-input item-checkbox" value="${optVal}" ${isChecked ? "checked" : ""}>
@@ -2169,10 +3745,41 @@ document.addEventListener("DOMContentLoaded", () => {
         <span class="option-label">${optVal.toUpperCase()}</span>
       `;
       dropdown.appendChild(row);
+      rowElements.push(row);
 
       const checkbox = row.querySelector(".item-checkbox");
       itemCheckboxes.push(checkbox);
     });
+
+    // Filter functionality
+    const filterOptions = () => {
+      const query = searchInput.value.toLowerCase().trim();
+      if (query === "") {
+        clearBtn.style.display = "none";
+        allRow.style.display = "flex";
+        rowElements.forEach(r => r.style.display = "flex");
+      } else {
+        clearBtn.style.display = "block";
+        allRow.style.display = "none";
+        rowElements.forEach(r => {
+          const val = r.getAttribute("data-value").toLowerCase();
+          if (val.includes(query)) {
+            r.style.display = "flex";
+          } else {
+            r.style.display = "none";
+          }
+        });
+      }
+    };
+
+    searchInput.oninput = filterOptions;
+
+    clearBtn.onclick = (e) => {
+      e.stopPropagation();
+      searchInput.value = "";
+      filterOptions();
+      searchInput.focus();
+    };
 
     // Toggle dropdown visibility
     btn.onclick = (e) => {
@@ -2180,7 +3787,14 @@ document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(".retro-multi-select-dropdown").forEach(d => {
         if (d !== dropdown) d.classList.add("dropdown-hidden");
       });
+      const isOpening = dropdown.classList.contains("dropdown-hidden");
       dropdown.classList.toggle("dropdown-hidden");
+
+      if (isOpening) {
+        searchInput.value = "";
+        filterOptions();
+        setTimeout(() => searchInput.focus(), 50);
+      }
     };
 
     dropdown.onclick = (e) => {
@@ -2228,7 +3842,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Row clicks trigger checkbox toggle
     dropdown.querySelectorAll(".retro-multi-option-row").forEach(row => {
       row.onclick = (e) => {
-        if (e.target.tagName !== "INPUT") {
+        if (e.target.tagName !== "INPUT" && e.target.tagName !== "LABEL" && !e.target.classList.contains("retro-checkbox-box")) {
           const input = row.querySelector("input");
           input.checked = !input.checked;
           input.dispatchEvent(new Event("change"));
@@ -2238,7 +3852,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateButtonText() {
       if (allCheckbox.checked || selectedValues.length === 0) {
-        selectedTextEl.textContent = containerId.includes("players") ? "ALL PLAYERS" : "ALL FIGHTERS";
+        if (containerId.includes("players")) {
+          selectedTextEl.textContent = "ALL PLAYERS";
+        } else if (containerId.includes("series")) {
+          selectedTextEl.textContent = "ALL SERIES";
+        } else {
+          selectedTextEl.textContent = "ALL FIGHTERS";
+        }
         btn.classList.remove("active-selection");
       } else {
         const display = selectedValues.map(v => v.toUpperCase()).join(", ");
@@ -2295,16 +3915,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Clear / Reset podium search filters
-  const btnClearPodiumSearch = document.getElementById("btn-clear-podium-search");
-  if (btnClearPodiumSearch) {
-    btnClearPodiumSearch.onclick = () => {
-      selectedSearchPlayers.length = 0;
-      selectedSearchFighters.length = 0;
-      selectedSearchWinnerPlayer = null;
-      selectedSearchWinnerFighter = null;
-      initSearchDropdowns();
-      updateSearchBadge();
+
+
+  // Clear / Reset podium search filters (Clear Filters Button)
+  const btnClearAllFilters = document.getElementById("btn-clear-all-filters");
+  if (btnClearAllFilters) {
+    btnClearAllFilters.onclick = () => {
+      clearAllHomeFilters();
       renderHome();
     };
   }
@@ -2358,6 +3975,379 @@ document.addEventListener("DOMContentLoaded", () => {
       };
       reader.readAsText(e.target.files[0]);
     };
+  }
+
+  // ==========================================
+  // Render Fighters Library View
+  // ==========================================
+  async function renderFightersLibrary() {
+    const gridWrapper = document.querySelector(".fighters-grid-wrapper");
+    if (gridWrapper) {
+      showSectionLoader(gridWrapper, "cyan");
+    }
+    const startTime = Date.now();
+
+    const roster = await api.getFullRoster();
+    if (!roster) {
+      if (gridWrapper) hideSectionLoader(gridWrapper);
+      return;
+    }
+
+    // 1. One-time Controls & Listeners Initialization
+    if (!isFightersControlsInitialized) {
+      // Extract unique series names
+      const seriesSet = new Set();
+      roster.forEach(r => {
+        if (r.series && r.series.name) {
+          seriesSet.add(r.series.name);
+        }
+      });
+      const uniqueSeries = Array.from(seriesSet).sort();
+      setupRetroMultiSelect("multi-select-series-container", uniqueSeries, fightersSelectedSeries, () => {
+        renderFightersLibrary();
+      });
+
+      // Sync & bind search box input
+      const searchBoxEl = document.getElementById("fighters-search-box");
+      if (searchBoxEl) {
+        searchBoxEl.value = fightersSearchQuery;
+        searchBoxEl.addEventListener("input", (e) => {
+          fightersSearchQuery = e.target.value;
+          renderFightersLibrary();
+        });
+      }
+
+      // Sync & bind sort toggle buttons
+      const sortSwitchEl = document.getElementById("fighters-sort-switch");
+      if (sortSwitchEl) {
+        sortSwitchEl.querySelectorAll(".toggle-btn").forEach(btn => {
+          const mode = btn.getAttribute("data-sort");
+          if (mode === fightersSortBy) {
+            btn.classList.add("active");
+          } else {
+            btn.classList.remove("active");
+          }
+          btn.addEventListener("click", () => {
+            sortSwitchEl.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            fightersSortBy = mode;
+            renderFightersLibrary();
+          });
+        });
+      }
+
+      isFightersControlsInitialized = true;
+    } else {
+      // Sync DOM elements to match existing state in case of page routing back-and-forth
+      const searchBoxEl = document.getElementById("fighters-search-box");
+      if (searchBoxEl) searchBoxEl.value = fightersSearchQuery;
+      const sortSwitchEl = document.getElementById("fighters-sort-switch");
+      if (sortSwitchEl) {
+        sortSwitchEl.querySelectorAll(".toggle-btn").forEach(btn => {
+          if (btn.getAttribute("data-sort") === fightersSortBy) {
+            btn.classList.add("active");
+          } else {
+            btn.classList.remove("active");
+          }
+        });
+      }
+    }
+
+    // 2. Compute dynamic play counts from match records
+    const allMatches = await window.Database.getMatchesAsync();
+    const playCounts = {};
+    if (allMatches) {
+      allMatches.forEach(m => {
+        if (m.players) {
+          m.players.forEach(p => {
+            if (p.character) {
+              const details = api.getFighterDetails(p.character);
+              if (details && details.id) {
+                playCounts[details.id] = (playCounts[details.id] || 0) + 1;
+              }
+            }
+          });
+        }
+      });
+    }
+
+    // 3. Filter & Sort Roster
+    let filteredRoster = [...roster];
+
+    // Search query: filters by name and variant names
+    const query = fightersSearchQuery.toLowerCase().trim();
+    if (query) {
+      filteredRoster = filteredRoster.filter(r => {
+        const matchName = r.name.toLowerCase().includes(query);
+        const matchVariants = r.variants && r.variants.some(v => v.name.toLowerCase().includes(query));
+        return matchName || matchVariants;
+      });
+    }
+
+    // Franchise / Series Filter
+    if (fightersSelectedSeries && fightersSelectedSeries.length > 0) {
+      filteredRoster = filteredRoster.filter(r => r.series && fightersSelectedSeries.includes(r.series.name));
+    }
+
+    // Sort Roster
+    if (fightersSortBy === "alpha") {
+      filteredRoster.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (fightersSortBy === "mostplayed") {
+      filteredRoster.sort((a, b) => {
+        const countA = playCounts[a.slug] || 0;
+        const countB = playCounts[b.slug] || 0;
+        if (countB !== countA) {
+          return countB - countA;
+        }
+        return a.name.localeCompare(b.name); // Secondary alpha sort
+      });
+    }
+
+    // 4. Invalidate and Repopulate Grid
+    const gridEl = document.getElementById("fighters-library-grid");
+    if (gridEl) {
+      gridEl.innerHTML = "";
+      if (filteredRoster.length === 0) {
+        gridEl.innerHTML = `
+          <div class="no-results-panel font-stats text-glow-magenta" style="grid-column: 1 / -1; text-align: center; padding: 40px; font-size: var(--font-size-md); font-weight: bold; background: rgba(12, 13, 18, 0.6); border: 1px dashed var(--color-neon-magenta); border-radius: 8px;">
+            NO FIGHTERS MATCHING THE CURRENT PROTOCOLS FOUND.
+          </div>
+        `;
+        const elapsed = Date.now() - startTime;
+        if (elapsed < 250) {
+          await new Promise(resolve => setTimeout(resolve, 250 - elapsed));
+        }
+        if (gridWrapper) hideSectionLoader(gridWrapper);
+        return;
+      }
+
+      filteredRoster.forEach(r => {
+        const cardNode = createLibraryCardNode(r);
+        gridEl.appendChild(cardNode);
+      });
+    }
+
+    if (gridWrapper) {
+      const elapsed = Date.now() - startTime;
+      if (elapsed < 250) {
+        await new Promise(resolve => setTimeout(resolve, 250 - elapsed));
+      }
+      hideSectionLoader(gridWrapper);
+    }
+  }
+
+  // --- Helper to build individual fighter library cards ---
+  function createLibraryCardNode(r) {
+    const card = document.createElement("div");
+    card.className = "fighter-library-card";
+    card.setAttribute("data-slug", r.slug);
+
+    // Initialize variant state tracker for this slug if not present
+    if (cardVariantIndices[r.slug] === undefined) {
+      cardVariantIndices[r.slug] = 0;
+    }
+
+    const variants = r.variants || [];
+
+    const renderCardState = () => {
+      let activeVariantIdx = cardVariantIndices[r.slug];
+      if (activeVariantIdx >= variants.length || activeVariantIdx < 0) {
+        activeVariantIdx = 0;
+        cardVariantIndices[r.slug] = 0;
+      }
+      const activeVariant = variants[activeVariantIdx] || { name: r.name, boxing_ring_title: "A legendary challenger." };
+
+      // Select active portrait image (find matching alt skin variant)
+      let activeImage = r.alts && r.alts[0] ? r.alts[0].image : "assets/mario.png?v=5";
+      if (r.alts && r.alts.length > 0) {
+        const matchedAlt = r.alts.find(alt => alt.variant && alt.variant.toLowerCase() === activeVariant.name.toLowerCase());
+        if (matchedAlt) {
+          activeImage = matchedAlt.image;
+        } else {
+          activeImage = r.alts[0].image;
+        }
+      }
+
+      // Variant navigation controls (arrow btns shown on-hover only if multiple variants exist)
+      let variantSelectorHtml = "";
+      if (variants.length > 1) {
+        variantSelectorHtml = `
+          <div class="card-variant-selector">
+            <button class="card-variant-arrow-btn prev-variant-btn">◀</button>
+            <div class="card-variant-name-badge">${activeVariant.name.toUpperCase()}</div>
+            <button class="card-variant-arrow-btn next-variant-btn">▶</button>
+          </div>
+        `;
+      }
+
+      const seriesIcon = r.series && r.series.icon ? r.series.icon : "";
+
+      card.innerHTML = `
+        <div class="card-series-backdrop" style="background-image: url('${seriesIcon}'); background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
+        <div class="card-portrait-wrapper">
+          <img class="card-portrait-img" src="${activeImage}" alt="${r.name}" loading="lazy">
+          ${variantSelectorHtml}
+        </div>
+        <div class="card-info-footer">
+          <h3 class="card-fighter-name">${r.name.toUpperCase()}</h3>
+          <div class="card-boxing-title" style="font-family: var(--font-stats); font-size: 10px; color: rgba(255, 255, 255, 0.6); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; margin-bottom: 4px;">
+            ${activeVariant.boxing_ring_title || "A LEGENDARY FIGHTER"}
+          </div>
+          <span class="card-series-badge">${(r.series && r.series.name ? r.series.name : 'Unknown Series').toUpperCase()}</span>
+        </div>
+      `;
+
+      // Bind events inside the newly set innerHTML
+      if (variants.length > 1) {
+        const prevBtn = card.querySelector(".prev-variant-btn");
+        const nextBtn = card.querySelector(".next-variant-btn");
+
+        if (prevBtn) {
+          prevBtn.addEventListener("click", (e) => {
+            e.stopPropagation(); // Avoid triggering card navigation click
+            cardVariantIndices[r.slug] = (cardVariantIndices[r.slug] - 1 + variants.length) % variants.length;
+            renderCardState();
+          });
+        }
+        if (nextBtn) {
+          nextBtn.addEventListener("click", (e) => {
+            e.stopPropagation(); // Avoid triggering card navigation click
+            cardVariantIndices[r.slug] = (cardVariantIndices[r.slug] + 1) % variants.length;
+            renderCardState();
+          });
+        }
+      }
+    };
+
+    // Trigger initial render
+    renderCardState();
+
+    // Card navigation trigger (clicks on the card take the user to `#fighter/slug`)
+    card.addEventListener("click", (e) => {
+      if (e.target.closest(".card-variant-arrow-btn")) {
+        return; // Handled by inline listeners
+      }
+      window.location.hash = `#fighter/${r.slug}`;
+    });
+
+    return card;
+  }
+
+  // --- New Player Training Session Modal Coordinator ---
+  const btnLearnToPlay = document.getElementById("btn-learn-to-play");
+  const customLearnModal = document.getElementById("custom-learn-modal");
+  const btnTrainingCancel = document.getElementById("btn-training-cancel");
+  const btnTrainingConfirm = document.getElementById("btn-training-confirm");
+  const btnTrainingOk = document.getElementById("btn-training-ok");
+  const trainingPlayerNameInput = document.getElementById("training-player-name");
+  const modalStepInput = document.getElementById("modal-step-input");
+  const modalStepSuccess = document.getElementById("modal-step-success");
+
+  if (btnLearnToPlay && customLearnModal) {
+    btnLearnToPlay.addEventListener("click", () => {
+      // Reset state and open modal
+      if (trainingPlayerNameInput) trainingPlayerNameInput.value = "";
+      if (modalStepInput) modalStepInput.style.display = "block";
+      if (modalStepSuccess) modalStepSuccess.style.display = "none";
+      customLearnModal.classList.add("active");
+      if (trainingPlayerNameInput) {
+        setTimeout(() => trainingPlayerNameInput.focus(), 100);
+      }
+    });
+  }
+
+  if (btnTrainingCancel && customLearnModal) {
+    btnTrainingCancel.addEventListener("click", () => {
+      customLearnModal.classList.remove("active");
+    });
+  }
+
+  if (btnTrainingConfirm && customLearnModal) {
+    btnTrainingConfirm.addEventListener("click", () => {
+      const name = trainingPlayerNameInput ? trainingPlayerNameInput.value.trim() : "";
+      if (!name) {
+        alert("PLEASE ENTER YOUR NAME TO REQUEST A TUTORIAL.");
+        return;
+      }
+      if (modalStepInput) modalStepInput.style.display = "none";
+      if (modalStepSuccess) modalStepSuccess.style.display = "block";
+    });
+
+    // Support hitting Enter in the input field
+    if (trainingPlayerNameInput) {
+      trainingPlayerNameInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          btnTrainingConfirm.click();
+        }
+      });
+    }
+  }
+
+  if (btnTrainingOk && customLearnModal) {
+    btnTrainingOk.addEventListener("click", () => {
+      customLearnModal.classList.remove("active");
+    });
+  }
+
+  // Close modal when clicking on the overlay background
+  if (customLearnModal) {
+    customLearnModal.addEventListener("click", (e) => {
+      if (e.target === customLearnModal) {
+        customLearnModal.classList.remove("active");
+      }
+    });
+  }
+
+  // --- New Player Collapsible (Accordion) Toggle Coordinator ---
+  const welcomePanelToggle = document.getElementById("welcome-panel-toggle");
+  const welcomePanelContent = document.getElementById("welcome-panel-content");
+  const welcomeCaret = document.getElementById("welcome-caret");
+
+  if (welcomePanelToggle && welcomePanelContent) {
+    welcomePanelToggle.addEventListener("click", () => {
+      const isExpanded = welcomePanelContent.style.maxHeight && welcomePanelContent.style.maxHeight !== "0px";
+      if (isExpanded) {
+        // Collapse
+        welcomePanelContent.style.maxHeight = "0px";
+        welcomePanelContent.style.padding = "0 25px";
+        if (welcomeCaret) welcomeCaret.style.transform = "rotate(0deg)";
+        welcomePanelToggle.style.backgroundColor = "transparent";
+        welcomePanelToggle.style.borderBottomColor = "rgba(255, 230, 0, 0)";
+      } else {
+        // Expand
+        welcomePanelContent.style.maxHeight = welcomePanelContent.scrollHeight + "px";
+        welcomePanelContent.style.padding = "0 25px 0 25px";
+        if (welcomeCaret) welcomeCaret.style.transform = "rotate(180deg)";
+        welcomePanelToggle.style.backgroundColor = "rgba(255, 230, 0, 0.05)";
+        welcomePanelToggle.style.borderBottomColor = "rgba(255, 230, 0, 0.2)";
+      }
+    });
+  }
+
+  // --- Mobile Sync Collapsible (Accordion) Toggle Coordinator ---
+  const qrPanelToggle = document.getElementById("qr-panel-toggle");
+  const qrPanelContent = document.getElementById("qr-panel-content");
+  const qrCaret = document.getElementById("qr-caret");
+
+  if (qrPanelToggle && qrPanelContent) {
+    qrPanelToggle.addEventListener("click", () => {
+      const isExpanded = qrPanelContent.style.maxHeight && qrPanelContent.style.maxHeight !== "0px";
+      if (isExpanded) {
+        // Collapse
+        qrPanelContent.style.maxHeight = "0px";
+        qrPanelContent.style.padding = "0 25px";
+        if (qrCaret) qrCaret.style.transform = "rotate(0deg)";
+        qrPanelToggle.style.backgroundColor = "transparent";
+        qrPanelToggle.style.borderBottomColor = "rgba(0, 240, 255, 0)";
+      } else {
+        // Expand
+        qrPanelContent.style.maxHeight = qrPanelContent.scrollHeight + "px";
+        qrPanelContent.style.padding = "0 25px 0 25px";
+        if (qrCaret) qrCaret.style.transform = "rotate(180deg)";
+        qrPanelToggle.style.backgroundColor = "rgba(0, 240, 255, 0.05)";
+        qrPanelToggle.style.borderBottomColor = "rgba(0, 240, 255, 0.2)";
+      }
+    });
   }
 
   const btnResetDb = document.getElementById("btn-reset-db");

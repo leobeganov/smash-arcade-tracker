@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Smashalytics - Super Smash Brothers Ultimate AI Screenshot Results Scanner & Retro Match Tracker">
   <title>SMASHALYTICS // ARCADE CABINET</title>
-  <link rel="stylesheet" href="index.css?v=19">
+  <link rel="stylesheet" href="index.css?v=22">
 </head>
 <body class="theme-storm">
 
@@ -34,11 +34,14 @@
 
       <!-- Top Right Action Buttons -->
       <div class="header-nav-buttons">
+        <a href="#fighters" class="btn-nav" id="nav-tab-fighters">
+          <span class="btn-nav-decor">&gt;</span> FIGHTERS
+        </a>
         <a href="#leaderboard" class="btn-nav" id="nav-tab-leaderboard">
           <span class="btn-nav-decor">&gt;</span> LEADERBOARD
         </a>
-        <a href="#telemetry" class="btn-nav" id="nav-tab-telemetry">
-          <span class="btn-nav-decor">&gt;</span> TELEMETRY
+        <a href="#insights" class="btn-nav" id="nav-tab-insights">
+          <span class="btn-nav-decor">&gt;</span> INSIGHTS
         </a>
       </div>
     </header>
@@ -48,8 +51,90 @@
     <!-- ========================================== -->
     <main class="view-container active" id="home-view">
       <div class="home-view-layout">
+        <div class="home-top-row">
+          <!-- New Player Initiation Area (Collapsible, Always Present on Home Page) -->
+          <div class="panel-beveled neon-yellow home-welcome-panel" style="box-sizing: border-box; display: flex; flex-direction: column; background: rgba(12, 13, 18, 0.7); backdrop-filter: blur(10px); padding: 0; overflow: hidden; border-radius: 4px;">
+            <!-- Accordion Toggle Header -->
+            <div id="welcome-panel-toggle" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; cursor: pointer; user-select: none; border-bottom: 2px solid rgba(255, 230, 0, 0); transition: border-color 0.3s, background-color 0.2s;" onmouseover="this.style.backgroundColor='rgba(255, 230, 0, 0.03)'" onmouseout="if(!document.getElementById('welcome-panel-content').style.maxHeight || document.getElementById('welcome-panel-content').style.maxHeight === '0px') this.style.backgroundColor='transparent';">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 18px; text-shadow: 0 0 8px var(--color-neon-yellow);" id="welcome-toggle-icon">❓</span>
+                <h3 class="font-arcade text-glow-yellow" style="font-size: var(--font-size-md); margin: 0; letter-spacing: 1px;">NEW PLAYER?</h3>
+              </div>
+              <span id="welcome-caret" class="font-arcade" style="font-size: 12px; color: var(--color-neon-yellow); transition: transform 0.3s ease; transform: rotate(0deg);">▼</span>
+            </div>
 
+            <!-- Collapsible Accordion Content -->
+            <div id="welcome-panel-content" style="max-height: 0px; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.35s ease; padding: 0 25px;">
+              <div style="padding-top: 15px; padding-bottom: 35px; display: flex; flex-direction: column; gap: 20px;">
+                <!-- Main Layout: Left-hand blurb & Right-hand count/CTA/Slack link -->
+                <div style="display: flex; flex-wrap: wrap; gap: 30px; justify-content: space-between; align-items: stretch;">
+                  
+                  <!-- Left column: Intro Blurb -->
+                  <div style="flex: 1.2; min-width: 280px; font-family: var(--font-stats); color: #cdd1e4; line-height: 1.6; display: flex; flex-direction: column; justify-content: center;">
+                    <p style="margin: 0; font-size: var(--font-size-md);">
+                      Welcome!<br><br>Super Smash Bros. Ultimate is a fighting game played on the Nintendo Switch. Over 85 fighters can be played in free-for-all or team matches. This app automatically shows match insights and player leaderboards.
+                    </p>
+                  </div>
 
+                  <!-- Right column: Count, Tutorial Button, and centered Slack link underneath -->
+                  <div style="flex: 1; min-width: 260px; display: flex; flex-direction: column; gap: 15px; align-items: center; justify-content: center; text-align: center; background: rgba(255, 230, 0, 0.03); border: 1px solid rgba(255, 230, 0, 0.1); border-radius: 6px; padding: 20px; box-shadow: inset 0 0 10px rgba(255, 230, 0, 0.02);">
+                    <!-- Dynamic Ferocian Count Sentence -->
+                    <p class="font-stats" style="margin: 0; font-size: var(--font-size-sm); color: #cdd1e4; line-height: 1.6; font-weight: 500;">
+                      There are already <span id="welcome-ferocian-count" class="font-arcade text-glow-yellow" style="font-size: 16px; color: var(--color-neon-yellow); margin: 0 3px;">0</span> Ferocians playing Smash Bros.<br><span style="display: block; margin-top: 4px;">Come and join us!</span>
+                    </p>
+
+                    <!-- Tutorial Button -->
+                    <div style="width: 100%; max-width: 280px;">
+                      <button class="btn-arcade yellow" id="btn-learn-to-play" style="font-size: 11px; padding: 12px 20px; border-radius: 4px; font-family: var(--font-arcade); font-weight: bold; width: 100%;">
+                        ASK FOR A TUTORIAL
+                      </button>
+                    </div>
+
+                    <!-- Centered Slack Link Box with Caption above -->
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                      <span style="font-family: var(--font-stats); font-size: 10px; color: #a3a6b5; text-transform: uppercase; letter-spacing: 0.5px;">Join our Slack channel</span>
+                      <div style="display: inline-flex; align-items: center; background: rgba(0, 240, 255, 0.08); border: 1px dashed var(--color-neon-cyan); padding: 6px 16px; border-radius: 4px; box-shadow: 0 0 10px rgba(0, 240, 255, 0.1); transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 0 15px rgba(0, 240, 255, 0.2)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 0 10px rgba(0, 240, 255, 0.1)';">
+                        <a href="https://ferocia.slack.com/archives/CQQPV5Y2G" target="_blank" rel="noopener noreferrer" class="font-arcade" style="color: var(--color-neon-cyan); text-decoration: none; font-size: 11px; text-shadow: 0 0 5px var(--color-neon-cyan); transition: text-shadow 0.2s ease, color 0.2s;" id="slack-link-welcome">#gaming-smash-bros</a>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                <!-- Tip section: Centered and full-width underneath both -->
+                <div style="background: rgba(12, 13, 18, 0.9); border-left: 4px solid var(--color-neon-yellow); padding: 12px 18px; margin-top: 5px; font-family: var(--font-stats); display: flex; align-items: center; gap: 12px; box-shadow: inset 0 0 6px rgba(0,0,0,0.5); border-radius: 0 4px 4px 0;">
+                  <span style="font-size: 18px;">💡</span>
+                  <span style="font-size: 12px; color: #a3a6b5; line-height: 1.5;">
+                    <strong style="color: var(--color-neon-yellow);">PRO-TIP:</strong><br><span style="display: block; margin-top: 4px;">Visit the <a href="#fighters" style="color: var(--color-neon-yellow); text-decoration: none; border-bottom: 1px dashed var(--color-neon-yellow); font-weight: bold; text-shadow: 0 0 4px rgba(255, 230, 0, 0.3);" id="tip-fighters-link">Fighters Library</a> to explore detailed characters and learn their moves.</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Desktop Only QR Code Mobile Sync Panel -->
+          <div class="panel-beveled neon-cyan home-qr-panel" style="box-sizing: border-box; display: flex; flex-direction: column; background: rgba(12, 13, 18, 0.7); backdrop-filter: blur(10px); padding: 0; overflow: hidden; border-radius: 4px;">
+            <!-- Accordion Toggle Header -->
+            <div id="qr-panel-toggle" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; cursor: pointer; user-select: none; border-bottom: 2px solid rgba(0, 240, 255, 0); transition: border-color 0.3s, background-color 0.2s;" onmouseover="this.style.backgroundColor='rgba(0, 240, 255, 0.03)'" onmouseout="if(!document.getElementById('qr-panel-content').style.maxHeight || document.getElementById('qr-panel-content').style.maxHeight === '0px') this.style.backgroundColor='transparent';">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 18px; text-shadow: 0 0 8px var(--color-neon-cyan);" id="qr-toggle-icon">📱</span>
+                <h3 class="font-arcade text-glow-cyan" style="font-size: var(--font-size-md); margin: 0; letter-spacing: 1px;">VIEW THIS ON MOBILE</h3>
+              </div>
+              <span id="qr-caret" class="font-arcade" style="font-size: 12px; color: var(--color-neon-cyan); transition: transform 0.3s ease; transform: rotate(0deg);">▼</span>
+            </div>
+
+            <!-- Collapsible Accordion Content -->
+            <div id="qr-panel-content" style="max-height: 0px; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.35s ease; padding: 0 25px;">
+              <div style="padding-top: 15px; padding-bottom: 35px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                <p style="font-family: var(--font-stats); font-size: 10px; color: #a3a6b5; text-align: center; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.4;">Scan this to view the app on your phone</p>
+                
+                <div class="qr-code-glow-box" style="background: #ffffff; padding: 10px; border: 3px solid var(--color-neon-cyan); border-radius: 6px; box-shadow: 0 0 15px rgba(0, 240, 255, 0.45); display: flex; align-items: center; justify-content: center; width: 156px; height: 156px; margin: 0 auto;">
+                  <img id="qr-code-img" src="" alt="Scan QR Code" style="width: 130px; height: 130px; display: block;" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- Podium Header and Timeframe Filter -->
         <div class="podium-header-row">
@@ -123,6 +208,11 @@
                 <!-- Dynamic JS options -->
               </div>
             </div>
+
+            <!-- Clear Filters Button -->
+            <button type="button" class="btn-arcade magenta" id="btn-clear-all-filters" style="font-size: 10px; padding: 10px 15px; border-radius: 4px; font-family: var(--font-arcade); font-weight: bold; height: 38px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; box-sizing: border-box; text-shadow: 0 0 5px rgba(255, 0, 127, 0.5);">
+              CLEAR
+            </button>
           </div>
         </div>
 
@@ -201,45 +291,122 @@
             <img src="" alt="" class="fighter-card-img" id="player-profile-fighter-img">
             <h2 class="profile-title-name" id="player-profile-name">Leo</h2>
           </div>
-          <button class="btn-arcade magenta" id="btn-player-see-matches" style="width: 100%; font-size: 10px; padding: 10px 15px;">SEE ALL MATCHES</button>
+
+          <!-- Player Metadata Box (Prototype) -->
+          <div class="panel-beveled neon-magenta" id="player-custom-profile-box" style="padding: 20px;">
+            <div style="font-family: var(--font-arcade); font-size: 11px; color: var(--color-neon-yellow); margin-bottom: 12px; letter-spacing: 0.5px; border-bottom: 1px dashed rgba(255, 0, 127, 0.3); padding-bottom: 8px;">
+              PLAYER PROFILE
+            </div>
+            
+            <!-- Prototype Warning -->
+            <div style="background: rgba(255, 230, 0, 0.1); border: 1px solid var(--color-neon-yellow); padding: 8px 10px; border-radius: 4px; font-family: monospace; font-size: 9px; color: var(--color-neon-yellow); line-height: 1.4; margin-bottom: 15px; box-shadow: 0 0 10px rgba(255, 230, 0, 0.15);">
+              ⚠️ Prototype only.<br>This is local only for the demo, and not built properly yet.<br>We also want to use a profile picture, instead of just the most popular character they're using.
+            </div>
+
+            <!-- Profile Form -->
+            <div class="profile-form-wrapper" style="display: flex; flex-direction: column; gap: 12px; font-family: var(--font-stats); font-size: 12px;">
+              <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="color: var(--color-neon-magenta); font-weight: bold; letter-spacing: 0.5px; font-size: 9px; text-transform: uppercase;">Name</label>
+                <input type="text" id="profile-input-name" class="retro-input-beveled" style="width: 100%; background: rgba(0,0,0,0.5); border: 1px solid var(--color-neon-magenta); color: #fff; padding: 8px 12px; font-family: monospace; font-size: 12px; box-sizing: border-box; outline: none; transition: all 0.2s ease;" value="" onfocus="this.style.borderColor='var(--color-neon-yellow)'; this.style.boxShadow='0 0 8px var(--color-neon-yellow)';" onblur="this.style.borderColor='var(--color-neon-magenta)'; this.style.boxShadow='none';">
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="color: var(--color-neon-magenta); font-weight: bold; letter-spacing: 0.5px; font-size: 9px; text-transform: uppercase;">Slack</label>
+                <input type="text" id="profile-input-slack" class="retro-input-beveled" style="width: 100%; background: rgba(0,0,0,0.5); border: 1px solid var(--color-neon-magenta); color: #fff; padding: 8px 12px; font-family: monospace; font-size: 12px; box-sizing: border-box; outline: none; transition: all 0.2s ease;" value="" placeholder="@username" onfocus="this.style.borderColor='var(--color-neon-yellow)'; this.style.boxShadow='0 0 8px var(--color-neon-yellow)';" onblur="this.style.borderColor='var(--color-neon-magenta)'; this.style.boxShadow='none';">
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="color: var(--color-neon-magenta); font-weight: bold; letter-spacing: 0.5px; font-size: 9px; text-transform: uppercase;">Team</label>
+                <input type="text" id="profile-input-team" class="retro-input-beveled" style="width: 100%; background: rgba(0,0,0,0.5); border: 1px solid var(--color-neon-magenta); color: #fff; padding: 8px 12px; font-family: monospace; font-size: 12px; box-sizing: border-box; outline: none; transition: all 0.2s ease;" value="" placeholder="e.g. Team Metal" onfocus="this.style.borderColor='var(--color-neon-yellow)'; this.style.boxShadow='0 0 8px var(--color-neon-yellow)';" onblur="this.style.borderColor='var(--color-neon-magenta)'; this.style.boxShadow='none';">
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 4px; border-top: 1px dashed rgba(255, 0, 127, 0.3); padding-top: 10px; margin-top: 5px;">
+                <label style="color: rgba(255,255,255,0.6); font-weight: bold; letter-spacing: 0.5px; font-size: 9px; text-transform: uppercase;">Last Played</label>
+                <div id="profile-text-lastplayed" style="font-family: monospace; font-size: 11px; color: var(--color-neon-cyan); text-shadow: 0 0 5px rgba(0,240,255,0.5); padding: 4px 0;">-</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Main stats panels -->
         <div class="profile-content-area">
           
-          <!-- Timeframe Selector -->
-          <div class="profile-timeframe-row" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-            <h2 class="profile-section-title text-glow-magenta" style="font-family: var(--font-arcade); font-size: var(--font-size-xs); margin: 0; letter-spacing: 1px; text-transform: uppercase;">PLAYER SPECS</h2>
-            <div class="timeframe-filter-wrapper" style="display: flex; align-items: center; gap: 10px;">
-              <span class="mode-toggle-label" style="font-size: 10px; color: var(--color-neon-magenta); letter-spacing: 0.5px; font-family: var(--font-arcade);">TIMEFRAME:</span>
-              <div class="toggle-switch-beveled" id="player-timeframe-filters">
-                <button class="toggle-btn" data-timeframe="today">Today</button>
-                <button class="toggle-btn" data-timeframe="7days">7 Days</button>
-                <button class="toggle-btn" data-timeframe="30days">30 Days</button>
-                <button class="toggle-btn active" data-timeframe="alltime">All Time</button>
+          <!-- Filter Row (Timeframe & Match Type Selector) -->
+          <div class="profile-timeframe-row" style="display: flex; align-items: center; justify-content: flex-end; margin-bottom: 15px;">
+            <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+              <!-- Match Type Filter -->
+              <div class="matchtype-filter-wrapper" style="display: flex; align-items: center; gap: 10px;">
+                <span class="mode-toggle-label" style="font-size: 10px; color: var(--color-neon-magenta); letter-spacing: 0.5px; font-family: var(--font-arcade);">MATCH TYPE:</span>
+                <div class="toggle-switch-beveled" id="player-matchtype-filters">
+                  <button class="toggle-btn active" data-matchtype="all">All</button>
+                  <button class="toggle-btn" data-matchtype="1v1">1v1</button>
+                  <button class="toggle-btn" data-matchtype="free-for-all">FFA</button>
+                  <button class="toggle-btn" data-matchtype="teams">Teams</button>
+                </div>
+              </div>
+              <!-- Timeframe Filter -->
+              <div class="timeframe-filter-wrapper" style="display: flex; align-items: center; gap: 10px;">
+                <span class="mode-toggle-label" style="font-size: 10px; color: var(--color-neon-magenta); letter-spacing: 0.5px; font-family: var(--font-arcade);">TIMEFRAME:</span>
+                <div class="toggle-switch-beveled" id="player-timeframe-filters">
+                  <button class="toggle-btn" data-timeframe="today">Today</button>
+                  <button class="toggle-btn" data-timeframe="7days">7 Days</button>
+                  <button class="toggle-btn" data-timeframe="30days">30 Days</button>
+                  <button class="toggle-btn active" data-timeframe="alltime">All Time</button>
+                </div>
+              </div>
+              <!-- Fighter Filter -->
+              <div class="fighter-filter-wrapper" style="display: flex; align-items: center; gap: 10px; z-index: 10;">
+                <span class="mode-toggle-label" style="font-size: 10px; color: var(--color-neon-magenta); letter-spacing: 0.5px; font-family: var(--font-arcade);">FIGHTER:</span>
+                <div class="retro-multi-select-container" id="player-profile-multi-select-fighters-container">
+                  <button type="button" class="retro-select retro-multi-select-btn magenta-theme" id="btn-player-profile-multi-fighters" style="border-color: var(--color-neon-magenta); text-shadow: 0 0 5px rgba(255, 0, 127, 0.3);">
+                    <span class="selected-text">ALL FIGHTERS</span>
+                    <span class="dropdown-caret">▼</span>
+                  </button>
+                  <div class="retro-multi-select-dropdown magenta-theme dropdown-hidden" id="dropdown-player-profile-multi-fighters">
+                    <!-- Generated options list -->
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Numerical stats grid -->
           <div class="stats-grid-container">
-            <div class="stat-cell-retro">
-              <div class="stat-title" id="player-stat-wins-title">Rating</div>
+            <div class="stat-cell-retro" id="player-games-cell" style="cursor: pointer;">
+              <div class="stat-title">Matches Played</div>
+              <div class="stat-num text-glow-cyan" id="player-stat-games">-</div>
+              <div class="stat-action-link text-glow-cyan" style="font-size: 8px; color: var(--color-neon-cyan); font-family: var(--font-arcade); margin-top: 5px; opacity: 0.8; letter-spacing: 0.5px;">(SHOW ALL MATCHES)</div>
+            </div>
+            <div class="stat-cell-retro" id="player-wins-cell" style="cursor: pointer;">
+              <div class="stat-title">Wins</div>
               <div class="stat-num text-glow-yellow" id="player-stat-wins">-</div>
               <div class="stat-sub-label" id="player-stat-wins-raw">-</div>
+              <div class="stat-action-link text-glow-yellow" style="font-size: 8px; color: var(--color-neon-yellow); font-family: var(--font-arcade); margin-top: 5px; opacity: 0.8; letter-spacing: 0.5px;">(SHOW ALL WINS)</div>
             </div>
-            <div class="stat-cell-retro">
+            <div class="stat-cell-retro" id="player-losses-cell" style="cursor: pointer;">
               <div class="stat-title">Losses</div>
               <div class="stat-num text-glow-magenta" id="player-stat-losses">-</div>
+              <div class="stat-action-link text-glow-magenta" style="font-size: 8px; color: var(--color-neon-magenta); font-family: var(--font-arcade); margin-top: 5px; opacity: 0.8; letter-spacing: 0.5px;">(SHOW ALL LOSSES)</div>
             </div>
-            <div class="stat-cell-retro" id="player-winrate-cell" style="cursor: pointer;">
+            <div class="stat-cell-retro" id="player-winrate-cell">
               <div class="stat-title">Win Rate</div>
               <div class="stat-num text-glow-yellow" id="player-stat-winrate">-%</div>
-              <div style="font-size: 8px; color: var(--color-neon-yellow); font-family: var(--font-arcade); margin-top: 5px; opacity: 0.8; letter-spacing: 0.5px;">(SEE WON MATCHES)</div>
             </div>
-            <div class="stat-cell-retro">
+            <div class="stat-cell-retro" id="player-kd-cell">
               <div class="stat-title">Knockout / Fall Ratio</div>
               <div class="stat-num text-glow-magenta" id="player-stat-kd">-</div>
+            </div>
+            <div class="stat-cell-retro" id="player-kos-cell">
+              <div class="stat-title">Knockouts</div>
+              <div class="stat-num text-glow-cyan" id="player-stat-kos">-</div>
+            </div>
+            <div class="stat-cell-retro" id="player-falls-cell">
+              <div class="stat-title">Falls</div>
+              <div class="stat-num text-glow-magenta" id="player-stat-falls">-</div>
+            </div>
+            <div class="stat-cell-retro" id="player-sds-cell">
+              <div class="stat-title">Self-Destructs</div>
+              <div class="stat-num text-glow-yellow" id="player-stat-sds">-</div>
             </div>
           </div>
 
@@ -319,27 +486,40 @@
             </div>
           </div>
 
-          <button class="btn-arcade cyan" id="btn-fighter-see-matches" style="width: 100%; font-size: 10px; padding: 10px 15px;">SEE ALL MATCHES</button>
-
           <!-- Numerical stats grid -->
           <div class="stats-grid-container">
-            <div class="stat-cell-retro">
-              <div class="stat-title" id="fighter-stat-wins-title">Rating</div>
+            <div class="stat-cell-retro" id="fighter-games-cell" style="cursor: pointer;">
+              <div class="stat-title">Matches Played</div>
+              <div class="stat-num text-glow-cyan" id="fighter-stat-games">-</div>
+            </div>
+            <div class="stat-cell-retro" id="fighter-wins-cell" style="cursor: pointer;">
+              <div class="stat-title">Wins</div>
               <div class="stat-num text-glow-yellow" id="fighter-stat-wins">-</div>
               <div class="stat-sub-label" id="fighter-stat-wins-raw">-</div>
             </div>
-            <div class="stat-cell-retro">
-              <div class="stat-title">Fighter Losses</div>
+            <div class="stat-cell-retro" id="fighter-losses-cell" style="cursor: pointer;">
+              <div class="stat-title">Losses</div>
               <div class="stat-num text-glow-magenta" id="fighter-stat-losses">-</div>
             </div>
             <div class="stat-cell-retro" id="fighter-winrate-cell" style="cursor: pointer;">
               <div class="stat-title">Win Rate</div>
               <div class="stat-num text-glow-yellow" id="fighter-stat-winrate">-%</div>
-              <div style="font-size: 8px; color: var(--color-neon-yellow); font-family: var(--font-arcade); margin-top: 5px; opacity: 0.8; letter-spacing: 0.5px;">(SEE WON MATCHES)</div>
             </div>
-            <div class="stat-cell-retro">
+            <div class="stat-cell-retro" id="fighter-kd-cell" style="cursor: pointer;">
               <div class="stat-title">Knockout / Fall Ratio</div>
               <div class="stat-num text-glow-magenta" id="fighter-stat-kd">-</div>
+            </div>
+            <div class="stat-cell-retro" id="fighter-kos-cell">
+              <div class="stat-title">Knockouts</div>
+              <div class="stat-num text-glow-cyan" id="fighter-stat-kos">-</div>
+            </div>
+            <div class="stat-cell-retro" id="fighter-falls-cell">
+              <div class="stat-title">Falls</div>
+              <div class="stat-num text-glow-magenta" id="fighter-stat-falls">-</div>
+            </div>
+            <div class="stat-cell-retro" id="fighter-sds-cell">
+              <div class="stat-title">Self-Destructs</div>
+              <div class="stat-num text-glow-yellow" id="fighter-stat-sds">-</div>
             </div>
           </div>
 
@@ -381,6 +561,61 @@
     </main>
 
     <!-- ========================================== -->
+    <!-- VIEW: FIGHTERS LIBRARY -->
+    <!-- ========================================== -->
+    <main class="view-container" id="fighters-view">
+      <div class="fighters-view-layout">
+        
+        <div class="fighters-header-row">
+          <div class="fighters-title-group">
+            <h2 class="fighters-title font-arcade text-glow-cyan" style="font-size: 24px; margin: 0; letter-spacing: 2px;">FIGHTERS LIBRARY</h2>
+          </div>
+        </div>
+
+        <div class="fighters-controls-row panel-beveled neon-cyan" style="display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 15px 25px; margin-bottom: 30px; background: rgba(12, 13, 18, 0.6);">
+          <!-- Left: Search Box -->
+          <div class="fighters-control-item" style="display: flex; flex-direction: column; gap: 6px; flex: 1; max-width: 320px;">
+            <label class="control-label text-glow-cyan" style="font-family: var(--font-arcade); font-size: var(--font-size-xs); font-weight: bold; letter-spacing: 1px;">SEARCH FIGHTER</label>
+            <div class="search-input-wrapper" style="width: 100%;">
+              <span class="search-icon-decor">&gt;</span>
+              <input type="text" class="retro-input" id="fighters-search-box" placeholder="ENTER NAME..." autocomplete="off" style="width: 100%; padding-left: 35px !important;">
+            </div>
+          </div>
+
+          <!-- Middle: Series Dropdown -->
+          <div class="fighters-control-item" style="display: flex; flex-direction: column; gap: 6px; flex: 1; max-width: 300px; position: relative;">
+            <label class="control-label text-glow-magenta" style="font-family: var(--font-arcade); font-size: var(--font-size-xs); font-weight: bold; letter-spacing: 1px;">SERIES</label>
+            <div class="retro-multi-select-container" id="multi-select-series-container" style="width: 100%;">
+              <button type="button" class="retro-select retro-multi-select-btn" id="btn-multi-series" style="width: 100%;">
+                <span class="selected-text">ALL SERIES</span>
+                <span class="dropdown-caret">▼</span>
+              </button>
+              <div class="retro-multi-select-dropdown dropdown-hidden" id="dropdown-multi-series">
+                <!-- Dynamic JS options -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Sort Switcher -->
+          <div class="fighters-control-item" style="display: flex; flex-direction: column; gap: 6px; width: auto;">
+            <label class="control-label text-glow-yellow" style="font-family: var(--font-arcade); font-size: var(--font-size-xs); font-weight: bold; letter-spacing: 1px;">SORT BY</label>
+            <div class="toggle-switch-beveled" id="fighters-sort-switch">
+              <button class="toggle-btn active" data-sort="alpha">ALPHABETICAL</button>
+              <button class="toggle-btn" data-sort="mostplayed">MOST PLAYED</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="fighters-grid-wrapper">
+          <div id="fighters-library-grid" class="fighters-library-grid">
+            <!-- Dynamic character cards injected by JS -->
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- ========================================== -->
     <!-- VIEW: GLOBAL LEADERBOARD -->
     <!-- ========================================== -->
     <main class="view-container" id="leaderboard-view">
@@ -389,10 +624,6 @@
         <div class="leaderboard-control-row">
           <div style="display: flex; align-items: center; gap: 20px;">
             <h2 class="leaderboard-title" id="leaderboard-header-title">RANKINGS: PLAYER MODE</h2>
-            <div class="retro-loader" id="leaderboard-loader" style="display: none;">
-              <span class="loader-led"></span>
-              <span class="loader-text">FETCHING DATA...</span>
-            </div>
           </div>
           
           <div class="leaderboard-filters-group">
@@ -574,54 +805,197 @@
     <!-- ========================================== -->
     <!-- VIEW: TELEMETRY (CHARTS) -->
     <!-- ========================================== -->
-    <main class="view-container" id="telemetry-view">
+    <!-- ========================================== -->
+    <!-- VIEW: INSIGHTS (CHARTS & TIMELINES) -->
+    <!-- ========================================== -->
+    <main class="view-container" id="insights-view">
       <div class="telemetry-view-layout">
 
+        <!-- Insights Header and Timeframe Filter -->
+        <div class="insights-header-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 15px; border-bottom: 1px dashed rgba(0, 240, 255, 0.2); padding-bottom: 15px; margin-bottom: -15px;">
+          <div class="insights-title-col">
+            <h2 class="text-glow-cyan font-arcade" style="margin: 0; font-size: 16px; letter-spacing: 1px;">MATCH INSIGHTS</h2>
+            <p class="cabinet-subtitle" style="margin: 4px 0 0 0; font-size: 10px; color: #8a8d9a; font-family: var(--font-stats);">DASHBOARD RECAP & ANALYTICS</p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+            <!-- Match Type Filter -->
+            <div class="matchtype-filter-wrapper" style="display: flex; align-items: center; gap: 10px;">
+              <span class="mode-toggle-label" style="font-size: 10px; color: var(--color-neon-cyan); letter-spacing: 0.5px; font-family: var(--font-arcade);">MATCH TYPE:</span>
+              <div class="toggle-switch-beveled" id="insights-matchtype-filters">
+                <button class="toggle-btn active" data-matchtype="all">All</button>
+                <button class="toggle-btn" data-matchtype="1v1">1v1</button>
+                <button class="toggle-btn" data-matchtype="free-for-all">FFA</button>
+                <button class="toggle-btn" data-matchtype="teams">Teams</button>
+              </div>
+            </div>
+            <!-- Timeframe Filter -->
+            <div class="toggle-switch-beveled" id="insights-timeframe-filters" style="min-width: 280px;">
+              <button class="toggle-btn" data-timeframe="today">TODAY</button>
+              <button class="toggle-btn" data-timeframe="7days">7 DAYS</button>
+              <button class="toggle-btn" data-timeframe="30days">30 DAYS</button>
+              <button class="toggle-btn active" data-timeframe="alltime">ALL TIME</button>
+            </div>
+          </div>
+        </div>
 
         <div class="telemetry-kpis-grid">
+          <!-- Top Left -->
           <div class="panel-beveled neon-cyan tel-kpi-card">
             <div class="kpi-title">TOTAL MATCHES</div>
             <div class="kpi-value text-glow-cyan" id="tel-kpi-matches">0</div>
           </div>
-          <div class="panel-beveled neon-yellow tel-kpi-card">
-            <div class="kpi-title">TOP PLAYER</div>
-            <div class="kpi-value text-glow-yellow" id="tel-kpi-player">N/A</div>
-          </div>
+          <!-- Top Right -->
           <div class="panel-beveled neon-magenta tel-kpi-card">
             <div class="kpi-title">DOMINANT FIGHTER</div>
             <div class="kpi-value text-glow-magenta" id="tel-kpi-character">N/A</div>
           </div>
-        </div>
-
-        <div class="telemetry-grid">
-          <!-- Win Rates / Gauges -->
-          <div class="panel-beveled tel-chart-box neon-cyan">
-            <h3 class="font-arcade text-glow-cyan chart-box-title">WIN RATE PERFORMANCE</h3>
-            <div class="chart-content" id="win-rate-gauges-container">
+          <!-- Bottom Left -->
+          <div class="panel-beveled neon-yellow tel-kpi-card" style="padding: 15px 20px; min-height: 140px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div class="kpi-title" style="margin-bottom: 5px;">WIN RATE PERFORMANCE</div>
+            <div class="chart-content" id="win-rate-gauges-container" style="display: flex; justify-content: space-around; width: 100%; min-height: 95px;">
               <!-- Injected SVGs of Glowing Win Rate Gauges -->
             </div>
           </div>
+          <!-- Bottom Right -->
+          <div class="panel-beveled neon-cyan tel-kpi-card" id="dominant-team-box" style="padding: 15px 15px; min-height: 140px; display: flex; flex-direction: column; justify-content: space-between; align-items: stretch; text-align: left;">
+            <div>
+              <div class="kpi-title text-glow-cyan" style="margin-bottom: 4px; font-size: 9.5px; text-align: center; letter-spacing: 0.5px; font-family: var(--font-arcade);">MOST VICTORIOUS TEAM COMBINATION</div>
+              <p style="margin: 0; font-size: 8px; color: #8a8d9a; font-family: var(--font-stats); text-transform: uppercase; text-align: center;">The team that has had the most victories together.</p>
+            </div>
+            <div class="chart-content" id="dominant-team-container" style="display: flex; align-items: center; justify-content: center; min-height: 70px; width: 100%;">
+              <!-- Dynamic content injected here -->
+            </div>
+          </div>
+        </div>
 
-          <!-- Fighter Popularity Donut -->
+        <div class="telemetry-grid">
+          <!-- Player Placements Stacked Bar -->
+          <div class="panel-beveled tel-chart-box neon-yellow full-width-chart">
+            <h3 class="font-arcade text-glow-yellow chart-box-title" style="margin-top: 0; margin-bottom: 20px;">PLAYER PLACEMENT DISTRIBUTION</h3>
+            <div class="chart-content" style="min-height: 250px;">
+              <div id="outcomes-stacked-bar-container" style="width:100%; height:auto; min-height:220px;">
+                <!-- Stacked Bar Chart SVG -->
+              </div>
+            </div>
+            <div class="show-more-placements-wrapper" style="display: flex; justify-content: center; width: 100%; margin-top: 20px;">
+              <button type="button" class="btn-arcade yellow" id="btn-show-more-placements" style="font-size: 10px; padding: 10px 20px; font-family: var(--font-arcade); font-weight: bold; display: none;">
+                SHOW MORE
+              </button>
+            </div>
+          </div>
+
+          <!-- Most Played Fighter (Vertical Bar Chart) -->
           <div class="panel-beveled tel-chart-box neon-magenta">
-            <h3 class="font-arcade text-glow-magenta chart-box-title">FIGHTER SPECTRUM POPULARITY</h3>
-            <div class="chart-content flex-center">
-              <div id="popularity-donut-chart-container" style="width:100%; height:100%; min-height:240px; display:flex; align-items:center; justify-content:center;">
-                <!-- Donut Chart SVG -->
+            <h3 class="font-arcade text-glow-magenta chart-box-title" style="margin-top: 0; margin-bottom: 20px;">MOST PLAYED FIGHTERS</h3>
+            <p style="margin: -15px 0 20px 0; font-size: 10px; color: #8a8d9a; font-family: var(--font-stats); text-transform: uppercase;">HOW MANY TIMES A FIGHTER HAS BEEN PLAYED</p>
+            <div class="chart-content flex-center" style="position: relative; padding: 15px; box-sizing: border-box; min-height: 250px;">
+              <div id="most-played-fighters-container" style="width: 100%; height: 100%; min-height: 240px; display: flex; align-items: flex-end; justify-content: space-around; padding-bottom: 20px; box-sizing: border-box; overflow: visible;">
+                <!-- Vertical Bars Injected Here -->
               </div>
             </div>
           </div>
 
-          <!-- Player Outcomes Stacked Bar -->
-          <div class="panel-beveled tel-chart-box neon-yellow full-width-chart">
-            <h3 class="font-arcade text-glow-yellow chart-box-title">PLAYER PLACEMENT DISTRIBUTION</h3>
-            <div class="chart-content" style="min-height: 250px;">
-              <div id="outcomes-stacked-bar-container" style="width:100%; height:100%; min-height:220px;">
-                <!-- Stacked Bar Chart SVG -->
+          <!-- Most Popular Fighter (Vertical Bar Chart) -->
+          <div class="panel-beveled tel-chart-box neon-yellow">
+            <h3 class="font-arcade text-glow-yellow chart-box-title" style="margin-top: 0; margin-bottom: 20px;">MOST POPULAR FIGHTERS</h3>
+            <p style="margin: -15px 0 20px 0; font-size: 10px; color: #8a8d9a; font-family: var(--font-stats); text-transform: uppercase;">HOW MANY PLAYERS HAVE PLAYED A FIGHTER</p>
+            <div class="chart-content flex-center" style="position: relative; padding: 15px; box-sizing: border-box; min-height: 250px;">
+              <div id="most-popular-fighters-container" style="width: 100%; height: 100%; min-height: 240px; display: flex; align-items: flex-end; justify-content: space-around; padding-bottom: 20px; box-sizing: border-box; overflow: visible;">
+                <!-- Vertical Bars Injected Here -->
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Daily match activity (Line Graph) -->
+        <div class="panel-beveled neon-yellow full-width-chart" style="padding: 25px 20px; overflow: visible; margin-top: 25px;">
+          <h3 class="font-arcade text-glow-yellow chart-box-title" style="margin-top: 0; margin-bottom: 20px;">DAILY MATCH ACTIVITY</h3>
+          <p style="margin: -15px 0 20px 0; font-size: 10px; color: #8a8d9a; font-family: var(--font-stats); text-transform: uppercase;">DISTRIBUTION OF MATCHES PLAYED</p>
+          <div class="chart-content" id="daily-peak-timeline-container" style="position: relative; width: 100%;">
+             <!-- Injected SVG of Glowing Line Chart with tooltip overlay -->
+          </div>
+        </div>
+
+        <!-- Average Knockout Timelines Section -->
+        <div class="panel-beveled neon-cyan full-width-chart" style="padding: 25px 20px; overflow: visible;">
+          <h3 class="font-arcade text-glow-cyan chart-box-title" style="margin-top: 0; margin-bottom: 20px;">AVERAGE ELIMINATION TIMELINES</h3>
+          
+          <!-- Visual Search Filter Controls -->
+          <div class="timeline-filter-controls" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 30px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+              
+              <!-- Custom Multi-select Player Dropdown -->
+              <div class="retro-multi-select-container" id="timeline-multi-select-players-container">
+                <button type="button" class="retro-select retro-multi-select-btn" id="btn-timeline-multi-players" style="border-color: var(--color-neon-cyan); text-shadow: 0 0 5px rgba(0, 240, 255, 0.3);">
+                  <span class="selected-text">ALL PLAYERS</span>
+                  <span class="dropdown-caret">▼</span>
+                </button>
+                <div class="retro-multi-select-dropdown dropdown-hidden" id="dropdown-timeline-multi-players">
+                  <!-- Dynamic JS options -->
+                </div>
+              </div>
+
+              <!-- Custom Multi-select Fighter Dropdown -->
+              <div class="retro-multi-select-container" id="timeline-multi-select-fighters-container">
+                <button type="button" class="retro-select retro-multi-select-btn" id="btn-timeline-multi-fighters" style="border-color: var(--color-neon-cyan); text-shadow: 0 0 5px rgba(0, 240, 255, 0.3);">
+                  <span class="selected-text">ALL FIGHTERS</span>
+                  <span class="dropdown-caret">▼</span>
+                </button>
+                <div class="retro-multi-select-dropdown dropdown-hidden" id="dropdown-timeline-multi-fighters">
+                  <!-- Dynamic JS options -->
+                </div>
+              </div>
+
+              <button type="button" class="btn-arcade cyan" id="btn-clear-timeline-filters" style="font-size: 9px; padding: 8px 12px; border-radius: 4px; font-family: var(--font-arcade); font-weight: bold; height: 32px; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; text-shadow: 0 0 5px rgba(0, 240, 255, 0.5);">
+                RESET FILTERS
+              </button>
+            </div>
+          </div>
+
+          <div class="timeline-section-wrapper" style="display: flex; flex-direction: column; gap: 65px; overflow: visible;">
+            <!-- PLAYER AVERAGE TIMELINE -->
+            <div class="average-timeline-card" style="position: relative; overflow: visible;">
+              <div class="timeline-title-row" style="margin-bottom: 20px;">
+                <h4 class="font-arcade text-glow-cyan" style="margin: 0; font-size: 11px; letter-spacing: 1px;">PLAYER AVERAGE KNOCKOUT</h4>
+              </div>
+              <div class="timeline-track-column" style="margin-top: 35px; margin-bottom: 35px; height: 10px; position: relative;">
+                <div class="timeline-track-container" id="player-average-timeline-track" style="height: 6px; position: relative; width: 100%;">
+                  <div class="timeline-track-glow" style="background: var(--color-neon-cyan); box-shadow: 0 0 10px var(--color-neon-cyan); opacity: 0.3; height: 100%; width: 100%;"></div>
+                  <div class="timeline-label start" style="font-size: 8px;">0:00 (START)</div>
+                  <div class="timeline-label end" style="font-size: 8px;">5:00 (END)</div>
+                  <div id="player-average-timeline-markers" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: visible;">
+                    <!-- Markers injected here -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Retro Dotted Divider with Cyan/Magenta glow accents -->
+            <div class="timeline-divider-line" style="border-top: 2px dotted rgba(0, 240, 255, 0.45); width: 100%; margin: 5px 0; position: relative; height: 1px; flex-shrink: 0;">
+              <div style="position: absolute; top: -2px; left: 0; right: 0; border-top: 2px dotted rgba(0, 240, 255, 0.35); filter: blur(1px);"></div>
+            </div>
+
+            <!-- CHARACTER AVERAGE TIMELINE -->
+            <div class="average-timeline-card" style="position: relative; overflow: visible;">
+              <div class="timeline-title-row" style="margin-bottom: 20px;">
+                <h4 class="font-arcade text-glow-cyan" style="margin: 0; font-size: 11px; letter-spacing: 1px;">CHARACTER AVERAGE KNOCKOUT</h4>
+              </div>
+              <div class="timeline-track-column" style="margin-top: 35px; margin-bottom: 35px; height: 10px; position: relative;">
+                <div class="timeline-track-container" id="character-average-timeline-track" style="height: 6px; position: relative; width: 100%;">
+                  <div class="timeline-track-glow" style="background: var(--color-neon-cyan); box-shadow: 0 0 10px var(--color-neon-cyan); opacity: 0.3; height: 100%; width: 100%;"></div>
+                  <div class="timeline-label start" style="font-size: 8px;">0:00 (START)</div>
+                  <div class="timeline-label end" style="font-size: 8px;">5:00 (END)</div>
+                  <div id="character-average-timeline-markers" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: visible;">
+                    <!-- Markers injected here -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
       </div>
     </main>
 
@@ -708,12 +1082,50 @@
     <div class="vs-stripe-curtain-top"></div>
     <div class="vs-stripe-curtain-bottom"></div>
   </div>
+  <!-- Custom Retro Dialog Modal Overlay -->
+  <div class="retro-modal-overlay" id="custom-learn-modal">
+    <div class="panel-beveled neon-yellow retro-modal-content" style="padding: 25px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid var(--color-neon-yellow); padding-bottom: 10px;">
+        <span style="font-size: 20px;">⚡</span>
+        <h3 class="font-arcade text-glow-yellow" style="font-size: var(--font-size-md); margin: 0; letter-spacing: 1.5px; text-transform: uppercase;">Challenger approaching</h3>
+      </div>
+      
+      <div id="modal-step-input">
+        <p class="font-stats" style="color: #cdd1e4; margin: 0 0 10px 0; font-size: var(--font-size-md); line-height: 1.5;">
+          Enter your name to coordinate a training session with an existing player in our Slack channel:
+        </p>
+        <p class="font-stats" style="color: var(--color-neon-magenta); text-shadow: 0 0 5px rgba(255, 0, 127, 0.3); margin: 0 0 15px 0; font-size: 11px; line-height: 1.5; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase;">
+          ⚠️ NOTE: THIS IS A POC/DEMO ONLY. THE SLACK FUNCTIONALITY IS NOT CONNECTED YET.
+        </p>
+        
+        <div class="search-input-wrapper" style="margin-bottom: 20px; width: 100%;">
+          <span class="search-icon-decor" style="color: var(--color-neon-yellow); left: 15px;">&gt;</span>
+          <input type="text" class="retro-input" id="training-player-name" placeholder="ENTER NAME..." autocomplete="off" data-1p-ignore data-lpignore="true" data-bwignore="true" data-protonpass-ignore="true" style="width: 100%; padding-left: 35px !important; border-color: var(--color-neon-yellow); box-shadow: inset 0 0 5px rgba(255, 230, 0, 0.15);">
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end; gap: 15px; width: 100%;">
+          <button class="btn-arcade" id="btn-training-cancel" style="font-size: 10px; padding: 10px 18px; background-color: transparent; border-color: #666;">CANCEL</button>
+          <button class="btn-arcade yellow" id="btn-training-confirm" style="font-size: 10px; padding: 10px 18px;">CONFIRM</button>
+        </div>
+      </div>
+      
+      <div id="modal-step-success" style="display: none;">
+        <p class="font-stats" style="color: #cdd1e4; margin: 0 0 20px 0; font-size: var(--font-size-md); line-height: 1.6;">
+          A message has been sent to Slack asking for a training session.
+        </p>
+        <div style="display: flex; justify-content: flex-end; width: 100%;">
+          <button class="btn-arcade yellow" id="btn-training-ok" style="font-size: 10px; padding: 10px 18px;">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Load mock database and SPA modules -->
-  <script src="mockData.js?v=19"></script>
-  <script src="database.js?v=19"></script>
-  <script src="apiService.js?v=19"></script>
-  <script src="gemini.js?v=19"></script>
-  <script src="charts.js?v=19"></script>
-  <script src="app.js?v=19"></script>
+  <script src="mockData.js?v=22"></script>
+  <script src="database.js?v=22"></script>
+  <script src="apiService.js?v=22"></script>
+  <script src="gemini.js?v=22"></script>
+  <script src="charts.js?v=22"></script>
+  <script src="app.js?v=22"></script>
 </body>
 </html>
