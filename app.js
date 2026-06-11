@@ -172,7 +172,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // ==========================================
   async function router() {
     const hash = window.location.hash || "#home";
-    const [route, id] = hash.slice(1).split("/");
+    const [routeRaw, idRaw] = hash.slice(1).split("/");
+    const route = routeRaw ? decodeURIComponent(routeRaw) : "";
+    const id = idRaw ? decodeURIComponent(idRaw) : "";
 
     closeSearch();
 
@@ -594,7 +596,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // ==========================================
   // 4. Render Player Profile
   // ==========================================
-  async function renderPlayerProfile(playerId) {
+  async function renderPlayerProfile(playerIdRaw) {
+    const playerId = decodeURIComponent(playerIdRaw);
     const profileContent = document.querySelector("#player-profile-view .profile-content-area");
     showSectionLoader(profileContent, "magenta");
     const startTime = Date.now();
@@ -720,8 +723,46 @@ document.addEventListener("DOMContentLoaded", () => {
       const profileSlackInput = document.getElementById("profile-input-slack");
       const profileTeamInput = document.getElementById("profile-input-team");
       if (profileNameInput) profileNameInput.value = stats.player.name;
-      if (profileSlackInput) profileSlackInput.value = "";
-      if (profileTeamInput) profileTeamInput.value = "";
+
+      const playerKey = playerId.toLowerCase().replace(/\s+/g, '-');
+      const savedSlack = localStorage.getItem(`profile_slack_${playerKey}`);
+      const savedTeam = localStorage.getItem(`profile_team_${playerKey}`);
+
+      if (profileSlackInput) {
+        if (savedSlack !== null) {
+          profileSlackInput.value = savedSlack;
+        } else if (playerKey === "matt") {
+          profileSlackInput.value = "@Matthew Long";
+        } else {
+          profileSlackInput.value = "";
+        }
+
+        if (!profileSlackInput.dataset.listenerAdded) {
+          profileSlackInput.addEventListener("input", (e) => {
+            const currentKey = currentProfilePlayerId.toLowerCase().replace(/\s+/g, '-');
+            localStorage.setItem(`profile_slack_${currentKey}`, e.target.value);
+          });
+          profileSlackInput.dataset.listenerAdded = "true";
+        }
+      }
+
+      if (profileTeamInput) {
+        if (savedTeam !== null) {
+          profileTeamInput.value = savedTeam;
+        } else if (playerKey === "matt") {
+          profileTeamInput.value = "Team Folk";
+        } else {
+          profileTeamInput.value = "";
+        }
+
+        if (!profileTeamInput.dataset.listenerAdded) {
+          profileTeamInput.addEventListener("input", (e) => {
+            const currentKey = currentProfilePlayerId.toLowerCase().replace(/\s+/g, '-');
+            localStorage.setItem(`profile_team_${currentKey}`, e.target.value);
+          });
+          profileTeamInput.dataset.listenerAdded = "true";
+        }
+      }
     }
 
     const playerAllMatches = allMatchesForPlayerName.filter(m => m.players && m.players.some(p => p.playerName.toLowerCase() === playerName.toLowerCase()));
@@ -1141,7 +1182,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // ==========================================
   // 5. Render Fighter Profile
   // ==========================================
-  async function renderFighterProfile(fighterId) {
+  async function renderFighterProfile(fighterIdRaw) {
+    const fighterId = decodeURIComponent(fighterIdRaw);
     const profileSidebar = document.querySelector("#fighter-profile-view .profile-sidebar");
     showSectionLoader(profileSidebar, "cyan");
     const startTime = Date.now();

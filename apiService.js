@@ -53,10 +53,11 @@ function getPlayersList(matches) {
 }
 
 // Dynamically resolve details for any fighter in Smash Ultimate
-function getFighterDetails(fighterNameOrId) {
-  if (!fighterNameOrId) {
+function getFighterDetails(fighterNameOrIdRaw) {
+  if (!fighterNameOrIdRaw) {
     return { id: "unknown", name: "Unknown", img: "assets/mario.png?v=5", bio: "A mysterious newcomer." };
   }
+  const fighterNameOrId = decodeURIComponent(fighterNameOrIdRaw);
 
   // Search roster_slots data first
   if (Array.isArray(rosterData) && rosterData.length > 0) {
@@ -345,11 +346,13 @@ const apiService = {
   },
 
   // 3. Get Player Profile Stats
-  async getPlayerProfile(playerId, customMatches = null) {
+  async getPlayerProfile(playerIdRaw, customMatches = null) {
     await initRoster();
     await apiDelay(250);
 
     if (!window.Database) return null;
+
+    const playerId = decodeURIComponent(playerIdRaw);
 
     const allMatches = await window.Database.getMatchesAsync();
     const playersList = getPlayersList(allMatches);
@@ -479,12 +482,13 @@ const apiService = {
   },
 
   // 4. Get Fighter Profile Stats
-  async getFighterProfile(fighterId, customMatches = null) {
+  async getFighterProfile(fighterIdRaw, customMatches = null) {
     await initRoster();
     await apiDelay(250);
 
     if (!window.Database) return null;
 
+    const fighterId = decodeURIComponent(fighterIdRaw);
     const fighter = getFighterDetails(fighterId);
     if (!fighter) return null;
 

@@ -940,15 +940,15 @@ body {
   grid-template-columns: repeat(2, 1fr);
   gap: 15px;
   width: 100%;
+  box-sizing: border-box;
 }
 
 #fighter-profile-view .profile-sidebar .profile-meta-row {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 15px;
   width: 100%;
   box-sizing: border-box;
-  align-items: stretch;
 }
 
 #fighter-profile-view .profile-sidebar .stat-cell-retro {
@@ -2440,6 +2440,12 @@ body.theme-retro .btn-arcade {
 
 .match-card-players-grid.large-lobby {
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+@media (min-width: 851px) {
+  .match-card-players-grid.large-lobby {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 .history-player-row {
@@ -4371,6 +4377,114 @@ body.theme-retro .btn-arcade {
   .form-grid-2 {
     grid-template-columns: 1fr !important;
   }
+
+  /* 14. Match Insights Page Mobile Compatibility */
+  .insights-header-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 15px !important;
+    text-align: center;
+  }
+
+  .insights-header-row .insights-title-col {
+    text-align: center;
+  }
+
+  .insights-header-row > div:last-child {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    gap: 12px !important;
+  }
+
+  .matchtype-filter-wrapper {
+    width: 100% !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+
+  #insights-matchtype-filters,
+  #insights-timeframe-filters {
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+
+  #insights-matchtype-filters .toggle-btn,
+  #insights-timeframe-filters .toggle-btn {
+    flex: 1 !important;
+    font-size: 9.5px !important;
+    padding: 0 4px !important;
+  }
+
+  .telemetry-view-layout {
+    gap: 25px !important;
+  }
+
+  .tel-kpi-card {
+    height: auto !important;
+    min-height: auto !important;
+    padding: 20px 15px !important;
+  }
+
+  .bar-chart-row {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    align-items: stretch !important;
+    padding: 12px 14px !important;
+  }
+
+  .bar-row-label {
+    text-align: left !important;
+    font-size: 11px !important;
+  }
+
+  #most-played-fighters-container,
+  #most-popular-fighters-container {
+    justify-content: flex-start !important;
+    overflow-x: auto !important;
+    gap: 12px;
+    padding-left: 10px;
+    padding-right: 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .timeline-section-wrapper {
+    overflow-x: auto !important;
+    padding-bottom: 25px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .average-timeline-card {
+    min-width: 650px !important;
+    margin-right: 20px !important;
+  }
+
+  /* Prevent overlapping labels on daily activity graph */
+  .hour-label:nth-of-type(even) {
+    display: none !important;
+  }
+
+  /* Prevent vertical columns from shrinking inside horizontally-scrolling charts */
+  .v-bar-col {
+    flex-shrink: 0 !important;
+  }
+
+  /* Disable hover tooltips on mobile/touch viewports to prevent overflow clipping */
+  .fighter-hover-tooltip {
+    display: none !important;
+  }
+
+  /* Stack and stretch average timeline controls uniformly */
+  .timeline-filter-controls > div {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  #btn-clear-timeline-filters {
+    width: 100% !important;
+  }
 }
 
 /* ==========================================================
@@ -4484,7 +4598,55 @@ body.theme-retro .btn-arcade {
 
   /* 5. Telemetry chart stack adjustments */
   .gauges-grid {
-    grid-template-columns: 1fr !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    justify-content: space-around !important;
+  }
+
+  /* 6. Win Rate Gauges size & layout compression for tiny screens */
+  .gauge-card {
+    min-width: 0 !important;
+    flex: 1 1 0 !important;
+    padding: 6px 2px !important;
+    gap: 6px !important;
+  }
+  .gauge-svg-wrapper {
+    width: 100% !important;
+    max-width: 80px !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1 !important;
+  }
+  .gauge-text {
+    font-size: 9px !important;
+  }
+  .gauge-number {
+    font-size: 11px !important;
+  }
+  .gauge-name {
+    font-size: 9px !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  .gauge-gp {
+    font-size: 7px !important;
+  }
+  .kpi-value {
+    font-size: var(--font-size-xl) !important;
+  }
+  #dominant-team-container div {
+    white-space: normal !important;
+  }
+  #dominant-team-container .player-link {
+    font-size: 11px !important;
+  }
+
+  /* Optimize bar stats summary for small mobile screens */
+  .bar-stats-summary {
+    font-size: 10px !important;
+    gap: 8px 12px !important;
   }
 }
 

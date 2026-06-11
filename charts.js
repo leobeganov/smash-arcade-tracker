@@ -363,7 +363,7 @@ const Charts = {
       
       gridLinesHtml += `
         <line x1="${x}" y1="${padding.top}" x2="${x}" y2="${padding.top + chartHeight}" stroke="rgba(255, 255, 255, 0.08)" stroke-dasharray="3 3" />
-        <text x="${x}" y="${padding.top + chartHeight + 20}" text-anchor="middle" fill="#8a8d9a" font-size="8.5px" font-family="var(--font-arcade)">${hourStr}</text>
+        <text class="hour-label" x="${x}" y="${padding.top + chartHeight + 20}" text-anchor="middle" fill="#8a8d9a" font-size="8.5px" font-family="var(--font-arcade)">${hourStr}</text>
       `;
     }
 
@@ -446,8 +446,34 @@ const Charts = {
     const hoverDot = svg.querySelector('#peak-hover-dot');
 
     svg.addEventListener('mousemove', (e) => {
+      handleMove(e.clientX);
+    });
+
+    svg.addEventListener('touchmove', (e) => {
+      if (e.touches && e.touches.length > 0) {
+        handleMove(e.touches[0].clientX);
+      }
+    }, { passive: true });
+
+    svg.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches.length > 0) {
+        handleMove(e.touches[0].clientX);
+      }
+    }, { passive: true });
+
+    const handleLeave = () => {
+      hoverLine.style.opacity = '0';
+      hoverDot.style.opacity = '0';
+      tooltip.style.display = 'none';
+    };
+
+    svg.addEventListener('mouseleave', handleLeave);
+    svg.addEventListener('touchend', handleLeave);
+    svg.addEventListener('touchcancel', handleLeave);
+
+    function handleMove(clientX) {
       const rect = svg.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
+      const mouseX = clientX - rect.left;
       
       // Map back to SVG coordinate space
       const svgX = (mouseX / rect.width) * width;
@@ -488,13 +514,20 @@ const Charts = {
       tooltip.style.top = `${tooltipY}px`;
       tooltip.style.transform = 'translateX(-50%)';
       tooltip.style.display = 'block';
-    });
 
-    svg.addEventListener('mouseleave', () => {
-      hoverLine.style.opacity = '0';
-      hoverDot.style.opacity = '0';
-      tooltip.style.display = 'none';
-    });
+      // Keep tooltip from overflowing left or right
+      const tooltipRect = tooltip.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      const halfWidth = tooltipRect.width / 2;
+      let leftOffset = tooltipX;
+      
+      if (tooltipX - halfWidth < 0) {
+        leftOffset = halfWidth + 4;
+      } else if (tooltipX + halfWidth > containerRect.width) {
+        leftOffset = containerRect.width - halfWidth - 4;
+      }
+      tooltip.style.left = `${leftOffset}px`;
+    }
   }
 };
 
