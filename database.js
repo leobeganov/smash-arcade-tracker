@@ -4,7 +4,7 @@
  */
 
 const STORAGE_KEYS = {
-  MATCHES: 'smashalytics_matches_v5',
+  MATCHES: 'smashalytics_matches_v6',
   API_KEY: 'smashalytics_api_key',
   THEME: 'smashalytics_theme',
   PLAYERS: 'smashalytics_players' // Custom nickname mappings
@@ -162,7 +162,7 @@ const POC_SEED_MATCHES = [
     players: [
       { playerNumber: "P1", playerName: "Matt", character: "Pikachu", placement: 1, kos: 4, falls: -1, sds: 0, outAt: "---", teamColor: "Red" },
       { playerNumber: "P2", playerName: "Jack", character: "Donkey Kong", placement: 1, kos: 3, falls: -2, sds: 0, outAt: "---", teamColor: "Red" },
-      { playerNumber: "P3", playerName: "Polo", character: "Ness", placement: 1, kos: 2, falls: -2, sds: 0, outAt: "---", teamColor: "Red" },
+      { playerNumber: "P3", playerName: "Polo", character: "Ness", placement: 1, kos: 2, falls: -3, sds: 0, outAt: "2:45", teamColor: "Red" },
       { playerNumber: "P4", playerName: "Leo", character: "Joker", placement: 2, kos: 2, falls: -3, sds: 0, outAt: "4:40", teamColor: "Blue" },
       { playerNumber: "P5", playerName: "Ceets", character: "Zelda", placement: 2, kos: 1, falls: -3, sds: -1, outAt: "3:55", teamColor: "Blue" },
       { playerNumber: "P6", playerName: "Sylv", character: "Zero Suit Samus", placement: 2, kos: 1, falls: -3, sds: 0, outAt: "3:10", teamColor: "Blue" }

@@ -1481,8 +1481,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             const staggerIndex = staggerCounts[sideKey][pctKey]++;
             
-            const markerColor = 'var(--color-neon-magenta)';
-            const textColor = 'var(--color-neon-magenta)';
+            const markerColor = isWinner ? 'var(--color-neon-yellow)' : 'var(--color-neon-magenta)';
+            const textColor = isWinner ? 'var(--color-neon-yellow)' : 'var(--color-neon-magenta)';
             
             const offsetSize = 15 + staggerIndex * 30;
             const displayTime = p.outAt || "5:00";
@@ -1497,7 +1497,7 @@ document.addEventListener("DOMContentLoaded", () => {
                  <div class="timeline-connector" style="position: absolute; left: 11px; ${isAbove ? `bottom: 24px` : `top: 24px`}; width: 2px; height: ${offsetSize}px; background: ${markerColor}; opacity: 0.8; z-index: 9;"></div>
                  <!-- Player details box -->
                  <div class="timeline-player-info panel-beveled ${filterClass}" style="position: absolute; left: 12px; ${isAbove ? `bottom: ${24 + offsetSize}px` : `top: ${24 + offsetSize}px`}; transform: translateX(-50%); text-align: center; white-space: nowrap; background: var(--color-bg-dark); border: 1px solid ${markerColor}; padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px; pointer-events: auto; user-select: none; z-index: 10;">
-                   <span style="font-weight: bold; color: #fff; text-shadow: 0 0 2px rgba(255,255,255,0.5);">${p.playerName}</span>
+                   <span style="font-weight: bold; color: #fff; text-shadow: 0 0 2px rgba(255,255,255,0.5);">${p.playerName}${isWinner ? ' 🏆' : ''}</span>
                    <span class="hover-time" style="color: ${textColor}; font-weight: bold; text-shadow: 0 0 4px ${textColor};">(${displayTime})</span>
                  </div>
                </div>
