@@ -333,9 +333,9 @@ body {
   justify-content: flex-start; /* Stacks elements sequentially from the top */
   flex-grow: 1;            /* Span full remaining height */
   width: 100%;
-  gap: 55px;               /* Generous spacing to support vertical rhythm */
+  gap: 24px;               /* Compact spacing to maximize above-the-fold content */
   padding-top: 10px;       /* Sleek breathing room at the top */
-  padding-bottom: 80px;    /* Comfortably push bottom of list above the viewport border when scrolled */
+  padding-bottom: 60px;    /* Comfortably push bottom of list above the viewport border when scrolled */
 }
 
 .podium-champions-title-container {
@@ -361,7 +361,7 @@ body {
   align-items: center;
   width: 100%;
   max-width: 1125px;
-  padding: 15px 10px;
+  padding: 6px 10px;
   margin-left: -10px;
   border-bottom: none;
   position: sticky;
@@ -435,7 +435,7 @@ body {
   align-items: flex-end;
   width: 100%;
   max-width: 1125px; /* Scaled from 900px */
-  height: 625px;     /* Scaled from 500px */
+  height: 480px;     /* Redesigned to fit completely within desktop viewports */
   position: relative;
 }
 
@@ -454,7 +454,7 @@ body {
   display: flex;
   justify-content: center;
   position: relative;
-  height: 350px;     /* Scaled from 280px */
+  height: 250px;     /* Scaled down to prevent overflow stretching */
   margin-bottom: -19px; /* Sit flat on top of the 3D elliptical cap top plate */
   z-index: 3;
 }
@@ -4494,7 +4494,7 @@ body.theme-retro .btn-arcade {
   width: 100%;
   max-width: 1125px;
   box-sizing: border-box;
-  margin-bottom: -35px;
+  margin-bottom: -4px;
 }
 
 .home-welcome-panel {
