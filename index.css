@@ -929,6 +929,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Sidebar Stats Shifting and Adaptive Formatting */
@@ -944,6 +946,8 @@ body {
   flex-direction: column;
   gap: 15px;
   width: 100%;
+  box-sizing: border-box;
+  align-items: stretch;
 }
 
 #fighter-profile-view .profile-sidebar .stat-cell-retro {
@@ -961,6 +965,8 @@ body {
 
 #fighter-profile-view .profile-sidebar .meta-card {
   padding: 15px 20px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 /* Nintendo Switch Controller Button Badges */

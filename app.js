@@ -40,6 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let selectedSearchWinnerPlayer = null;
   let selectedSearchWinnerFighter = null;
   let selectedSearchLoserPlayer = null;
+  let selectedSearchLoserFighter = null;
   let isSearchDropdownsInitialized = false;
   let shouldScrollToMatchList = false;
   let skipClearFiltersOnHome = false;
@@ -158,6 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
     selectedSearchWinnerPlayer = null;
     selectedSearchWinnerFighter = null;
     selectedSearchLoserPlayer = null;
+    selectedSearchLoserFighter = null;
 
     // 5. Force search multi-select dropdowns & sync state to re-initialize next time renderHomeMatchesList runs
     isSearchDropdownsInitialized = false;
@@ -350,7 +352,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const isTimeframeCleared = currentPodiumTimeframe === "30days";
     const isPlayersCleared = selectedSearchPlayers.length === 0;
     const isFightersCleared = selectedSearchFighters.length === 0;
-    const isWinnerCleared = !selectedSearchWinnerPlayer && !selectedSearchWinnerFighter && !selectedSearchLoserPlayer;
+    const isWinnerCleared = !selectedSearchWinnerPlayer && !selectedSearchWinnerFighter && !selectedSearchLoserPlayer && !selectedSearchLoserFighter;
 
     const isAlreadyCleared = isStyleCleared && isTimeframeCleared && isPlayersCleared && isFightersCleared && isWinnerCleared;
 
@@ -517,9 +519,10 @@ document.addEventListener("DOMContentLoaded", () => {
           badgeIcon.style.textShadow = "0 0 4px var(--color-neon-yellow)";
         }
         badgeContainer.style.display = "flex";
-      } else if (selectedSearchLoserPlayer) {
-        badgeName.textContent = selectedSearchLoserPlayer.toUpperCase();
-        if (badgeLabel) badgeLabel.innerHTML = `ONLY SHOWING MATCHES LOST BY: <span id="winner-filter-name" class="text-glow-magenta" style="font-weight: bold;">${selectedSearchLoserPlayer.toUpperCase()}</span>`;
+      } else if (selectedSearchLoserPlayer || selectedSearchLoserFighter) {
+        const name = (selectedSearchLoserPlayer || selectedSearchLoserFighter).toUpperCase();
+        badgeName.textContent = name;
+        if (badgeLabel) badgeLabel.innerHTML = `ONLY SHOWING MATCHES LOST BY: <span id="winner-filter-name" class="text-glow-magenta" style="font-weight: bold;">${name}</span>`;
         if (badgeIcon) {
           badgeIcon.textContent = "💀";
           badgeIcon.style.color = "var(--color-neon-magenta)";
@@ -535,6 +538,7 @@ document.addEventListener("DOMContentLoaded", () => {
           selectedSearchWinnerPlayer = null;
           selectedSearchWinnerFighter = null;
           selectedSearchLoserPlayer = null;
+          selectedSearchLoserFighter = null;
           badgeContainer.style.display = "none";
           isSearchDropdownsInitialized = false; // force dropdown re-initialization
           renderHome();
@@ -819,6 +823,7 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedSearchWinnerPlayer = null;
         selectedSearchWinnerFighter = null;
         selectedSearchLoserPlayer = null;
+        selectedSearchLoserFighter = null;
         currentPodiumTimeframe = currentPlayerTimeframe;
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
@@ -837,6 +842,7 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedSearchWinnerPlayer = stats.player.name;
         selectedSearchWinnerFighter = null;
         selectedSearchLoserPlayer = null;
+        selectedSearchLoserFighter = null;
         currentPodiumTimeframe = currentPlayerTimeframe;
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
@@ -855,6 +861,7 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedSearchWinnerPlayer = null;
         selectedSearchWinnerFighter = null;
         selectedSearchLoserPlayer = stats.player.name;
+        selectedSearchLoserFighter = null;
         currentPodiumTimeframe = currentPlayerTimeframe;
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
@@ -1111,8 +1118,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // 5. Render Fighter Profile
   // ==========================================
   async function renderFighterProfile(fighterId) {
-    const profileContent = document.querySelector("#fighter-profile-view .profile-content-area");
-    showSectionLoader(profileContent, "cyan");
+    const profileSidebar = document.querySelector("#fighter-profile-view .profile-sidebar");
+    showSectionLoader(profileSidebar, "cyan");
     const startTime = Date.now();
 
     // Sync timeframe filter toggle buttons
@@ -1144,7 +1151,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const stats = await api.getFighterProfile(fighterId, matches);
     if (!stats) {
-      hideSectionLoader(profileContent);
+      hideSectionLoader(profileSidebar);
       return;
     }
 
@@ -1385,16 +1392,53 @@ document.addEventListener("DOMContentLoaded", () => {
       movesContainer.innerHTML = `<div style="font-family: var(--font-stats); opacity: 0.6; font-size: 13px; text-align: center; padding: 20px;">NO MOVES REGISTERED FOR THIS FIGHTER</div>`;
     }
 
-    // See all matches button integration
-    const btnSeeMatches = document.getElementById("btn-fighter-see-matches");
-    if (btnSeeMatches) {
-      btnSeeMatches.onclick = () => {
+    // Games Played cell click-through integration
+    const gamesCell = document.getElementById("fighter-games-cell");
+    if (gamesCell) {
+      gamesCell.onclick = () => {
         selectedSearchFighters = [stats.fighter.name];
         selectedSearchPlayers = [];
         selectedSearchWinnerPlayer = null;
         selectedSearchWinnerFighter = null;
         selectedSearchLoserPlayer = null;
-        currentPodiumTimeframe = "30days";
+        selectedSearchLoserFighter = null;
+        currentPodiumTimeframe = currentFighterTimeframe;
+        shouldScrollToMatchList = true;
+        isSearchDropdownsInitialized = false; // force dropdown re-initialization
+        skipClearFiltersOnHome = true;
+        window.location.hash = "#home";
+      };
+    }
+
+    // Wins cell click-through integration
+    const winsCell = document.getElementById("fighter-wins-cell");
+    if (winsCell) {
+      winsCell.onclick = () => {
+        selectedSearchFighters = [stats.fighter.name];
+        selectedSearchPlayers = [];
+        selectedSearchWinnerPlayer = null;
+        selectedSearchWinnerFighter = stats.fighter.name;
+        selectedSearchLoserPlayer = null;
+        selectedSearchLoserFighter = null;
+        currentPodiumTimeframe = currentFighterTimeframe;
+        shouldScrollToMatchList = true;
+        isSearchDropdownsInitialized = false; // force dropdown re-initialization
+        skipClearFiltersOnHome = true;
+        window.location.hash = "#home";
+      };
+    }
+
+    // Losses cell click-through integration
+    const lossesCell = document.getElementById("fighter-losses-cell");
+    if (lossesCell) {
+      lossesCell.onclick = () => {
+        selectedSearchFighters = [stats.fighter.name];
+        selectedSearchPlayers = [];
+        selectedSearchWinnerPlayer = null;
+        selectedSearchWinnerFighter = null;
+        selectedSearchLoserPlayer = null;
+        selectedSearchLoserFighter = stats.fighter.name;
+        currentPodiumTimeframe = currentFighterTimeframe;
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
         skipClearFiltersOnHome = true;
@@ -1411,7 +1455,26 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedSearchWinnerPlayer = null;
         selectedSearchWinnerFighter = stats.fighter.name;
         selectedSearchLoserPlayer = null;
-        currentPodiumTimeframe = "30days";
+        selectedSearchLoserFighter = null;
+        currentPodiumTimeframe = currentFighterTimeframe;
+        shouldScrollToMatchList = true;
+        isSearchDropdownsInitialized = false; // force dropdown re-initialization
+        skipClearFiltersOnHome = true;
+        window.location.hash = "#home";
+      };
+    }
+
+    // Knockout / Fall ratio cell click-through integration
+    const kdCell = document.getElementById("fighter-kd-cell");
+    if (kdCell) {
+      kdCell.onclick = () => {
+        selectedSearchFighters = [stats.fighter.name];
+        selectedSearchPlayers = [];
+        selectedSearchWinnerPlayer = null;
+        selectedSearchWinnerFighter = null;
+        selectedSearchLoserPlayer = null;
+        selectedSearchLoserFighter = null;
+        currentPodiumTimeframe = currentFighterTimeframe;
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
         skipClearFiltersOnHome = true;
@@ -1423,7 +1486,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (elapsed < 250) {
       await new Promise(resolve => setTimeout(resolve, 250 - elapsed));
     }
-    hideSectionLoader(profileContent);
+    hideSectionLoader(profileSidebar);
   }
 
 
@@ -1447,10 +1510,15 @@ document.addEventListener("DOMContentLoaded", () => {
       { key: "rank", label: "Rank" },
       { key: "name", label: isFighterMode ? "Fighter" : "Player" },
       { key: "wins", label: "Rating" },
+      { key: "detailLabel", label: isFighterMode ? "Top Player" : "Signature fighter" },
+      { key: "winRate", label: "Win rate" },
+      { key: "totalGames", label: "Matches played" },
+      { key: "pureWins", label: "Wins" },
+      { key: "losses", label: "Losses" },
+      { key: "kd", label: "Knockout / fall ratio" },
       { key: "KOs", label: "Knockouts" },
-      { key: "winRate", label: "Win Percentage" },
-      { key: "kd", label: "Knockout / Fall Ratio" },
-      { key: "detailLabel", label: isFighterMode ? "Top Player" : "Signature" }
+      { key: "falls", label: "Falls" },
+      { key: "sds", label: "Self-Destructs" }
     ];
 
     headers.forEach(h => {
@@ -1502,13 +1570,18 @@ document.addEventListener("DOMContentLoaded", () => {
       tr.innerHTML = `
         <td class="rank-cell">#${rec.rank}</td>
         <td class="name-cell text-glow-cyan" onclick="window.location.hash = '${mainLink}'">${rec.name}</td>
-        <td class="numeric-cell text-glow-yellow">${rec.adjustedWins} <span style="font-size: var(--font-size-sm); opacity: 0.6; font-family: var(--font-stats);">(${rec.wins}/${rec.totalGames})</span></td>
-        <td class="numeric-cell">${rec.KOs}</td>
-        <td class="numeric-cell">${rec.winRate}%</td>
-        <td class="numeric-cell text-glow-magenta">${rec.kd}</td>
+        <td class="numeric-cell text-glow-yellow">${rec.adjustedWins}</td>
         <td class="name-cell text-glow-yellow" onclick="window.location.hash = '${detailLink}'">
           ${detailContent}
         </td>
+        <td class="numeric-cell">${rec.winRate}%</td>
+        <td class="numeric-cell">${rec.totalGames}</td>
+        <td class="numeric-cell">${rec.wins}</td>
+        <td class="numeric-cell">${rec.losses}</td>
+        <td class="numeric-cell text-glow-magenta">${rec.kd}</td>
+        <td class="numeric-cell">${rec.KOs}</td>
+        <td class="numeric-cell">${rec.falls}</td>
+        <td class="numeric-cell">${rec.sds}</td>
       `;
 
       rowsBody.appendChild(tr);
@@ -1764,6 +1837,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const lpLower = selectedSearchLoserPlayer.toLowerCase().trim();
       matches = matches.filter(m => m.players && m.players.some(p => p.playerName.toLowerCase().trim() === lpLower && p.placement !== 1));
     }
+    if (selectedSearchLoserFighter) {
+      const lfLower = selectedSearchLoserFighter.toLowerCase().trim();
+      matches = matches.filter(m => m.players && m.players.some(p => p.character.toLowerCase().trim() === lfLower && p.placement !== 1));
+    }
 
     const container = document.getElementById("history-matches-list");
     container.innerHTML = "";
@@ -1801,9 +1878,11 @@ document.addEventListener("DOMContentLoaded", () => {
           const iconUrl = fighterObj.icon || 'assets/mario.png';
 
           const isPlayerFiltered = (selectedSearchPlayers && selectedSearchPlayers.some(sp => sp.toLowerCase() === p.playerName.toLowerCase())) || 
-                                   (selectedSearchWinnerPlayer && selectedSearchWinnerPlayer.toLowerCase() === p.playerName.toLowerCase());
+                                   (selectedSearchWinnerPlayer && selectedSearchWinnerPlayer.toLowerCase() === p.playerName.toLowerCase()) ||
+                                   (selectedSearchLoserPlayer && selectedSearchLoserPlayer.toLowerCase() === p.playerName.toLowerCase());
           const isFighterFiltered = (selectedSearchFighters && selectedSearchFighters.some(sf => sf.toLowerCase() === p.character.toLowerCase())) || 
-                                    (selectedSearchWinnerFighter && selectedSearchWinnerFighter.toLowerCase() === p.character.toLowerCase());
+                                    (selectedSearchWinnerFighter && selectedSearchWinnerFighter.toLowerCase() === p.character.toLowerCase()) ||
+                                    (selectedSearchLoserFighter && selectedSearchLoserFighter.toLowerCase() === p.character.toLowerCase());
           const isFilteredMatch = isPlayerFiltered || isFighterFiltered;
           const filterClass = isFilteredMatch ? 'filter-highlighted' : '';
 
@@ -1881,6 +1960,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
 
+      const pTop = maxStaggerAbove >= 0 ? Math.max(50, 75 + maxStaggerAbove * 30) : 50;
+      const pBottom = maxStaggerBelow >= 0 ? Math.max(40, 75 + maxStaggerBelow * 30) : 40;
+
       card.innerHTML = `
         <div class="match-card-header">
           <div class="match-card-title">
@@ -1899,9 +1981,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const iconUrl = fighterObj.icon || 'assets/mario.png';
 
             const isPlayerFiltered = (selectedSearchPlayers && selectedSearchPlayers.some(sp => sp.toLowerCase() === p.playerName.toLowerCase())) || 
-                                     (selectedSearchWinnerPlayer && selectedSearchWinnerPlayer.toLowerCase() === p.playerName.toLowerCase());
+                                     (selectedSearchWinnerPlayer && selectedSearchWinnerPlayer.toLowerCase() === p.playerName.toLowerCase()) ||
+                                     (selectedSearchLoserPlayer && selectedSearchLoserPlayer.toLowerCase() === p.playerName.toLowerCase());
             const isFighterFiltered = (selectedSearchFighters && selectedSearchFighters.some(sf => sf.toLowerCase() === p.character.toLowerCase())) || 
-                                      (selectedSearchWinnerFighter && selectedSearchWinnerFighter.toLowerCase() === p.character.toLowerCase());
+                                      (selectedSearchWinnerFighter && selectedSearchWinnerFighter.toLowerCase() === p.character.toLowerCase()) ||
+                                      (selectedSearchLoserFighter && selectedSearchLoserFighter.toLowerCase() === p.character.toLowerCase());
             const isFilteredMatch = isPlayerFiltered || isFighterFiltered;
             const filterClass = isFilteredMatch ? 'filter-highlighted' : '';
 
@@ -1927,10 +2011,6 @@ document.addEventListener("DOMContentLoaded", () => {
         <button class="delete-match-btn" data-id="${m.id}" title="Delete Record">🗑️</button>
         <div class="match-timeline-drawer" id="timeline-drawer-${m.id}">
           <!-- Timeline Track Column -->
-          <%
-            const pTop = maxStaggerAbove >= 0 ? Math.max(50, 75 + maxStaggerAbove * 30) : 50;
-            const pBottom = maxStaggerBelow >= 0 ? Math.max(40, 75 + maxStaggerBelow * 30) : 40;
-          %>
           <div class="timeline-track-column" style="padding-top: ${pTop}px; padding-bottom: ${pBottom}px;">
             <div class="timeline-track-container">
               <div class="timeline-track-glow"></div>
@@ -2370,6 +2450,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!matches || matches.length === 0) {
       container.innerHTML = "";
+      const trackColumn = container.closest('.timeline-track-column');
+      if (trackColumn) {
+        trackColumn.style.paddingTop = '50px';
+        trackColumn.style.paddingBottom = '40px';
+        trackColumn.style.height = 'auto';
+        trackColumn.style.marginTop = '0px';
+        trackColumn.style.marginBottom = '0px';
+      }
       return;
     }
 
@@ -2483,6 +2571,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const placedMarkers = { above: [], below: [] };
+    let maxStaggerAbove = -1;
+    let maxStaggerBelow = -1;
     let markersHtml = "";
     let markerIdx = 0;
 
@@ -2500,6 +2590,12 @@ document.addEventListener("DOMContentLoaded", () => {
         staggerIndex++;
       }
       placedMarkers[sideKey].push({ pct: safePct, stagger: staggerIndex });
+      
+      if (isAbove) {
+        maxStaggerAbove = Math.max(maxStaggerAbove, staggerIndex);
+      } else {
+        maxStaggerBelow = Math.max(maxStaggerBelow, staggerIndex);
+      }
       
       // Use var(--color-neon-cyan) consistently across both timelines
       const markerColor = 'var(--color-neon-cyan)';
@@ -2523,6 +2619,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     container.innerHTML = markersHtml;
+
+    // Dynamically adjust padding of the container's timeline-track-column to fit all markers
+    const trackColumn = container.closest('.timeline-track-column');
+    if (trackColumn) {
+      const pTop = maxStaggerAbove >= 0 ? Math.max(50, 75 + maxStaggerAbove * 35) : 50;
+      const pBottom = maxStaggerBelow >= 0 ? Math.max(40, 75 + maxStaggerBelow * 35) : 40;
+      trackColumn.style.paddingTop = `${pTop}px`;
+      trackColumn.style.paddingBottom = `${pBottom}px`;
+      trackColumn.style.height = 'auto';
+      trackColumn.style.marginTop = '0px';
+      trackColumn.style.marginBottom = '0px';
+    }
   }
 
 

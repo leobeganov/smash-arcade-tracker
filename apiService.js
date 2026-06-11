@@ -659,7 +659,9 @@ const apiService = {
           detailId: stats.mostUsedFighter ? stats.mostUsedFighter.id : null,
           detailType: "fighter",
           detailImg: stats.mostUsedFighter ? stats.mostUsedFighter.img : null,
-          detailIcon: stats.mostUsedFighter ? stats.mostUsedFighter.icon : null
+          detailIcon: stats.mostUsedFighter ? stats.mostUsedFighter.icon : null,
+          losses: stats.losses,
+          sds: stats.sds
         });
       }
     } else {
@@ -702,13 +704,18 @@ const apiService = {
           kd: parseFloat(stats.kdRatio),
           detailLabel: topPlayerRecord ? topPlayerRecord.player.name : "None",
           detailId: topPlayerRecord ? topPlayerRecord.player.id : null,
-          detailType: "player"
+          detailType: "player",
+          losses: stats.losses,
+          sds: stats.sds
         });
       }
     }
 
     // Determine actual sorting field
-    const sortField = sortBy === "wins" ? "adjustedWins" : sortBy;
+    let sortField = sortBy === "wins" ? "adjustedWins" : sortBy;
+    if (sortField === "pureWins") {
+      sortField = "wins";
+    }
 
     // Sort records dynamically
     records.sort((a, b) => {
