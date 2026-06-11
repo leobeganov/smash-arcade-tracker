@@ -351,10 +351,12 @@ const apiService = {
 
     if (!window.Database) return null;
 
-    const matches = customMatches || await window.Database.getMatchesAsync();
-    const playersList = getPlayersList(matches);
+    const allMatches = await window.Database.getMatchesAsync();
+    const playersList = getPlayersList(allMatches);
     const player = playersList.find(p => p.id === playerId || p.name.toLowerCase() === playerId.toLowerCase());
     if (!player) return null;
+
+    const matches = customMatches || allMatches;
     const playerMatches = matches.filter(m => 
       m.players && m.players.some(p => p.playerName.toLowerCase() === player.name.toLowerCase())
     );
