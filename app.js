@@ -773,11 +773,20 @@ document.addEventListener("DOMContentLoaded", () => {
     if (gamesCell) {
       gamesCell.onclick = () => {
         selectedSearchPlayers = [stats.player.name];
-        selectedSearchFighters = [];
+        
+        let sFighters = [];
+        if (currentPlayerFighterFilter !== "all") {
+          const fDetails = window.apiService.getFighterDetails(currentPlayerFighterFilter);
+          if (fDetails && fDetails.id !== "unknown") {
+            sFighters = [fDetails.name];
+          }
+        }
+        selectedSearchFighters = sFighters;
+        
         selectedSearchWinnerPlayer = null;
         selectedSearchWinnerFighter = null;
         selectedSearchLoserPlayer = null;
-        currentPodiumTimeframe = "30days";
+        currentPodiumTimeframe = currentPlayerTimeframe;
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
         syncHomePageStyleWithPlayerFilter();
@@ -790,11 +799,20 @@ document.addEventListener("DOMContentLoaded", () => {
     if (winsCell) {
       winsCell.onclick = () => {
         selectedSearchPlayers = [stats.player.name];
-        selectedSearchFighters = [];
+        
+        let sFighters = [];
+        if (currentPlayerFighterFilter !== "all") {
+          const fDetails = window.apiService.getFighterDetails(currentPlayerFighterFilter);
+          if (fDetails && fDetails.id !== "unknown") {
+            sFighters = [fDetails.name];
+          }
+        }
+        selectedSearchFighters = sFighters;
+        
         selectedSearchWinnerPlayer = stats.player.name;
         selectedSearchWinnerFighter = null;
         selectedSearchLoserPlayer = null;
-        currentPodiumTimeframe = "30days";
+        currentPodiumTimeframe = currentPlayerTimeframe;
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
         syncHomePageStyleWithPlayerFilter();
@@ -807,11 +825,20 @@ document.addEventListener("DOMContentLoaded", () => {
     if (lossesCell) {
       lossesCell.onclick = () => {
         selectedSearchPlayers = [stats.player.name];
-        selectedSearchFighters = [];
+        
+        let sFighters = [];
+        if (currentPlayerFighterFilter !== "all") {
+          const fDetails = window.apiService.getFighterDetails(currentPlayerFighterFilter);
+          if (fDetails && fDetails.id !== "unknown") {
+            sFighters = [fDetails.name];
+          }
+        }
+        selectedSearchFighters = sFighters;
+        
         selectedSearchWinnerPlayer = null;
         selectedSearchWinnerFighter = null;
         selectedSearchLoserPlayer = stats.player.name;
-        currentPodiumTimeframe = "30days";
+        currentPodiumTimeframe = currentPlayerTimeframe;
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
         syncHomePageStyleWithPlayerFilter();
