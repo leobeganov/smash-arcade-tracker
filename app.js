@@ -289,10 +289,44 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+  function updateClearFiltersButtonState() {
+    const btn = document.getElementById("btn-clear-all-filters");
+    if (!btn) return;
+
+    const styleSelect = document.getElementById("podium-style-select");
+    const isStyleCleared = !styleSelect || styleSelect.value === "all";
+    const isTimeframeCleared = currentPodiumTimeframe === "30days";
+    const isPlayersCleared = selectedSearchPlayers.length === 0;
+    const isFightersCleared = selectedSearchFighters.length === 0;
+    const isWinnerCleared = !selectedSearchWinnerPlayer && !selectedSearchWinnerFighter && !selectedSearchLoserPlayer;
+
+    const isAlreadyCleared = isStyleCleared && isTimeframeCleared && isPlayersCleared && isFightersCleared && isWinnerCleared;
+
+    if (isAlreadyCleared) {
+      btn.disabled = true;
+      btn.style.opacity = "0.3";
+      btn.style.cursor = "not-allowed";
+      btn.style.pointerEvents = "none";
+      btn.style.textShadow = "none";
+      btn.style.boxShadow = "none";
+    } else {
+      btn.disabled = false;
+      btn.style.opacity = "1";
+      btn.style.cursor = "pointer";
+      btn.style.pointerEvents = "auto";
+      btn.style.textShadow = "0 0 5px rgba(255, 0, 127, 0.5)";
+      btn.style.boxShadow = "";
+    }
+  }
+
+
   // ==========================================
   // 3. Render Home (The Main Stage)
   // ==========================================
   async function renderHome() {
+    // Update Clear Filters button active state
+    updateClearFiltersButtonState();
+
     // Sync dynamic QR code link
     initQrCode();
 
