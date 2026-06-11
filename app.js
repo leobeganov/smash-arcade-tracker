@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentLeaderboardTimeframe = "alltime";
   let currentPlayerTimeframe = "alltime";
   let currentPlayerMatchType = "all";
-  let currentPlayerFighterFilter = "all";
+  let currentPlayerFighterFilters = [];
   let currentFighterTimeframe = "alltime";
   let currentInsightsTimeframe = "alltime";
   let currentInsightsMatchType = "all";
@@ -567,21 +567,11 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // Sync fighter filter select dropdown
-    const pff = document.getElementById("player-fighter-filter");
-    if (pff) {
-      if (pff.options.length <= 1) {
-        const roster = await api.getFullRoster();
-        const sortedRoster = [...roster].sort((a, b) => a.name.localeCompare(b.name));
-        sortedRoster.forEach(f => {
-          const opt = document.createElement("option");
-          opt.value = f.slug || f.id;
-          opt.textContent = f.name.toUpperCase();
-          pff.appendChild(opt);
-        });
-      }
-      pff.value = currentPlayerFighterFilter;
-    }
+    // Sync fighter filter multi-select dropdown
+    const roster = await api.getAllFighters();
+    setupRetroMultiSelect("player-profile-multi-select-fighters-container", roster, currentPlayerFighterFilters, () => {
+      renderPlayerProfile(playerId);
+    });
 
     // Fetch and filter matches dynamically
     let matches = await window.Database.getMatchesAsync();
@@ -629,14 +619,15 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Filter matches by selected fighter
-    if (currentPlayerFighterFilter !== 'all') {
+    // Filter matches by selected fighters (multi-select)
+    if (currentPlayerFighterFilters && currentPlayerFighterFilters.length > 0) {
+      const lowerFighters = currentPlayerFighterFilters.map(f => f.toLowerCase().trim());
       matches = matches.filter(m => {
         if (!m.players) return false;
         const pRec = m.players.find(p => p.playerName.toLowerCase() === playerName.toLowerCase());
         if (!pRec) return false;
         const fDetails = window.apiService.getFighterDetails(pRec.character);
-        return fDetails.id === currentPlayerFighterFilter;
+        return lowerFighters.includes(pRec.character.toLowerCase().trim()) || lowerFighters.includes(fDetails.id.toLowerCase().trim());
       });
     }
 
@@ -773,16 +764,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (gamesCell) {
       gamesCell.onclick = () => {
         selectedSearchPlayers = [stats.player.name];
-        
-        let sFighters = [];
-        if (currentPlayerFighterFilter !== "all") {
-          const fDetails = window.apiService.getFighterDetails(currentPlayerFighterFilter);
-          if (fDetails && fDetails.id !== "unknown") {
-            sFighters = [fDetails.name];
-          }
-        }
-        selectedSearchFighters = sFighters;
-        
+        selectedSearchFighters = currentPlayerFighterFilters ? [...currentPlayerFighterFilters] : [];
         selectedSearchWinnerPlayer = null;
         selectedSearchWinnerFighter = null;
         selectedSearchLoserPlayer = null;
@@ -799,16 +781,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (winsCell) {
       winsCell.onclick = () => {
         selectedSearchPlayers = [stats.player.name];
-        
-        let sFighters = [];
-        if (currentPlayerFighterFilter !== "all") {
-          const fDetails = window.apiService.getFighterDetails(currentPlayerFighterFilter);
-          if (fDetails && fDetails.id !== "unknown") {
-            sFighters = [fDetails.name];
-          }
-        }
-        selectedSearchFighters = sFighters;
-        
+        selectedSearchFighters = currentPlayerFighterFilters ? [...currentPlayerFighterFilters] : [];
         selectedSearchWinnerPlayer = stats.player.name;
         selectedSearchWinnerFighter = null;
         selectedSearchLoserPlayer = null;
@@ -825,16 +798,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (lossesCell) {
       lossesCell.onclick = () => {
         selectedSearchPlayers = [stats.player.name];
-        
-        let sFighters = [];
-        if (currentPlayerFighterFilter !== "all") {
-          const fDetails = window.apiService.getFighterDetails(currentPlayerFighterFilter);
-          if (fDetails && fDetails.id !== "unknown") {
-            sFighters = [fDetails.name];
-          }
-        }
-        selectedSearchFighters = sFighters;
-        
+        selectedSearchFighters = currentPlayerFighterFilters ? [...currentPlayerFighterFilters] : [];
         selectedSearchWinnerPlayer = null;
         selectedSearchWinnerFighter = null;
         selectedSearchLoserPlayer = stats.player.name;
@@ -2723,17 +2687,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Player Profile Fighter Dropdown
-  const playerFighterFilter = document.getElementById("player-fighter-filter");
-  if (playerFighterFilter) {
-    playerFighterFilter.addEventListener("change", (e) => {
-      currentPlayerFighterFilter = e.target.value;
-      const parts = window.location.hash.split("/");
-      if (parts[0] === "#player" && parts[1]) {
-        renderPlayerProfile(parts[1]);
-      }
-    });
-  }
+
 
   // Fighter Profile Timeframe Toggles
   const fighterTimeframeFilters = document.getElementById("fighter-timeframe-filters");

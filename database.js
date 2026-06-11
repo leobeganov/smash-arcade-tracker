@@ -4,7 +4,7 @@
  */
 
 const STORAGE_KEYS = {
-  MATCHES: 'smashalytics_matches_v7',
+  MATCHES: 'smashalytics_matches_v8',
   API_KEY: 'smashalytics_api_key',
   THEME: 'smashalytics_theme',
   PLAYERS: 'smashalytics_players' // Custom nickname mappings
@@ -447,6 +447,282 @@ const POC_SEED_MATCHES = [
       { playerNumber: "P2", playerName: "Matt", character: "Pikachu", placement: 1, kos: 4, falls: -2, sds: 0, outAt: "---", teamColor: "None", damageDealt: 310, damageTaken: 210 },
       { playerNumber: "P3", playerName: "Polo", character: "Ness", placement: 3, kos: 2, falls: -3, sds: 0, outAt: "3:42", teamColor: "None", damageDealt: 220, damageTaken: 285 },
       { playerNumber: "P4", playerName: "Jack", character: "Donkey Kong", placement: 4, kos: 0, falls: -3, sds: -1, outAt: "2:15", teamColor: "None", damageDealt: 110, damageTaken: 290 }
+    ]
+  },
+  {
+    id: "match-seed-31",
+    timestamp: Date.now() - 1000 * 60 * 45, // 45 minutes ago
+    screenType: "EndScreen",
+    stage: "Pokémon Stadium 2",
+    rules: "3 Stock, 5:00",
+    gameMode: "1v1",
+    gameStyle: "1v1",
+    players: [
+      { playerNumber: "P1", playerName: "Matt", character: "Pikachu", placement: 1, kos: 3, falls: -2, sds: 0, outAt: "---", teamColor: "None", damageDealt: 184, damageTaken: 152 },
+      { playerNumber: "P2", playerName: "Jack", character: "Donkey Kong", placement: 2, kos: 2, falls: -3, sds: 0, outAt: "4:32", teamColor: "None", damageDealt: 148, damageTaken: 190 }
+    ]
+  },
+  {
+    id: "match-seed-32",
+    timestamp: Date.now() - 1000 * 60 * 90, // 1.5 hours ago
+    screenType: "EndScreen",
+    stage: "Small Battlefield",
+    rules: "3 Stock, 5:00",
+    gameMode: "3-Player",
+    gameStyle: "Free-for-All",
+    players: [
+      { playerNumber: "P1", playerName: "Leo", character: "Joker", placement: 1, kos: 4, falls: -1, sds: 0, outAt: "---", teamColor: "None", damageDealt: 298, damageTaken: 140 },
+      { playerNumber: "P2", playerName: "Polo", character: "Fox", placement: 2, kos: 2, falls: -3, sds: 0, outAt: "4:15", teamColor: "None", damageDealt: 180, damageTaken: 250 },
+      { playerNumber: "P3", playerName: "Sylv", character: "Snake", placement: 3, kos: 1, falls: -3, sds: -1, outAt: "2:58", teamColor: "None", damageDealt: 150, damageTaken: 310 }
+    ]
+  },
+  {
+    id: "match-seed-33",
+    timestamp: Date.now() - 1000 * 60 * 300, // 5 hours ago
+    screenType: "EndScreen",
+    stage: "Yoshi's Story",
+    rules: "3 Stock, 5:00",
+    gameMode: "1v1",
+    gameStyle: "1v1",
+    players: [
+      { playerNumber: "P1", playerName: "Ceets", character: "Zelda", placement: 2, kos: 1, falls: -3, sds: 0, outAt: "3:45", teamColor: "None", damageDealt: 110, damageTaken: 175 },
+      { playerNumber: "P2", playerName: "Leo", character: "Pyra/Mythra", placement: 1, kos: 3, falls: -1, sds: 0, outAt: "---", teamColor: "None", damageDealt: 180, damageTaken: 115 }
+    ]
+  },
+  {
+    id: "match-seed-34",
+    timestamp: Date.now() - 1000 * 60 * 60 * 26, // 1.1 days ago
+    screenType: "EndScreen",
+    stage: "Town and City",
+    rules: "3 Stock, 5:00",
+    gameMode: "4-Player",
+    gameStyle: "Teams",
+    players: [
+      { playerNumber: "P1", playerName: "Matt", character: "Sonic", placement: 1, kos: 3, falls: -1, sds: 0, outAt: "---", teamColor: "Red", damageDealt: 210, damageTaken: 130 },
+      { playerNumber: "P2", playerName: "Sylv", character: "Zero Suit Samus", placement: 1, kos: 2, falls: -2, sds: 0, outAt: "---", teamColor: "Red", damageDealt: 165, damageTaken: 180 },
+      { playerNumber: "P3", playerName: "Leo", character: "Sephiroth", placement: 2, kos: 2, falls: -3, sds: 0, outAt: "4:48", teamColor: "Blue", damageDealt: 195, damageTaken: 220 },
+      { playerNumber: "P4", playerName: "Jack", character: "Kazuya", placement: 2, kos: 1, falls: -3, sds: 0, outAt: "3:50", teamColor: "Blue", damageDealt: 140, damageTaken: 215 }
+    ]
+  },
+  {
+    id: "match-seed-35",
+    timestamp: Date.now() - 1000 * 60 * 60 * 77, // 3.2 days ago
+    screenType: "EndScreen",
+    stage: "Smashville",
+    rules: "3 Stock, 5:00",
+    gameMode: "4-Player",
+    gameStyle: "Free-for-All",
+    players: [
+      { playerNumber: "P1", playerName: "Polo", character: "Ness", placement: 3, kos: 1, falls: -3, sds: 0, outAt: "3:10", teamColor: "None", damageDealt: 155, damageTaken: 285 },
+      { playerNumber: "P2", playerName: "Ceets", character: "Peach", placement: 1, kos: 4, falls: -2, sds: 0, outAt: "---", teamColor: "None", damageDealt: 310, damageTaken: 190 },
+      { playerNumber: "P3", playerName: "Matt", character: "Mario", placement: 2, kos: 3, falls: -3, sds: 0, outAt: "4:35", teamColor: "None", damageDealt: 245, damageTaken: 260 },
+      { playerNumber: "P4", playerName: "Leo", character: "Cloud", placement: 4, kos: 0, falls: -3, sds: -1, outAt: "2:05", teamColor: "None", damageDealt: 98, damageTaken: 290 }
+    ]
+  },
+  {
+    id: "match-seed-36",
+    timestamp: Date.now() - 1000 * 60 * 60 * 132, // 5.5 days ago
+    screenType: "EndScreen",
+    stage: "Final Destination",
+    rules: "3 Stock, 5:00",
+    gameMode: "1v1",
+    gameStyle: "1v1",
+    players: [
+      { playerNumber: "P1", playerName: "Jack", character: "Banjo & Kazooie", placement: 2, kos: 1, falls: -3, sds: 0, outAt: "4:01", teamColor: "None", damageDealt: 112, damageTaken: 178 },
+      { playerNumber: "P2", playerName: "Matt", character: "Pikachu", placement: 1, kos: 3, falls: -1, sds: 0, outAt: "---", teamColor: "None", damageDealt: 182, damageTaken: 110 }
+    ]
+  },
+  {
+    id: "match-seed-37",
+    timestamp: Date.now() - 9 * 24 * 60 * 60 * 1000, // 9 days ago
+    screenType: "EndScreen",
+    stage: "Battlefield",
+    rules: "3 Stock, 5:00",
+    gameMode: "1v1",
+    gameStyle: "1v1",
+    players: [
+      { playerNumber: "P1", playerName: "Leo", character: "Byleth", placement: 1, kos: 3, falls: -2, sds: 0, outAt: "---", teamColor: "None", damageDealt: 194, damageTaken: 155 },
+      { playerNumber: "P2", playerName: "Sylv", character: "Zero Suit Samus", placement: 2, kos: 2, falls: -3, sds: 0, outAt: "4:49", teamColor: "None", damageDealt: 160, damageTaken: 202 }
+    ]
+  },
+  {
+    id: "match-seed-38",
+    timestamp: Date.now() - 11 * 24 * 60 * 60 * 1000, // 11 days ago
+    screenType: "EndScreen",
+    stage: "Pokémon Stadium 2",
+    rules: "3 Stock, 5:00",
+    gameMode: "4-Player",
+    gameStyle: "Free-for-All",
+    players: [
+      { playerNumber: "P1", playerName: "Ceets", character: "Samus", placement: 2, kos: 2, falls: -3, sds: 0, outAt: "4:12", teamColor: "None", damageDealt: 230, damageTaken: 265 },
+      { playerNumber: "P2", playerName: "Jack", character: "Terry", placement: 1, kos: 5, falls: -2, sds: 0, outAt: "---", teamColor: "None", damageDealt: 345, damageTaken: 210 },
+      { playerNumber: "P3", playerName: "Polo", character: "Richter", placement: 4, kos: 1, falls: -3, sds: -1, outAt: "2:18", teamColor: "None", damageDealt: 125, damageTaken: 280 },
+      { playerNumber: "P4", playerName: "Matt", character: "Link", placement: 3, kos: 2, falls: -3, sds: 0, outAt: "3:25", teamColor: "None", damageDealt: 190, damageTaken: 295 }
+    ]
+  },
+  {
+    id: "match-seed-39",
+    timestamp: Date.now() - 13 * 24 * 60 * 60 * 1000, // 13 days ago
+    screenType: "EndScreen",
+    stage: "Small Battlefield",
+    rules: "3 Stock, 5:00",
+    gameMode: "1v1",
+    gameStyle: "1v1",
+    players: [
+      { playerNumber: "P1", playerName: "Polo", character: "Hero", placement: 1, kos: 3, falls: -1, sds: 0, outAt: "---", teamColor: "None", damageDealt: 172, damageTaken: 124 },
+      { playerNumber: "P2", playerName: "Ceets", character: "Zelda", placement: 2, kos: 1, falls: -3, sds: 0, outAt: "4:11", teamColor: "None", damageDealt: 118, damageTaken: 180 }
+    ]
+  },
+  {
+    id: "match-seed-40",
+    timestamp: Date.now() - 16 * 24 * 60 * 60 * 1000, // 16 days ago
+    screenType: "EndScreen",
+    stage: "Smashville",
+    rules: "3 Stock, 5:00",
+    gameMode: "3-Player",
+    gameStyle: "Free-for-All",
+    players: [
+      { playerNumber: "P1", playerName: "Sylv", character: "Snake", placement: 1, kos: 4, falls: -2, sds: 0, outAt: "---", teamColor: "None", damageDealt: 285, damageTaken: 165 },
+      { playerNumber: "P2", playerName: "Matt", character: "Pikachu", placement: 2, kos: 2, falls: -3, sds: 0, outAt: "4:02", teamColor: "None", damageDealt: 180, damageTaken: 230 },
+      { playerNumber: "P3", playerName: "Jack", character: "Bowser", placement: 3, kos: 1, falls: -3, sds: 0, outAt: "3:01", teamColor: "None", damageDealt: 140, damageTaken: 275 }
+    ]
+  },
+  {
+    id: "match-seed-41",
+    timestamp: Date.now() - 18 * 24 * 60 * 60 * 1000, // 18 days ago
+    screenType: "EndScreen",
+    stage: "Town and City",
+    rules: "3 Stock, 5:00",
+    gameMode: "1v1",
+    gameStyle: "1v1",
+    players: [
+      { playerNumber: "P1", playerName: "Leo", character: "Joker", placement: 1, kos: 3, falls: -1, sds: 0, outAt: "---", teamColor: "None", damageDealt: 189, damageTaken: 98 },
+      { playerNumber: "P2", playerName: "Polo", character: "Ness", placement: 2, kos: 1, falls: -3, sds: 0, outAt: "3:58", teamColor: "None", damageDealt: 104, damageTaken: 195 }
+    ]
+  },
+  {
+    id: "match-seed-42",
+    timestamp: Date.now() - 22 * 24 * 60 * 60 * 1000, // 22 days ago
+    screenType: "EndScreen",
+    stage: "Battlefield",
+    rules: "3 Stock, 5:00",
+    gameMode: "4-Player",
+    gameStyle: "Teams",
+    players: [
+      { playerNumber: "P1", playerName: "Jack", character: "Donkey Kong", placement: 1, kos: 3, falls: -2, sds: 0, outAt: "---", teamColor: "Red", damageDealt: 220, damageTaken: 180 },
+      { playerNumber: "P2", playerName: "Polo", character: "Ness", placement: 1, kos: 2, falls: -1, sds: 0, outAt: "---", teamColor: "Red", damageDealt: 175, damageTaken: 130 },
+      { playerNumber: "P3", playerName: "Leo", character: "Byleth", placement: 2, kos: 2, falls: -3, sds: 0, outAt: "4:39", teamColor: "Blue", damageDealt: 190, damageTaken: 225 },
+      { playerNumber: "P4", playerName: "Ceets", character: "Peach", placement: 2, kos: 1, falls: -3, sds: 0, outAt: "3:45", teamColor: "Blue", damageDealt: 125, damageTaken: 210 }
+    ]
+  },
+  {
+    id: "match-seed-43",
+    timestamp: Date.now() - 24 * 24 * 60 * 60 * 1000, // 24 days ago
+    screenType: "EndScreen",
+    stage: "Small Battlefield",
+    rules: "3 Stock, 5:00",
+    gameMode: "1v1",
+    gameStyle: "1v1",
+    players: [
+      { playerNumber: "P1", playerName: "Matt", character: "Pikachu", placement: 2, kos: 2, falls: -3, sds: 0, outAt: "4:41", teamColor: "None", damageDealt: 168, damageTaken: 195 },
+      { playerNumber: "P2", playerName: "Sylv", character: "Zero Suit Samus", placement: 1, kos: 3, falls: -2, sds: 0, outAt: "---", teamColor: "None", damageDealt: 185, damageTaken: 170 }
+    ]
+  },
+  {
+    id: "match-seed-44",
+    timestamp: Date.now() - 27 * 24 * 60 * 60 * 1000, // 27 days ago
+    screenType: "EndScreen",
+    stage: "Final Destination",
+    rules: "3 Stock, 5:00",
+    gameMode: "4-Player",
+    gameStyle: "Free-for-All",
+    players: [
+      { playerNumber: "P1", playerName: "Leo", character: "Pyra/Mythra", placement: 1, kos: 4, falls: -1, sds: 0, outAt: "---", teamColor: "None", damageDealt: 290, damageTaken: 150 },
+      { playerNumber: "P2", playerName: "Jack", character: "Terry", placement: 2, kos: 3, falls: -3, sds: 0, outAt: "4:45", teamColor: "None", damageDealt: 225, damageTaken: 240 },
+      { playerNumber: "P3", playerName: "Ceets", character: "Zelda", placement: 3, kos: 1, falls: -3, sds: -1, outAt: "3:20", teamColor: "None", damageDealt: 120, damageTaken: 260 },
+      { playerNumber: "P4", playerName: "Polo", character: "Richter", placement: 4, kos: 0, falls: -3, sds: 0, outAt: "2:02", teamColor: "None", damageDealt: 95, damageTaken: 250 }
+    ]
+  },
+  {
+    id: "match-seed-45",
+    timestamp: Date.now() - 29 * 24 * 60 * 60 * 1000, // 29 days ago
+    screenType: "EndScreen",
+    stage: "Smashville",
+    rules: "3 Stock, 5:00",
+    gameMode: "1v1",
+    gameStyle: "1v1",
+    players: [
+      { playerNumber: "P1", playerName: "Matt", character: "Mario", placement: 1, kos: 3, falls: -1, sds: 0, outAt: "---", teamColor: "None", damageDealt: 180, damageTaken: 115 },
+      { playerNumber: "P2", playerName: "Leo", character: "Cloud", placement: 2, kos: 1, falls: -3, sds: 0, outAt: "3:55", teamColor: "None", damageDealt: 122, damageTaken: 176 }
+    ]
+  },
+  {
+    id: "match-seed-46",
+    timestamp: Date.now() - 32 * 24 * 60 * 60 * 1000, // 32 days ago
+    screenType: "EndScreen",
+    stage: "Yoshi's Story",
+    rules: "3 Stock, 5:00",
+    gameMode: "1v1",
+    gameStyle: "1v1",
+    players: [
+      { playerNumber: "P1", playerName: "Jack", character: "Kazuya", placement: 1, kos: 3, falls: -1, sds: 0, outAt: "---", teamColor: "None", damageDealt: 215, damageTaken: 130 },
+      { playerNumber: "P2", playerName: "Sylv", character: "Snake", placement: 2, kos: 1, falls: -3, sds: 0, outAt: "4:08", teamColor: "None", damageDealt: 128, damageTaken: 212 }
+    ]
+  },
+  {
+    id: "match-seed-47",
+    timestamp: Date.now() - 37 * 24 * 60 * 60 * 1000, // 37 days ago
+    screenType: "EndScreen",
+    stage: "Town and City",
+    rules: "3 Stock, 5:00",
+    gameMode: "4-Player",
+    gameStyle: "Free-for-All",
+    players: [
+      { playerNumber: "P1", playerName: "Matt", character: "Pikachu", placement: 2, kos: 3, falls: -3, sds: 0, outAt: "4:28", teamColor: "None", damageDealt: 240, damageTaken: 270 },
+      { playerNumber: "P2", playerName: "Leo", character: "Joker", placement: 1, kos: 5, falls: -2, sds: 0, outAt: "---", teamColor: "None", damageDealt: 320, damageTaken: 180 },
+      { playerNumber: "P3", playerName: "Jack", character: "Donkey Kong", placement: 3, kos: 1, falls: -3, sds: 0, outAt: "3:12", teamColor: "None", damageDealt: 175, damageTaken: 295 },
+      { playerNumber: "P4", playerName: "Polo", character: "Ness", placement: 4, kos: 0, falls: -3, sds: -1, outAt: "2:00", teamColor: "None", damageDealt: 110, damageTaken: 280 }
+    ]
+  },
+  {
+    id: "match-seed-48",
+    timestamp: Date.now() - 42 * 24 * 60 * 60 * 1000, // 42 days ago
+    screenType: "EndScreen",
+    stage: "Pokémon Stadium 2",
+    rules: "3 Stock, 5:00",
+    gameMode: "1v1",
+    gameStyle: "1v1",
+    players: [
+      { playerNumber: "P1", playerName: "Ceets", character: "Peach", placement: 1, kos: 3, falls: -2, sds: 0, outAt: "---", teamColor: "None", damageDealt: 195, damageTaken: 168 },
+      { playerNumber: "P2", playerName: "Matt", character: "Link", placement: 2, kos: 2, falls: -3, sds: 0, outAt: "4:42", teamColor: "None", damageDealt: 162, damageTaken: 200 }
+    ]
+  },
+  {
+    id: "match-seed-49",
+    timestamp: Date.now() - 45 * 24 * 60 * 60 * 1000, // 45 days ago
+    screenType: "EndScreen",
+    stage: "Battlefield",
+    rules: "3 Stock, 5:00",
+    gameMode: "1v1",
+    gameStyle: "1v1",
+    players: [
+      { playerNumber: "P1", playerName: "Polo", character: "Fox", placement: 2, kos: 1, falls: -3, sds: 0, outAt: "3:40", teamColor: "None", damageDealt: 115, damageTaken: 182 },
+      { playerNumber: "P2", playerName: "Leo", character: "Joker", placement: 1, kos: 3, falls: -1, sds: 0, outAt: "---", teamColor: "None", damageDealt: 178, damageTaken: 120 }
+    ]
+  },
+  {
+    id: "match-seed-50",
+    timestamp: Date.now() - 50 * 24 * 60 * 60 * 1000, // 50 days ago
+    screenType: "EndScreen",
+    stage: "Final Destination",
+    rules: "3 Stock, 5:00",
+    gameMode: "4-Player",
+    gameStyle: "Teams",
+    players: [
+      { playerNumber: "P1", playerName: "Jack", character: "Donkey Kong", placement: 2, kos: 2, falls: -3, sds: -1, outAt: "4:10", teamColor: "Red", damageDealt: 180, damageTaken: 260 },
+      { playerNumber: "P2", playerName: "Matt", character: "Pikachu", placement: 2, kos: 1, falls: -3, sds: 0, outAt: "3:25", teamColor: "Red", damageDealt: 145, damageTaken: 230 },
+      { playerNumber: "P3", playerName: "Leo", character: "Joker", placement: 1, kos: 4, falls: -1, sds: 0, outAt: "---", teamColor: "Blue", damageDealt: 290, damageTaken: 135 },
+      { playerNumber: "P4", playerName: "Sylv", character: "Zero Suit Samus", placement: 1, kos: 2, falls: -2, sds: 0, outAt: "---", teamColor: "Blue", damageDealt: 160, damageTaken: 170 }
     ]
   }
 ];
