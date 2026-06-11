@@ -365,6 +365,7 @@ const apiService = {
     let wins = 0;
     let falls = 0;
     let KOs = 0;
+    let sds = 0;
     let damageDealtSum = 0;
     let damageTakenSum = 0;
 
@@ -380,6 +381,7 @@ const apiService = {
 
       falls += Math.abs(pRec.falls || 0);
       KOs += (pRec.kos || 0);
+      sds += Math.abs(pRec.sds || 0);
       damageDealtSum += (pRec.damageDealt || 0);
       damageTakenSum += (pRec.damageTaken || 0);
 
@@ -456,6 +458,7 @@ const apiService = {
       adjustedWins: parseFloat(adjustedWins.toFixed(2)),
       falls,
       KOs,
+      sds,
       winRate: totalMatches > 0 ? ((wins / totalMatches) * 100).toFixed(1) : "0.0",
       kdRatio: falls > 0 ? (KOs / falls).toFixed(2) : KOs.toFixed(2),
       avgDamageDealt: totalMatches > 0 ? Math.round(damageDealtSum / totalMatches) : 0,

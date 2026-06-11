@@ -307,6 +307,13 @@
                   <button class="toggle-btn active" data-timeframe="alltime">All Time</button>
                 </div>
               </div>
+              <!-- Fighter Filter -->
+              <div class="fighter-filter-wrapper" style="display: flex; align-items: center; gap: 10px;">
+                <span class="mode-toggle-label" style="font-size: 10px; color: var(--color-neon-magenta); letter-spacing: 0.5px; font-family: var(--font-arcade);">FIGHTER:</span>
+                <select id="player-fighter-filter" class="retro-dropdown-select magenta-theme">
+                  <option value="all">ALL FIGHTERS</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -339,6 +346,21 @@
               <div class="stat-title">Knockout / Fall Ratio</div>
               <div class="stat-num text-glow-magenta" id="player-stat-kd">-</div>
               <div class="stat-sub-label" id="player-stat-kd-sub">K/D RATIO</div>
+            </div>
+            <div class="stat-cell-retro" id="player-kos-cell">
+              <div class="stat-title">Knockouts</div>
+              <div class="stat-num text-glow-cyan" id="player-stat-kos">-</div>
+              <div class="stat-sub-label" id="player-stat-kos-sub">TOTAL KOS</div>
+            </div>
+            <div class="stat-cell-retro" id="player-falls-cell">
+              <div class="stat-title">Falls</div>
+              <div class="stat-num text-glow-magenta" id="player-stat-falls">-</div>
+              <div class="stat-sub-label" id="player-stat-falls-sub">TOTAL FALLS</div>
+            </div>
+            <div class="stat-cell-retro" id="player-sds-cell">
+              <div class="stat-title">Self-Destructs</div>
+              <div class="stat-num text-glow-yellow" id="player-stat-sds">-</div>
+              <div class="stat-sub-label" id="player-stat-sds-sub">TOTAL SDS</div>
             </div>
           </div>
 
@@ -777,7 +799,7 @@
 
           <!-- Most Played Fighter (Vertical Bar Chart) -->
           <div class="panel-beveled tel-chart-box neon-magenta">
-            <h3 class="font-arcade text-glow-magenta chart-box-title">MOST PLAYED FIGHTERS (TOP 10)</h3>
+            <h3 class="font-arcade text-glow-magenta chart-box-title">MOST PLAYED FIGHTERS</h3>
             <div class="chart-content flex-center" style="position: relative; padding: 15px; box-sizing: border-box; min-height: 250px;">
               <div id="most-played-fighters-container" style="width: 100%; height: 100%; min-height: 240px; display: flex; align-items: flex-end; justify-content: space-around; padding-bottom: 20px; box-sizing: border-box; overflow: visible;">
                 <!-- Vertical Bars Injected Here -->
@@ -830,9 +852,6 @@
                 RESET FILTERS
               </button>
             </div>
-            <p class="font-stats" style="margin: 6px 0 0 0; font-size: 10px; color: #a3a6b5; letter-spacing: 0.2px; text-transform: uppercase; opacity: 0.85;">
-              ⚠️ Note: This is a visual search filter to isolate items on the timelines below. It does not alter the underlying match dataset being analyzed.
-            </p>
           </div>
 
           <div class="timeline-section-wrapper" style="display: flex; flex-direction: column; gap: 65px; overflow: visible;">
