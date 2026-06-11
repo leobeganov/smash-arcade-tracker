@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentLeaderboardTimeframe = "alltime";
   let currentPlayerTimeframe = "alltime";
   let currentPlayerMatchType = "all";
+  let currentPlayerFighterFilter = "all";
   let currentFighterTimeframe = "alltime";
   let currentInsightsTimeframe = "alltime";
   let currentInsightsMatchType = "all";
@@ -566,6 +567,22 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
+    // Sync fighter filter select dropdown
+    const pff = document.getElementById("player-fighter-filter");
+    if (pff) {
+      if (pff.options.length <= 1) {
+        const roster = await api.getFullRoster();
+        const sortedRoster = [...roster].sort((a, b) => a.name.localeCompare(b.name));
+        sortedRoster.forEach(f => {
+          const opt = document.createElement("option");
+          opt.value = f.slug || f.id;
+          opt.textContent = f.name.toUpperCase();
+          pff.appendChild(opt);
+        });
+      }
+      pff.value = currentPlayerFighterFilter;
+    }
+
     // Fetch and filter matches dynamically
     let matches = await window.Database.getMatchesAsync();
     const now = Date.now();
@@ -599,6 +616,30 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
+    // Determine the real player name from the playerId
+    let playerName = playerId; // fallback
+    const allMatchesForPlayerName = await window.Database.getMatchesAsync();
+    for (const m of allMatchesForPlayerName) {
+      if (m.players) {
+        const p = m.players.find(p => p.playerName.toLowerCase() === playerId.toLowerCase() || p.playerName.toLowerCase().replace(/\s+/g, '-') === playerId.toLowerCase());
+        if (p) {
+          playerName = p.playerName;
+          break;
+        }
+      }
+    }
+
+    // Filter matches by selected fighter
+    if (currentPlayerFighterFilter !== 'all') {
+      matches = matches.filter(m => {
+        if (!m.players) return false;
+        const pRec = m.players.find(p => p.playerName.toLowerCase() === playerName.toLowerCase());
+        if (!pRec) return false;
+        const fDetails = window.apiService.getFighterDetails(pRec.character);
+        return fDetails.id === currentPlayerFighterFilter;
+      });
+    }
+
     const stats = await api.getPlayerProfile(playerId, matches);
     if (!stats) {
       hideSectionLoader(profileContent);
@@ -606,7 +647,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Sidebar Portrait and Info
-    document.getElementById("player-profile-fighter-img").src = stats.mostUsedFighter ? stats.mostUsedFighter.img : "assets/mario.png?v=5";
+    const fighterImgEl = document.getElementById("player-profile-fighter-img");
+    if (stats.mostUsedFighter) {
+      fighterImgEl.src = stats.mostUsedFighter.img;
+      fighterImgEl.style.opacity = "1.0";
+      fighterImgEl.style.filter = "none";
+    } else {
+      fighterImgEl.src = "assets/mario.png?v=5";
+      if (stats.totalMatches === 0) {
+        fighterImgEl.style.opacity = "0.35";
+        fighterImgEl.style.filter = "grayscale(1)";
+      } else {
+        fighterImgEl.style.opacity = "1.0";
+        fighterImgEl.style.filter = "none";
+      }
+    }
     document.getElementById("player-profile-name").textContent = stats.player.name;
 
     // Stat grids
@@ -616,6 +671,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("player-stat-losses").textContent = stats.losses;
     document.getElementById("player-stat-winrate").textContent = `${stats.winRate}%`;
     document.getElementById("player-stat-kd").textContent = stats.kdRatio;
+    
+    // Physical metrics
+    document.getElementById("player-stat-kos").textContent = stats.KOs;
+    document.getElementById("player-stat-falls").textContent = stats.falls;
+    document.getElementById("player-stat-sds").textContent = stats.sds !== undefined ? stats.sds : 0;
 
     // Render Signature Fighter
     const sigCard = document.getElementById("player-sig-card");
@@ -706,22 +766,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // See all matches button integration
-    const btnSeeMatches = document.getElementById("btn-player-see-matches");
-    if (btnSeeMatches) {
-      btnSeeMatches.onclick = () => {
-        selectedSearchPlayers = [stats.player.name];
-        selectedSearchFighters = [];
-        selectedSearchWinnerPlayer = null;
-        selectedSearchWinnerFighter = null;
-        selectedSearchLoserPlayer = null;
-        currentPodiumTimeframe = "30days";
-        shouldScrollToMatchList = true;
-        isSearchDropdownsInitialized = false; // force dropdown re-initialization
-        syncHomePageStyleWithPlayerFilter();
-        window.location.hash = "#home";
-      };
-    }
+
 
     // Games Played cell click-through integration
     const gamesCell = document.getElementById("player-games-cell");
@@ -1983,11 +2028,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const fightersList = await api.getAllFighters();
 
     setupRetroMultiSelect("timeline-multi-select-players-container", playerNames, timelineSelectedPlayers, () => {
-      renderAverageKOTimeline("player-average-timeline-markers", matches, "players", timelineSelectedPlayers);
+      renderAverageKOTimeline("player-average-timeline-markers", matches, "players", timelineSelectedPlayers, timelineSelectedFighters);
+      renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", timelineSelectedPlayers, timelineSelectedFighters);
     });
 
     setupRetroMultiSelect("timeline-multi-select-fighters-container", fightersList, timelineSelectedFighters, () => {
-      renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", timelineSelectedFighters);
+      renderAverageKOTimeline("player-average-timeline-markers", matches, "players", timelineSelectedPlayers, timelineSelectedFighters);
+      renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", timelineSelectedPlayers, timelineSelectedFighters);
     });
 
     // Handle RESET button click
@@ -1998,19 +2045,21 @@ document.addEventListener("DOMContentLoaded", () => {
         timelineSelectedFighters.length = 0;
         
         setupRetroMultiSelect("timeline-multi-select-players-container", playerNames, timelineSelectedPlayers, () => {
-          renderAverageKOTimeline("player-average-timeline-markers", matches, "players", timelineSelectedPlayers);
+          renderAverageKOTimeline("player-average-timeline-markers", matches, "players", timelineSelectedPlayers, timelineSelectedFighters);
+          renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", timelineSelectedPlayers, timelineSelectedFighters);
         });
         setupRetroMultiSelect("timeline-multi-select-fighters-container", fightersList, timelineSelectedFighters, () => {
-          renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", timelineSelectedFighters);
+          renderAverageKOTimeline("player-average-timeline-markers", matches, "players", timelineSelectedPlayers, timelineSelectedFighters);
+          renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", timelineSelectedPlayers, timelineSelectedFighters);
         });
 
-        renderAverageKOTimeline("player-average-timeline-markers", matches, "players", timelineSelectedPlayers);
-        renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", timelineSelectedFighters);
+        renderAverageKOTimeline("player-average-timeline-markers", matches, "players", timelineSelectedPlayers, timelineSelectedFighters);
+        renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", timelineSelectedPlayers, timelineSelectedFighters);
       };
     }
 
-    renderAverageKOTimeline("player-average-timeline-markers", matches, "players", timelineSelectedPlayers);
-    renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", timelineSelectedFighters);
+    renderAverageKOTimeline("player-average-timeline-markers", matches, "players", timelineSelectedPlayers, timelineSelectedFighters);
+    renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", timelineSelectedPlayers, timelineSelectedFighters);
 
     const elapsed = Date.now() - startTime;
     if (elapsed < 250) {
@@ -2251,7 +2300,7 @@ document.addEventListener("DOMContentLoaded", () => {
     container.innerHTML = html;
   }
 
-  function renderAverageKOTimeline(containerId, matches, mode, selectedFilters = []) {
+  function renderAverageKOTimeline(containerId, matches, mode, selectedPlayers = [], selectedFighters = []) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
@@ -2276,27 +2325,65 @@ document.addEventListener("DOMContentLoaded", () => {
       return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
+    // Filter matches based on the selected players and fighters to affect the dataset being analyzed
+    let timelineMatches = [...matches];
+    if (Array.isArray(selectedPlayers) && selectedPlayers.length > 0) {
+      const lowerPlayers = selectedPlayers.map(p => p.toLowerCase().trim());
+      timelineMatches = timelineMatches.filter(m => 
+        m.players && m.players.some(p => lowerPlayers.includes(p.playerName.toLowerCase().trim()))
+      );
+    }
+    if (Array.isArray(selectedFighters) && selectedFighters.length > 0) {
+      const lowerFighters = selectedFighters.map(f => f.toLowerCase().trim());
+      timelineMatches = timelineMatches.filter(m => 
+        m.players && m.players.some(p => lowerFighters.includes(p.character.toLowerCase().trim()))
+      );
+    }
+
+    const lowerSelectedPlayers = (selectedPlayers || []).map(p => p.toLowerCase().trim());
+    const lowerSelectedFighters = (selectedFighters || []).map(f => f.toLowerCase().trim());
+
     const entities = {};
-    matches.forEach(m => {
+    timelineMatches.forEach(m => {
       if (m.players) {
         m.players.forEach(p => {
-          const key = (mode === "players") ? p.playerName : p.character;
-          if (!key) return;
-          if (!entities[key]) {
-            entities[key] = { name: key, totalSecs: 0, count: 0, characters: {} };
-          }
-          const secs = parseOutAtToSeconds(p.outAt) ?? 300; // survivors set to 5:00 mark
-          entities[key].totalSecs += secs;
-          entities[key].count++;
-          
+          const pNameLower = p.playerName.toLowerCase().trim();
+          const pCharLower = p.character.toLowerCase().trim();
+
+          // If we are looking at players
           if (mode === "players") {
+            // If a fighter is selected, the player must have played one of the selected fighters in this match to be included
+            if (lowerSelectedFighters.length > 0 && !lowerSelectedFighters.includes(pCharLower)) {
+              return;
+            }
+            const key = p.playerName;
+            if (!entities[key]) {
+              entities[key] = { name: key, totalSecs: 0, count: 0, characters: {} };
+            }
+            const secs = parseOutAtToSeconds(p.outAt) ?? 300; // survivors set to 5:00 mark
+            entities[key].totalSecs += secs;
+            entities[key].count++;
             entities[key].characters[p.character] = (entities[key].characters[p.character] || 0) + 1;
+          } 
+          // If we are looking at characters
+          else {
+            // If a player is selected, the character must have been played by one of the selected players in this match to be included
+            if (lowerSelectedPlayers.length > 0 && !lowerSelectedPlayers.includes(pNameLower)) {
+              return;
+            }
+            const key = p.character;
+            if (!entities[key]) {
+              entities[key] = { name: key, totalSecs: 0, count: 0 };
+            }
+            const secs = parseOutAtToSeconds(p.outAt) ?? 300; // survivors set to 5:00 mark
+            entities[key].totalSecs += secs;
+            entities[key].count++;
           }
         });
       }
     });
 
-    const sortedEntities = Object.values(entities).map(ent => {
+    let filteredEntities = Object.values(entities).map(ent => {
       const avgSecs = ent.totalSecs / ent.count;
       let iconUrl = 'assets/mario.png';
       if (mode === "players") {
@@ -2324,11 +2411,11 @@ document.addEventListener("DOMContentLoaded", () => {
       };
     }).sort((a, b) => a.avgSecs - b.avgSecs);
 
-    // Apply timeline filters
-    let filteredEntities = sortedEntities;
-    if (Array.isArray(selectedFilters) && selectedFilters.length > 0) {
-      const lowerFilters = selectedFilters.map(f => f.toLowerCase().trim());
-      filteredEntities = sortedEntities.filter(ent => lowerFilters.includes(ent.name.toLowerCase().trim()));
+    // If filter selection is specified, only show the selected ones on their respective timeline
+    if (mode === "players" && lowerSelectedPlayers.length > 0) {
+      filteredEntities = filteredEntities.filter(ent => lowerSelectedPlayers.includes(ent.name.toLowerCase().trim()));
+    } else if (mode === "characters" && lowerSelectedFighters.length > 0) {
+      filteredEntities = filteredEntities.filter(ent => lowerSelectedFighters.includes(ent.name.toLowerCase().trim()));
     }
 
     const placedMarkers = { above: [], below: [] };
@@ -2602,6 +2689,18 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.classList.add("active");
       
       currentPlayerMatchType = btn.getAttribute("data-matchtype");
+      const parts = window.location.hash.split("/");
+      if (parts[0] === "#player" && parts[1]) {
+        renderPlayerProfile(parts[1]);
+      }
+    });
+  }
+
+  // Player Profile Fighter Dropdown
+  const playerFighterFilter = document.getElementById("player-fighter-filter");
+  if (playerFighterFilter) {
+    playerFighterFilter.addEventListener("change", (e) => {
+      currentPlayerFighterFilter = e.target.value;
       const parts = window.location.hash.split("/");
       if (parts[0] === "#player" && parts[1]) {
         renderPlayerProfile(parts[1]);

@@ -811,6 +811,18 @@ body {
   grid-column: span 3;
 }
 
+#player-profile-view #player-kos-cell {
+  grid-column: span 2;
+}
+
+#player-profile-view #player-falls-cell {
+  grid-column: span 2;
+}
+
+#player-profile-view #player-sds-cell {
+  grid-column: span 2;
+}
+
 #player-profile-view .stat-cell-retro {
   background: linear-gradient(180deg, var(--bg-obsidian) 0%, #12001a 100%);
   border: 3px solid var(--color-neon-magenta);
@@ -1397,6 +1409,25 @@ body {
 }
 
 .retro-dropdown-select option {
+  background-color: var(--color-bg-dark);
+  color: #fff;
+  font-family: var(--font-stats);
+  font-size: var(--font-size-xs);
+}
+
+/* Magenta version of retro dropdown select */
+.retro-dropdown-select.magenta-theme {
+  border-color: var(--color-neon-magenta);
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23ff007f' height='10' viewBox='0 0 24 24' width='10' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+  box-shadow: 0 0 5px rgba(255, 0, 127, 0.15);
+}
+
+.retro-dropdown-select.magenta-theme:hover, .retro-dropdown-select.magenta-theme:focus {
+  border-color: var(--color-neon-magenta);
+  box-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
+}
+
+.retro-dropdown-select.magenta-theme option {
   background-color: var(--color-bg-dark);
   color: #fff;
   font-family: var(--font-stats);
@@ -4212,11 +4243,16 @@ body.theme-retro .btn-arcade {
   }
 
   #player-profile-view .profile-timeframe-row .timeframe-filter-wrapper,
-  #player-profile-view .profile-timeframe-row .matchtype-filter-wrapper {
+  #player-profile-view .profile-timeframe-row .matchtype-filter-wrapper,
+  #player-profile-view .profile-timeframe-row .fighter-filter-wrapper {
     flex-direction: column !important;
     align-items: center !important;
     width: 100% !important;
     gap: 8px !important;
+  }
+
+  #player-profile-view .profile-timeframe-row .fighter-filter-wrapper select {
+    width: 100% !important;
   }
 
   #player-profile-view .profile-timeframe-row .mode-toggle-label {
