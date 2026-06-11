@@ -43,6 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- Fighters Library State ---
   let fightersSearchQuery = "";
+  let timelineSearchQuery = "";
   let fightersSelectedSeries = "all";
   let fightersSortBy = "alpha"; // "alpha" or "mostplayed"
   const cardVariantIndices = {}; // Track active variant index per fighter slug/ID
@@ -1908,8 +1909,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Trigger custom html/css dynamic renderings
     renderMostPlayedFighters("most-played-fighters-container", stats.characters, matches);
     renderPlayerCombatOutcomes("player-combat-outcomes-container", stats.players);
-    renderAverageKOTimeline("player-average-timeline-markers", matches, "players");
-    renderAverageKOTimeline("character-average-timeline-markers", matches, "characters");
+    renderAverageKOTimeline("player-average-timeline-markers", matches, "players", timelineSearchQuery);
+    renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", timelineSearchQuery);
 
     const elapsed = Date.now() - startTime;
     if (elapsed < 250) {
@@ -2060,7 +2061,7 @@ document.addEventListener("DOMContentLoaded", () => {
     container.innerHTML = html;
   }
 
-  function renderAverageKOTimeline(containerId, matches, mode) {
+  function renderAverageKOTimeline(containerId, matches, mode, searchQuery = "") {
     const container = document.getElementById(containerId);
     if (!container) return;
 
@@ -2133,11 +2134,18 @@ document.addEventListener("DOMContentLoaded", () => {
       };
     }).sort((a, b) => a.avgSecs - b.avgSecs);
 
+    // Apply timeline search filter
+    let filteredEntities = sortedEntities;
+    if (searchQuery && searchQuery.trim() !== "") {
+      const q = searchQuery.toLowerCase().trim();
+      filteredEntities = sortedEntities.filter(ent => ent.name.toLowerCase().includes(q));
+    }
+
     const placedMarkers = { above: [], below: [] };
     let markersHtml = "";
     let markerIdx = 0;
 
-    sortedEntities.forEach(ent => {
+    filteredEntities.forEach(ent => {
       const pct = (ent.avgSecs / 300) * 100;
       const safePct = Math.max(0, Math.min(100, pct));
       
@@ -2152,7 +2160,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       placedMarkers[sideKey].push({ pct: safePct, stagger: staggerIndex });
       
-      const markerColor = (mode === 'players') ? 'var(--color-neon-cyan)' : 'var(--color-neon-magenta)';
+      // Use var(--color-neon-cyan) consistently across both timelines
+      const markerColor = 'var(--color-neon-cyan)';
       const offsetSize = 15 + staggerIndex * 35; // staggers are spaced out vertically
       
       markersHtml += `
@@ -2908,6 +2917,58 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
   });
+
+  // Timeline Participant Search Filter Control
+  const timelineSearchInput = document.getElementById("timeline-search-input");
+  if (timelineSearchInput) {
+    timelineSearchInput.value = timelineSearchQuery;
+    timelineSearchInput.addEventListener("input", async (e) => {
+      timelineSearchQuery = e.target.value;
+      
+      // Fetch currently filtered matches based on timeframe
+      let matches = await window.Database.getMatchesAsync();
+      const now = Date.now();
+      if (currentInsightsTimeframe === 'today') {
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        matches = matches.filter(m => m.timestamp >= todayStart.getTime());
+      } else if (currentInsightsTimeframe === '7days') {
+        const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
+        matches = matches.filter(m => m.timestamp >= sevenDaysAgo);
+      } else if (currentInsightsTimeframe === '30days') {
+        const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
+        matches = matches.filter(m => m.timestamp >= thirtyDaysAgo);
+      }
+      
+      renderAverageKOTimeline("player-average-timeline-markers", matches, "players", timelineSearchQuery);
+      renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", timelineSearchQuery);
+    });
+  }
+
+  const btnClearTimelineSearch = document.getElementById("btn-clear-timeline-search");
+  if (btnClearTimelineSearch) {
+    btnClearTimelineSearch.addEventListener("click", async () => {
+      timelineSearchQuery = "";
+      if (timelineSearchInput) timelineSearchInput.value = "";
+      
+      let matches = await window.Database.getMatchesAsync();
+      const now = Date.now();
+      if (currentInsightsTimeframe === 'today') {
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        matches = matches.filter(m => m.timestamp >= todayStart.getTime());
+      } else if (currentInsightsTimeframe === '7days') {
+        const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
+        matches = matches.filter(m => m.timestamp >= sevenDaysAgo);
+      } else if (currentInsightsTimeframe === '30days') {
+        const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
+        matches = matches.filter(m => m.timestamp >= thirtyDaysAgo);
+      }
+      
+      renderAverageKOTimeline("player-average-timeline-markers", matches, "players", "");
+      renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", "");
+    });
+  }
 
   // Clear / Reset podium search filters
   const btnClearPodiumSearch = document.getElementById("btn-clear-podium-search");
