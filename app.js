@@ -2608,6 +2608,21 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Insights Match Type Toggles
+  const insightsMatchtypeFilters = document.getElementById("insights-matchtype-filters");
+  if (insightsMatchtypeFilters) {
+    insightsMatchtypeFilters.addEventListener("click", (e) => {
+      const btn = e.target.closest(".toggle-btn");
+      if (!btn) return;
+      
+      insightsMatchtypeFilters.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      
+      currentInsightsMatchType = btn.getAttribute("data-matchtype");
+      renderInsights();
+    });
+  }
+
   // Variant Navigation Click Listeners
   const btnPrev = document.getElementById("btn-variant-prev");
   if (btnPrev) {
@@ -3076,17 +3091,55 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-  // Clear / Reset podium search filters
-  const btnClearPodiumSearch = document.getElementById("btn-clear-podium-search");
-  if (btnClearPodiumSearch) {
-    btnClearPodiumSearch.onclick = () => {
+  // Clear / Reset podium search filters (Clear Filters Button)
+  const btnClearAllFilters = document.getElementById("btn-clear-all-filters");
+  if (btnClearAllFilters) {
+    btnClearAllFilters.onclick = () => {
+      // 1. Reset to 30 days
+      currentPodiumTimeframe = "30days";
+
+      // 2. Reset all games (style select)
+      const podiumStyleSelect = document.getElementById("podium-style-select");
+      if (podiumStyleSelect) {
+        podiumStyleSelect.value = "all";
+      }
+      
+      const styleContainer = document.getElementById("multi-select-style-container");
+      if (styleContainer) {
+        const btn = styleContainer.querySelector(".retro-multi-select-btn");
+        const selectedTextEl = btn ? btn.querySelector(".selected-text") : null;
+        if (selectedTextEl) selectedTextEl.textContent = "ALL GAMES";
+        if (btn) btn.classList.remove("active-selection");
+
+        const rows = styleContainer.querySelectorAll(".retro-multi-option-row");
+        rows.forEach(r => {
+          const val = r.getAttribute("data-value");
+          if (val === "all") {
+            r.classList.add("active-selection");
+            const chk = r.querySelector(".style-checkbox");
+            if (chk) chk.checked = true;
+          } else {
+            r.classList.remove("active-selection");
+            const chk = r.querySelector(".style-checkbox");
+            if (chk) chk.checked = false;
+          }
+        });
+      }
+
+      // 3. Reset all players & fighters
       selectedSearchPlayers.length = 0;
       selectedSearchFighters.length = 0;
+
+      // 4. Wipe winner/loser filters ("wins only" / "losses only" sections)
       selectedSearchWinnerPlayer = null;
       selectedSearchWinnerFighter = null;
       selectedSearchLoserPlayer = null;
+
+      // 5. Reinitialize search multi-select dropdowns & sync state
       initSearchDropdowns();
       updateSearchBadge();
+      
+      // 6. Rerender home
       renderHome();
     };
   }
