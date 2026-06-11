@@ -846,6 +846,22 @@ body {
   line-height: 1;
 }
 
+#player-profile-view .stat-cell-retro .stat-action-link {
+  font-family: var(--font-arcade);
+  font-size: 8px;
+  margin-top: 10px;
+  opacity: 0.7;
+  letter-spacing: 0.5px;
+  transition: opacity 0.2s ease, transform 0.2s ease, text-shadow 0.2s ease;
+  text-decoration: none;
+}
+
+#player-profile-view .stat-cell-retro:hover .stat-action-link {
+  opacity: 1;
+  text-decoration: underline;
+  transform: scale(1.05);
+}
+
 
 #fighter-profile-view {
   position: relative;
@@ -4481,9 +4497,6 @@ body.theme-retro .btn-arcade {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-
-
-
 /* ==========================================================
    DESKTOP ONLY MOBILE SYNC QR PANEL STYLING
    ========================================================== */

@@ -195,6 +195,11 @@
                 <!-- Dynamic JS options -->
               </div>
             </div>
+
+            <!-- Clear Filters Button -->
+            <button type="button" class="btn-arcade magenta" id="btn-clear-all-filters" style="font-size: 10px; padding: 10px 15px; border-radius: 4px; font-family: var(--font-arcade); font-weight: bold; height: 38px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; box-sizing: border-box; text-shadow: 0 0 5px rgba(255, 0, 127, 0.5);">
+              CLEAR FILTERS
+            </button>
           </div>
         </div>
 
@@ -280,8 +285,7 @@
         <div class="profile-content-area">
           
           <!-- Filter Row (Timeframe & Match Type Selector) -->
-          <div class="profile-timeframe-row" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-            <h2 class="profile-section-title text-glow-magenta" style="font-family: var(--font-arcade); font-size: var(--font-size-xs); margin: 0; letter-spacing: 1px; text-transform: uppercase;">PLAYER SPECS</h2>
+          <div class="profile-timeframe-row" style="display: flex; align-items: center; justify-content: flex-end; margin-bottom: 15px;">
             <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
               <!-- Match Type Filter -->
               <div class="matchtype-filter-wrapper" style="display: flex; align-items: center; gap: 10px;">
@@ -308,25 +312,28 @@
 
           <!-- Numerical stats grid -->
           <div class="stats-grid-container">
-            <div class="stat-cell-retro" id="player-games-cell">
+            <div class="stat-cell-retro" id="player-games-cell" style="cursor: pointer;">
               <div class="stat-title">Games Played</div>
               <div class="stat-num text-glow-cyan" id="player-stat-games">-</div>
               <div class="stat-sub-label" id="player-stat-games-sub">TOTAL MATCHES</div>
+              <div class="stat-action-link text-glow-cyan" style="font-size: 8px; color: var(--color-neon-cyan); font-family: var(--font-arcade); margin-top: 5px; opacity: 0.8; letter-spacing: 0.5px;">(SHOW ALL MATCHES)</div>
             </div>
-            <div class="stat-cell-retro" id="player-wins-cell">
+            <div class="stat-cell-retro" id="player-wins-cell" style="cursor: pointer;">
               <div class="stat-title">Wins</div>
               <div class="stat-num text-glow-yellow" id="player-stat-wins">-</div>
               <div class="stat-sub-label" id="player-stat-wins-raw">-</div>
+              <div class="stat-action-link text-glow-yellow" style="font-size: 8px; color: var(--color-neon-yellow); font-family: var(--font-arcade); margin-top: 5px; opacity: 0.8; letter-spacing: 0.5px;">(SHOW ALL WINS)</div>
             </div>
-            <div class="stat-cell-retro" id="player-losses-cell">
+            <div class="stat-cell-retro" id="player-losses-cell" style="cursor: pointer;">
               <div class="stat-title">Losses</div>
               <div class="stat-num text-glow-magenta" id="player-stat-losses">-</div>
               <div class="stat-sub-label" id="player-stat-losses-sub">TOTAL DEFEATS</div>
+              <div class="stat-action-link text-glow-magenta" style="font-size: 8px; color: var(--color-neon-magenta); font-family: var(--font-arcade); margin-top: 5px; opacity: 0.8; letter-spacing: 0.5px;">(SHOW ALL LOSSES)</div>
             </div>
-            <div class="stat-cell-retro" id="player-winrate-cell" style="cursor: pointer;">
+            <div class="stat-cell-retro" id="player-winrate-cell">
               <div class="stat-title">Win Rate</div>
               <div class="stat-num text-glow-yellow" id="player-stat-winrate">-%</div>
-              <div style="font-size: 8px; color: var(--color-neon-yellow); font-family: var(--font-arcade); margin-top: 5px; opacity: 0.8; letter-spacing: 0.5px;">(SEE WON MATCHES)</div>
+              <div class="stat-sub-label" id="player-stat-winrate-sub">WIN RATIO</div>
             </div>
             <div class="stat-cell-retro" id="player-kd-cell">
               <div class="stat-title">Knockout / Fall Ratio</div>
