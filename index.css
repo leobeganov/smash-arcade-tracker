@@ -3794,3 +3794,52 @@ body.theme-retro .btn-arcade {
   padding-left: 35px !important;
 }
 
+/* Custom Retro Modal Overlay */
+.retro-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(6, 4, 12, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000; /* On top of everything */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.retro-modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.retro-modal-content {
+  width: 90%;
+  max-width: 500px;
+  background-color: var(--color-bg-dark) !important;
+  border-radius: 4px;
+  box-shadow: 0 0 30px rgba(255, 230, 0, 0.4), 0 15px 0 #000 !important;
+  transform: scale(0.9);
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.retro-modal-overlay.active .retro-modal-content {
+  transform: scale(1);
+}
+
+/* Yellow Retro Arcade Button */
+.btn-arcade.yellow {
+  border-color: var(--color-neon-yellow);
+  box-shadow: 0 0 10px rgba(255, 230, 0, 0.4);
+}
+.btn-arcade.yellow:hover {
+  background-color: var(--color-neon-yellow);
+  box-shadow: 0 0 15px rgba(255, 230, 0, 0.8);
+  color: #000;
+}
+

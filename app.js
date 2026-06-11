@@ -2634,6 +2634,71 @@ document.addEventListener("DOMContentLoaded", () => {
     return card;
   }
 
+  // --- New Player Training Session Modal Coordinator ---
+  const btnLearnToPlay = document.getElementById("btn-learn-to-play");
+  const customLearnModal = document.getElementById("custom-learn-modal");
+  const btnTrainingCancel = document.getElementById("btn-training-cancel");
+  const btnTrainingConfirm = document.getElementById("btn-training-confirm");
+  const btnTrainingOk = document.getElementById("btn-training-ok");
+  const trainingPlayerNameInput = document.getElementById("training-player-name");
+  const modalStepInput = document.getElementById("modal-step-input");
+  const modalStepSuccess = document.getElementById("modal-step-success");
+
+  if (btnLearnToPlay && customLearnModal) {
+    btnLearnToPlay.addEventListener("click", () => {
+      // Reset state and open modal
+      if (trainingPlayerNameInput) trainingPlayerNameInput.value = "";
+      if (modalStepInput) modalStepInput.style.display = "block";
+      if (modalStepSuccess) modalStepSuccess.style.display = "none";
+      customLearnModal.classList.add("active");
+      if (trainingPlayerNameInput) {
+        setTimeout(() => trainingPlayerNameInput.focus(), 100);
+      }
+    });
+  }
+
+  if (btnTrainingCancel && customLearnModal) {
+    btnTrainingCancel.addEventListener("click", () => {
+      customLearnModal.classList.remove("active");
+    });
+  }
+
+  if (btnTrainingConfirm && customLearnModal) {
+    btnTrainingConfirm.addEventListener("click", () => {
+      const name = trainingPlayerNameInput ? trainingPlayerNameInput.value.trim() : "";
+      if (!name) {
+        alert("PLEASE ENTER YOUR NAME TO REQUEST TRAINING.");
+        return;
+      }
+      if (modalStepInput) modalStepInput.style.display = "none";
+      if (modalStepSuccess) modalStepSuccess.style.display = "block";
+    });
+
+    // Support hitting Enter in the input field
+    if (trainingPlayerNameInput) {
+      trainingPlayerNameInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          btnTrainingConfirm.click();
+        }
+      });
+    }
+  }
+
+  if (btnTrainingOk && customLearnModal) {
+    btnTrainingOk.addEventListener("click", () => {
+      customLearnModal.classList.remove("active");
+    });
+  }
+
+  // Close modal when clicking on the overlay background
+  if (customLearnModal) {
+    customLearnModal.addEventListener("click", (e) => {
+      if (e.target === customLearnModal) {
+        customLearnModal.classList.remove("active");
+      }
+    });
+  }
+
   const btnResetDb = document.getElementById("btn-reset-db");
   if (btnResetDb) {
     btnResetDb.onclick = async () => {
