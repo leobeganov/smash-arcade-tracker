@@ -583,11 +583,17 @@
           </div>
 
           <!-- Middle: Series Dropdown -->
-          <div class="fighters-control-item" style="display: flex; flex-direction: column; gap: 6px; flex: 1; max-width: 300px;">
+          <div class="fighters-control-item" style="display: flex; flex-direction: column; gap: 6px; flex: 1; max-width: 300px; position: relative;">
             <label class="control-label text-glow-magenta" style="font-family: var(--font-arcade); font-size: var(--font-size-xs); font-weight: bold; letter-spacing: 1px;">SERIES</label>
-            <select id="fighters-series-filter" class="retro-dropdown-select" style="width: 100%;">
-              <option value="all">ALL SERIES</option>
-            </select>
+            <div class="retro-multi-select-container" id="multi-select-series-container" style="width: 100%;">
+              <button type="button" class="retro-select retro-multi-select-btn" id="btn-multi-series" style="width: 100%;">
+                <span class="selected-text">ALL SERIES</span>
+                <span class="dropdown-caret">▼</span>
+              </button>
+              <div class="retro-multi-select-dropdown dropdown-hidden" id="dropdown-multi-series">
+                <!-- Dynamic JS options -->
+              </div>
+            </div>
           </div>
 
           <!-- Right: Sort Switcher -->
@@ -872,7 +878,7 @@
               </div>
             </div>
             <div class="show-more-placements-wrapper" style="display: flex; justify-content: center; width: 100%; margin-top: 20px;">
-              <button class="btn-arcade yellow" id="btn-show-more-placements" style="font-size: 10px; padding: 10px 20px; font-family: var(--font-arcade); font-weight: bold; display: none;">
+              <button type="button" class="btn-arcade yellow" id="btn-show-more-placements" style="font-size: 10px; padding: 10px 20px; font-family: var(--font-arcade); font-weight: bold; display: none;">
                 SHOW MORE
               </button>
             </div>

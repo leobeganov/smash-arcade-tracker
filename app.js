@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let fightersSearchQuery = "";
   let timelineSelectedPlayers = [];
   let timelineSelectedFighters = [];
-  let fightersSelectedSeries = "all";
+  let fightersSelectedSeries = [];
   let fightersSortBy = "alpha"; // "alpha" or "mostplayed"
   const cardVariantIndices = {}; // Track active variant index per fighter slug/ID
   let isFightersControlsInitialized = false;
@@ -223,6 +223,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function clearAllFightersFilters() {
+    fightersSearchQuery = "";
+    fightersSelectedSeries = [];
+    fightersSortBy = "alpha";
+    isFightersControlsInitialized = false;
+  }
+
+
 
 
   // ==========================================
@@ -290,6 +298,7 @@ document.addEventListener("DOMContentLoaded", () => {
       currentFighterTimeframe = "alltime";
       await renderFighterProfile(id);
     } else if (target === "fighters") {
+      clearAllFightersFilters();
       await renderFightersLibrary();
     } else if (target === "leaderboard") {
       clearAllLeaderboardFilters();
@@ -316,6 +325,16 @@ document.addEventListener("DOMContentLoaded", () => {
       if (window.location.hash === "#leaderboard") {
         clearAllLeaderboardFilters();
         renderLeaderboard();
+      }
+    });
+  }
+
+  const fightersNavTab = document.getElementById("nav-tab-fighters");
+  if (fightersNavTab) {
+    fightersNavTab.addEventListener("click", () => {
+      if (window.location.hash === "#fighters") {
+        clearAllFightersFilters();
+        renderFightersLibrary();
       }
     });
   }
@@ -2368,11 +2387,17 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log("[ShowMore Placements] stats.players:", stats.players ? stats.players.length : 0, "limit:", currentInsightsPlacementLimit);
       if (stats.players && stats.players.length > currentInsightsPlacementLimit) {
         btnShowMorePlacements.style.display = "inline-block";
-        btnShowMorePlacements.onclick = () => {
+        btnShowMorePlacements.onclick = (e) => {
+          if (e) e.preventDefault();
           currentInsightsPlacementLimit += 5;
           console.log("[ShowMore Placements] Button clicked! Increasing limit to:", currentInsightsPlacementLimit);
-          if (window.Charts) {
-            window.Charts.renderPlayerPlacements("outcomes-stacked-bar-container", stats.players, currentInsightsPlacementLimit);
+          console.log("[ShowMore Placements] Full players list:", stats.players);
+          try {
+            if (window.Charts) {
+              window.Charts.renderPlayerPlacements("outcomes-stacked-bar-container", stats.players, currentInsightsPlacementLimit);
+            }
+          } catch (err) {
+            console.error("[ShowMore Placements] Error rendering placements:", err);
           }
           if (stats.players.length <= currentInsightsPlacementLimit) {
             console.log("[ShowMore Placements] Reached the end of players list. Hiding button.");
@@ -3827,7 +3852,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateButtonText() {
       if (allCheckbox.checked || selectedValues.length === 0) {
-        selectedTextEl.textContent = containerId.includes("players") ? "ALL PLAYERS" : "ALL FIGHTERS";
+        if (containerId.includes("players")) {
+          selectedTextEl.textContent = "ALL PLAYERS";
+        } else if (containerId.includes("series")) {
+          selectedTextEl.textContent = "ALL SERIES";
+        } else {
+          selectedTextEl.textContent = "ALL FIGHTERS";
+        }
         btn.classList.remove("active-selection");
       } else {
         const display = selectedValues.map(v => v.toUpperCase()).join(", ");
@@ -3972,23 +4003,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
       const uniqueSeries = Array.from(seriesSet).sort();
-      const selectEl = document.getElementById("fighters-series-filter");
-      if (selectEl) {
-        selectEl.innerHTML = '<option value="all">ALL SERIES</option>';
-        uniqueSeries.forEach(s => {
-          const opt = document.createElement("option");
-          opt.value = s;
-          opt.textContent = s.toUpperCase();
-          selectEl.appendChild(opt);
-        });
-        
-        // Sync filter value on load
-        selectEl.value = fightersSelectedSeries;
-        selectEl.addEventListener("change", (e) => {
-          fightersSelectedSeries = e.target.value;
-          renderFightersLibrary();
-        });
-      }
+      setupRetroMultiSelect("multi-select-series-container", uniqueSeries, fightersSelectedSeries, () => {
+        renderFightersLibrary();
+      });
 
       // Sync & bind search box input
       const searchBoxEl = document.getElementById("fighters-search-box");
@@ -4022,8 +4039,6 @@ document.addEventListener("DOMContentLoaded", () => {
       isFightersControlsInitialized = true;
     } else {
       // Sync DOM elements to match existing state in case of page routing back-and-forth
-      const selectEl = document.getElementById("fighters-series-filter");
-      if (selectEl) selectEl.value = fightersSelectedSeries;
       const searchBoxEl = document.getElementById("fighters-search-box");
       if (searchBoxEl) searchBoxEl.value = fightersSearchQuery;
       const sortSwitchEl = document.getElementById("fighters-sort-switch");
@@ -4070,8 +4085,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Franchise / Series Filter
-    if (fightersSelectedSeries !== "all") {
-      filteredRoster = filteredRoster.filter(r => r.series && r.series.name === fightersSelectedSeries);
+    if (fightersSelectedSeries && fightersSelectedSeries.length > 0) {
+      filteredRoster = filteredRoster.filter(r => r.series && fightersSelectedSeries.includes(r.series.name));
     }
 
     // Sort Roster
