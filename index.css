@@ -4576,3 +4576,37 @@ body.theme-retro .btn-arcade {
     display: none !important; /* Hide QR completely on mobile devices */
   }
 }
+
+/* --- MAGENTA RETRO MULTI-SELECT OVERRIDES --- */
+.retro-multi-select-btn.magenta-theme:hover,
+.retro-multi-select-btn.magenta-theme.active-selection {
+  border-color: var(--color-neon-magenta) !important;
+  box-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
+}
+
+.retro-multi-select-btn.magenta-theme.active-selection {
+  background-color: rgba(255, 0, 127, 0.1) !important;
+}
+
+.retro-multi-select-dropdown.magenta-theme {
+  border-color: var(--color-neon-magenta) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.95), 0 0 15px rgba(255, 0, 127, 0.35);
+}
+
+.retro-multi-select-dropdown.magenta-theme::-webkit-scrollbar-thumb {
+  background: var(--color-neon-magenta) !important;
+}
+
+.retro-multi-select-dropdown.magenta-theme .retro-multi-option-row:hover {
+  background: rgba(255, 0, 127, 0.12) !important;
+}
+
+.retro-multi-select-dropdown.magenta-theme .retro-multi-option-row:hover .retro-checkbox-box {
+  border-color: var(--color-neon-magenta) !important;
+}
+
+.retro-multi-select-dropdown.magenta-theme .retro-checkbox-input:checked ~ .retro-checkbox-box {
+  background-color: var(--color-neon-magenta) !important;
+  border-color: var(--color-neon-magenta) !important;
+  box-shadow: 0 0 6px var(--color-neon-magenta) !important;
+}
