@@ -429,7 +429,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const qrImg = document.getElementById("qr-code-img");
     if (!qrImg) return;
 
-    const targetUrl = "https://smash-arcade-tracker-wine.vercel.app/#home";
+    const targetUrl = "https://smash-arcade-tracker.vercel.app/";
     // Set the QR image source using the free, fast qrserver API
     qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&color=000000&bgcolor=ffffff&data=${encodeURIComponent(targetUrl)}`;
   }
