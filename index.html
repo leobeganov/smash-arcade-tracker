@@ -34,6 +34,9 @@
 
       <!-- Top Right Action Buttons -->
       <div class="header-nav-buttons">
+        <a href="#fighters" class="btn-nav" id="nav-tab-fighters">
+          <span class="btn-nav-decor">&gt;</span> FIGHTERS
+        </a>
         <a href="#leaderboard" class="btn-nav" id="nav-tab-leaderboard">
           <span class="btn-nav-decor">&gt;</span> LEADERBOARD
         </a>
@@ -375,6 +378,56 @@
             </div>
           </div>
 
+        </div>
+
+      </div>
+    </main>
+
+    <!-- ========================================== -->
+    <!-- VIEW: FIGHTERS LIBRARY -->
+    <!-- ========================================== -->
+    <main class="view-container" id="fighters-view">
+      <div class="fighters-view-layout">
+        
+        <div class="fighters-header-row">
+          <div class="fighters-title-group">
+            <h2 class="fighters-title font-arcade text-glow-cyan" style="font-size: 24px; margin: 0; letter-spacing: 2px;">FIGHTERS LIBRARY</h2>
+            <p class="fighters-subtitle" style="font-family: var(--font-stats); font-size: var(--font-size-xs); color: var(--color-neon-yellow); text-shadow: 0 0 5px var(--color-neon-yellow); margin: 4px 0 0 0; font-weight: bold; letter-spacing: 1px;">CHOOSE YOUR CHARACTER</p>
+          </div>
+        </div>
+
+        <div class="fighters-controls-row panel-beveled neon-cyan" style="display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 15px 25px; margin-bottom: 30px; background: rgba(12, 13, 18, 0.6);">
+          <!-- Left: Search Box -->
+          <div class="fighters-control-item" style="display: flex; flex-direction: column; gap: 6px; flex: 1; max-width: 320px;">
+            <label class="control-label text-glow-cyan" style="font-family: var(--font-arcade); font-size: var(--font-size-xs); font-weight: bold; letter-spacing: 1px;">SEARCH FIGHTER</label>
+            <div class="search-input-wrapper" style="width: 100%;">
+              <span class="search-icon-decor">&gt;</span>
+              <input type="text" class="retro-input" id="fighters-search-box" placeholder="ENTER NAME..." autocomplete="off" style="width: 100%;">
+            </div>
+          </div>
+
+          <!-- Middle: Series Dropdown -->
+          <div class="fighters-control-item" style="display: flex; flex-direction: column; gap: 6px; flex: 1; max-width: 300px;">
+            <label class="control-label text-glow-magenta" style="font-family: var(--font-arcade); font-size: var(--font-size-xs); font-weight: bold; letter-spacing: 1px;">FRANCHISE / SERIES</label>
+            <select id="fighters-series-filter" class="retro-dropdown-select" style="width: 100%;">
+              <option value="all">ALL SERIES</option>
+            </select>
+          </div>
+
+          <!-- Right: Sort Switcher -->
+          <div class="fighters-control-item" style="display: flex; flex-direction: column; gap: 6px; width: auto;">
+            <label class="control-label text-glow-yellow" style="font-family: var(--font-arcade); font-size: var(--font-size-xs); font-weight: bold; letter-spacing: 1px;">SORT BY</label>
+            <div class="toggle-switch-beveled" id="fighters-sort-switch">
+              <button class="toggle-btn active" data-sort="alpha">ALPHABETICAL</button>
+              <button class="toggle-btn" data-sort="mostplayed">MOST PLAYED</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="fighters-grid-wrapper">
+          <div id="fighters-library-grid" class="fighters-library-grid">
+            <!-- Dynamic character cards injected by JS -->
+          </div>
         </div>
 
       </div>

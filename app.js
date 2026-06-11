@@ -5,6 +5,19 @@
 document.addEventListener("DOMContentLoaded", () => {
   const api = window.apiService;
 
+  // Self-healing fallback in case of browser script caching
+  if (api && typeof api.getFullRoster !== "function") {
+    api.getFullRoster = async function() {
+      try {
+        const res = await fetch('assets/roster_slots.json');
+        return await res.json();
+      } catch (e) {
+        console.error("Self-healing getFullRoster fallback failed:", e);
+        return [];
+      }
+    };
+  }
+
   // --- Global State ---
   let currentLeaderboardMode = "players"; // "players" or "fighters"
   let currentSortBy = "wins";
@@ -25,11 +38,19 @@ document.addEventListener("DOMContentLoaded", () => {
   let isSearchDropdownsInitialized = false;
   let shouldScrollToMatchList = false;
 
+  // --- Fighters Library State ---
+  let fightersSearchQuery = "";
+  let fightersSelectedSeries = "all";
+  let fightersSortBy = "alpha"; // "alpha" or "mostplayed"
+  const cardVariantIndices = {}; // Track active variant index per fighter slug/ID
+  let isFightersControlsInitialized = false;
+
   // --- DOM Elements ---
   const views = {
     home: document.getElementById("home-view"),
     player: document.getElementById("player-profile-view"),
     fighter: document.getElementById("fighter-profile-view"),
+    fighters: document.getElementById("fighters-view"),
     leaderboard: document.getElementById("leaderboard-view"),
     scanner: document.getElementById("scanner-view"),
     telemetry: document.getElementById("telemetry-view"),
@@ -67,13 +88,14 @@ document.addEventListener("DOMContentLoaded", () => {
     let target = "home";
     if (route === "player" && id) target = "player";
     else if (route === "fighter" && id) target = "fighter";
+    else if (route === "fighters") target = "fighters";
     else if (route === "leaderboard") target = "leaderboard";
     else if (route === "scanner") target = "scanner";
     else if (route === "telemetry") target = "telemetry";
     else if (route === "settings") target = "settings";
 
     // Update active state in nav tabs
-    const navTabs = ["home", "leaderboard", "scanner", "telemetry", "settings"];
+    const navTabs = ["home", "fighters", "leaderboard", "scanner", "telemetry", "settings"];
     navTabs.forEach(tab => {
       const el = document.getElementById(`nav-tab-${tab}`);
       if (el) {
@@ -107,6 +129,8 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if (target === "fighter") {
       currentFighterTimeframe = "alltime";
       await renderFighterProfile(id);
+    } else if (target === "fighters") {
+      await renderFightersLibrary();
     } else if (target === "leaderboard") {
       await renderLeaderboard();
     } else if (target === "scanner") {
@@ -2358,6 +2382,256 @@ document.addEventListener("DOMContentLoaded", () => {
       };
       reader.readAsText(e.target.files[0]);
     };
+  }
+
+  // ==========================================
+  // Render Fighters Library View
+  // ==========================================
+  async function renderFightersLibrary() {
+    const roster = await api.getFullRoster();
+    if (!roster) return;
+
+    // 1. One-time Controls & Listeners Initialization
+    if (!isFightersControlsInitialized) {
+      // Extract unique series names
+      const seriesSet = new Set();
+      roster.forEach(r => {
+        if (r.series && r.series.name) {
+          seriesSet.add(r.series.name);
+        }
+      });
+      const uniqueSeries = Array.from(seriesSet).sort();
+      const selectEl = document.getElementById("fighters-series-filter");
+      if (selectEl) {
+        selectEl.innerHTML = '<option value="all">ALL SERIES</option>';
+        uniqueSeries.forEach(s => {
+          const opt = document.createElement("option");
+          opt.value = s;
+          opt.textContent = s.toUpperCase();
+          selectEl.appendChild(opt);
+        });
+        
+        // Sync filter value on load
+        selectEl.value = fightersSelectedSeries;
+        selectEl.addEventListener("change", (e) => {
+          fightersSelectedSeries = e.target.value;
+          renderFightersLibrary();
+        });
+      }
+
+      // Sync & bind search box input
+      const searchBoxEl = document.getElementById("fighters-search-box");
+      if (searchBoxEl) {
+        searchBoxEl.value = fightersSearchQuery;
+        searchBoxEl.addEventListener("input", (e) => {
+          fightersSearchQuery = e.target.value;
+          renderFightersLibrary();
+        });
+      }
+
+      // Sync & bind sort toggle buttons
+      const sortSwitchEl = document.getElementById("fighters-sort-switch");
+      if (sortSwitchEl) {
+        sortSwitchEl.querySelectorAll(".toggle-btn").forEach(btn => {
+          const mode = btn.getAttribute("data-sort");
+          if (mode === fightersSortBy) {
+            btn.classList.add("active");
+          } else {
+            btn.classList.remove("active");
+          }
+          btn.addEventListener("click", () => {
+            sortSwitchEl.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            fightersSortBy = mode;
+            renderFightersLibrary();
+          });
+        });
+      }
+
+      isFightersControlsInitialized = true;
+    } else {
+      // Sync DOM elements to match existing state in case of page routing back-and-forth
+      const selectEl = document.getElementById("fighters-series-filter");
+      if (selectEl) selectEl.value = fightersSelectedSeries;
+      const searchBoxEl = document.getElementById("fighters-search-box");
+      if (searchBoxEl) searchBoxEl.value = fightersSearchQuery;
+      const sortSwitchEl = document.getElementById("fighters-sort-switch");
+      if (sortSwitchEl) {
+        sortSwitchEl.querySelectorAll(".toggle-btn").forEach(btn => {
+          if (btn.getAttribute("data-sort") === fightersSortBy) {
+            btn.classList.add("active");
+          } else {
+            btn.classList.remove("active");
+          }
+        });
+      }
+    }
+
+    // 2. Compute dynamic play counts from match records
+    const allMatches = await window.Database.getMatchesAsync();
+    const playCounts = {};
+    if (allMatches) {
+      allMatches.forEach(m => {
+        if (m.players) {
+          m.players.forEach(p => {
+            if (p.character) {
+              const details = api.getFighterDetails(p.character);
+              if (details && details.id) {
+                playCounts[details.id] = (playCounts[details.id] || 0) + 1;
+              }
+            }
+          });
+        }
+      });
+    }
+
+    // 3. Filter & Sort Roster
+    let filteredRoster = [...roster];
+
+    // Search query: filters by name and variant names
+    const query = fightersSearchQuery.toLowerCase().trim();
+    if (query) {
+      filteredRoster = filteredRoster.filter(r => {
+        const matchName = r.name.toLowerCase().includes(query);
+        const matchVariants = r.variants && r.variants.some(v => v.name.toLowerCase().includes(query));
+        return matchName || matchVariants;
+      });
+    }
+
+    // Franchise / Series Filter
+    if (fightersSelectedSeries !== "all") {
+      filteredRoster = filteredRoster.filter(r => r.series && r.series.name === fightersSelectedSeries);
+    }
+
+    // Sort Roster
+    if (fightersSortBy === "alpha") {
+      filteredRoster.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (fightersSortBy === "mostplayed") {
+      filteredRoster.sort((a, b) => {
+        const countA = playCounts[a.slug] || 0;
+        const countB = playCounts[b.slug] || 0;
+        if (countB !== countA) {
+          return countB - countA;
+        }
+        return a.name.localeCompare(b.name); // Secondary alpha sort
+      });
+    }
+
+    // 4. Invalidate and Repopulate Grid
+    const gridEl = document.getElementById("fighters-library-grid");
+    if (gridEl) {
+      gridEl.innerHTML = "";
+      if (filteredRoster.length === 0) {
+        gridEl.innerHTML = `
+          <div class="no-results-panel font-stats text-glow-magenta" style="grid-column: 1 / -1; text-align: center; padding: 40px; font-size: var(--font-size-md); font-weight: bold; background: rgba(12, 13, 18, 0.6); border: 1px dashed var(--color-neon-magenta); border-radius: 8px;">
+            NO FIGHTERS MATCHING THE CURRENT PROTOCOLS FOUND.
+          </div>
+        `;
+        return;
+      }
+
+      filteredRoster.forEach(r => {
+        const cardNode = createLibraryCardNode(r);
+        gridEl.appendChild(cardNode);
+      });
+    }
+  }
+
+  // --- Helper to build individual fighter library cards ---
+  function createLibraryCardNode(r) {
+    const card = document.createElement("div");
+    card.className = "fighter-library-card";
+    card.setAttribute("data-slug", r.slug);
+
+    // Initialize variant state tracker for this slug if not present
+    if (cardVariantIndices[r.slug] === undefined) {
+      cardVariantIndices[r.slug] = 0;
+    }
+
+    const variants = r.variants || [];
+
+    const renderCardState = () => {
+      let activeVariantIdx = cardVariantIndices[r.slug];
+      if (activeVariantIdx >= variants.length || activeVariantIdx < 0) {
+        activeVariantIdx = 0;
+        cardVariantIndices[r.slug] = 0;
+      }
+      const activeVariant = variants[activeVariantIdx] || { name: r.name, boxing_ring_title: "A legendary challenger." };
+
+      // Select active portrait image (find matching alt skin variant)
+      let activeImage = r.alts && r.alts[0] ? r.alts[0].image : "assets/mario.png?v=5";
+      if (r.alts && r.alts.length > 0) {
+        const matchedAlt = r.alts.find(alt => alt.variant && alt.variant.toLowerCase() === activeVariant.name.toLowerCase());
+        if (matchedAlt) {
+          activeImage = matchedAlt.image;
+        } else {
+          activeImage = r.alts[0].image;
+        }
+      }
+
+      // Variant navigation controls (arrow btns shown on-hover only if multiple variants exist)
+      let variantSelectorHtml = "";
+      if (variants.length > 1) {
+        variantSelectorHtml = `
+          <div class="card-variant-selector">
+            <button class="card-variant-arrow-btn prev-variant-btn">◀</button>
+            <div class="card-variant-name-badge">${activeVariant.name.toUpperCase()}</div>
+            <button class="card-variant-arrow-btn next-variant-btn">▶</button>
+          </div>
+        `;
+      }
+
+      const seriesIcon = r.series && r.series.icon ? r.series.icon : "";
+
+      card.innerHTML = `
+        <div class="card-series-backdrop" style="background-image: url('${seriesIcon}'); background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
+        <div class="card-portrait-wrapper">
+          <img class="card-portrait-img" src="${activeImage}" alt="${r.name}" loading="lazy">
+          ${variantSelectorHtml}
+        </div>
+        <div class="card-info-footer">
+          <h3 class="card-fighter-name">${r.name.toUpperCase()}</h3>
+          <div class="card-boxing-title" style="font-family: var(--font-stats); font-size: 10px; color: rgba(255, 255, 255, 0.6); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; margin-bottom: 4px;">
+            ${activeVariant.boxing_ring_title || "A LEGENDARY FIGHTER"}
+          </div>
+          <span class="card-series-badge">${(r.series && r.series.name ? r.series.name : 'Unknown Series').toUpperCase()}</span>
+        </div>
+      `;
+
+      // Bind events inside the newly set innerHTML
+      if (variants.length > 1) {
+        const prevBtn = card.querySelector(".prev-variant-btn");
+        const nextBtn = card.querySelector(".next-variant-btn");
+
+        if (prevBtn) {
+          prevBtn.addEventListener("click", (e) => {
+            e.stopPropagation(); // Avoid triggering card navigation click
+            cardVariantIndices[r.slug] = (cardVariantIndices[r.slug] - 1 + variants.length) % variants.length;
+            renderCardState();
+          });
+        }
+        if (nextBtn) {
+          nextBtn.addEventListener("click", (e) => {
+            e.stopPropagation(); // Avoid triggering card navigation click
+            cardVariantIndices[r.slug] = (cardVariantIndices[r.slug] + 1) % variants.length;
+            renderCardState();
+          });
+        }
+      }
+    };
+
+    // Trigger initial render
+    renderCardState();
+
+    // Card navigation trigger (clicks on the card take the user to `#fighter/slug`)
+    card.addEventListener("click", (e) => {
+      if (e.target.closest(".card-variant-arrow-btn")) {
+        return; // Handled by inline listeners
+      }
+      window.location.hash = `#fighter/${r.slug}`;
+    });
+
+    return card;
   }
 
   const btnResetDb = document.getElementById("btn-reset-db");

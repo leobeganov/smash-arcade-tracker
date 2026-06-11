@@ -728,6 +728,12 @@ const apiService = {
     return Array.from(new Set([...baseFighters, ...rosterNames])).sort();
   },
 
+  // Get all full fighter records from roster_slots.json
+  async getFullRoster() {
+    await initRoster();
+    return rosterData;
+  },
+
   // Get all stage names for dropdown lists
   async getAllStages() {
     try {
