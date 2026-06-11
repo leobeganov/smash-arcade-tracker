@@ -198,7 +198,7 @@
 
             <!-- Clear Filters Button -->
             <button type="button" class="btn-arcade magenta" id="btn-clear-all-filters" style="font-size: 10px; padding: 10px 15px; border-radius: 4px; font-family: var(--font-arcade); font-weight: bold; height: 38px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; box-sizing: border-box; text-shadow: 0 0 5px rgba(255, 0, 127, 0.5);">
-              CLEAR FILTERS
+              CLEAR
             </button>
           </div>
         </div>
@@ -833,6 +833,17 @@
           <div class="panel-beveled neon-magenta tel-kpi-card">
             <div class="kpi-title">DOMINANT FIGHTER</div>
             <div class="kpi-value text-glow-magenta" id="tel-kpi-character">N/A</div>
+          </div>
+
+          <!-- Dominant Team Panel -->
+          <div class="panel-beveled neon-cyan tel-kpi-card" id="dominant-team-box" style="padding: 15px 15px; min-height: 140px; display: flex; flex-direction: column; justify-content: space-between; align-items: stretch; text-align: left;">
+            <div>
+              <div class="kpi-title text-glow-cyan" style="margin-bottom: 4px; font-size: 9.5px; text-align: center; letter-spacing: 0.5px; font-family: var(--font-arcade);">MOST VICTORIOUS TEAM COMBINATION</div>
+              <p style="margin: 0; font-size: 8px; color: #8a8d9a; font-family: var(--font-stats); text-transform: uppercase; text-align: center;">The team that has had the most victories together.</p>
+            </div>
+            <div class="chart-content" id="dominant-team-container" style="display: flex; align-items: center; justify-content: center; min-height: 70px; width: 100%;">
+              <!-- Dynamic content injected here -->
+            </div>
           </div>
         </div>
 

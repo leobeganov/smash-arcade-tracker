@@ -551,7 +551,7 @@ const apiService = {
     });
     const nemesisFighter = nemesisFighterId ? getFighterDetails(nemesisFighterId) : null;
 
-    // Find top 3 players who use this fighter most
+    // Find top 5 players who use this fighter most
     const topPlayers = Object.entries(playerUsage)
       .map(([pId, count]) => {
         const player = playersList.find(p => p.id === pId) || { 
@@ -562,7 +562,7 @@ const apiService = {
         return { player, count };
       })
       .sort((a, b) => b.count - a.count)
-      .slice(0, 3);
+      .slice(0, 5);
 
     const adjustedWins = totalMatches > 0
       ? Math.pow(wins, 2.5) / Math.pow(totalMatches, 1.5)

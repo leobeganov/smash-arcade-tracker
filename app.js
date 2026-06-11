@@ -848,7 +848,7 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedSearchWinnerFighter = null;
         selectedSearchLoserPlayer = null;
         selectedSearchLoserFighter = null;
-        currentPodiumTimeframe = currentPlayerTimeframe;
+        currentPodiumTimeframe = (currentPlayerTimeframe === "alltime") ? "30days" : currentPlayerTimeframe;
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
         syncHomePageStyleWithPlayerFilter();
@@ -867,7 +867,7 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedSearchWinnerFighter = null;
         selectedSearchLoserPlayer = null;
         selectedSearchLoserFighter = null;
-        currentPodiumTimeframe = currentPlayerTimeframe;
+        currentPodiumTimeframe = (currentPlayerTimeframe === "alltime") ? "30days" : currentPlayerTimeframe;
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
         syncHomePageStyleWithPlayerFilter();
@@ -886,7 +886,7 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedSearchWinnerFighter = null;
         selectedSearchLoserPlayer = stats.player.name;
         selectedSearchLoserFighter = null;
-        currentPodiumTimeframe = currentPlayerTimeframe;
+        currentPodiumTimeframe = (currentPlayerTimeframe === "alltime") ? "30days" : currentPlayerTimeframe;
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
         syncHomePageStyleWithPlayerFilter();
@@ -1284,7 +1284,7 @@ document.addEventListener("DOMContentLoaded", () => {
     topPlayersContainer.innerHTML = "";
 
     if (stats.topPlayers && stats.topPlayers.length > 0) {
-      stats.topPlayers.forEach((tp, i) => {
+      stats.topPlayers.slice(0, 5).forEach((tp, i) => {
         const item = document.createElement("div");
         item.className = "top-player-item";
         item.innerHTML = `
@@ -1426,7 +1426,7 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedSearchWinnerFighter = null;
         selectedSearchLoserPlayer = null;
         selectedSearchLoserFighter = null;
-        currentPodiumTimeframe = currentFighterTimeframe;
+        currentPodiumTimeframe = (currentFighterTimeframe === "alltime") ? "30days" : currentFighterTimeframe;
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
         skipClearFiltersOnHome = true;
@@ -1444,7 +1444,7 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedSearchWinnerFighter = stats.fighter.name;
         selectedSearchLoserPlayer = null;
         selectedSearchLoserFighter = null;
-        currentPodiumTimeframe = currentFighterTimeframe;
+        currentPodiumTimeframe = (currentFighterTimeframe === "alltime") ? "30days" : currentFighterTimeframe;
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
         skipClearFiltersOnHome = true;
@@ -1462,7 +1462,7 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedSearchWinnerFighter = null;
         selectedSearchLoserPlayer = null;
         selectedSearchLoserFighter = stats.fighter.name;
-        currentPodiumTimeframe = currentFighterTimeframe;
+        currentPodiumTimeframe = (currentFighterTimeframe === "alltime") ? "30days" : currentFighterTimeframe;
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
         skipClearFiltersOnHome = true;
@@ -1480,7 +1480,7 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedSearchWinnerFighter = stats.fighter.name;
         selectedSearchLoserPlayer = null;
         selectedSearchLoserFighter = null;
-        currentPodiumTimeframe = currentFighterTimeframe;
+        currentPodiumTimeframe = (currentFighterTimeframe === "alltime") ? "30days" : currentFighterTimeframe;
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
         skipClearFiltersOnHome = true;
@@ -1498,7 +1498,7 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedSearchWinnerFighter = null;
         selectedSearchLoserPlayer = null;
         selectedSearchLoserFighter = null;
-        currentPodiumTimeframe = currentFighterTimeframe;
+        currentPodiumTimeframe = (currentFighterTimeframe === "alltime") ? "30days" : currentFighterTimeframe;
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
         skipClearFiltersOnHome = true;
@@ -1998,7 +1998,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="match-card-meta">${new Date(m.timestamp).toLocaleDateString()} ${new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
         </div>
         <div class="match-card-players-grid ${m.players && m.players.length > 4 ? 'large-lobby' : ''}">
-          ${m.players.map(p => {
+          ${[...m.players].sort((a, b) => (a.placement || Number.MAX_SAFE_INTEGER) - (b.placement || Number.MAX_SAFE_INTEGER)).map(p => {
             const hasTeamColor = m.gameStyle && m.gameStyle.toLowerCase() === 'teams' && p.teamColor && p.teamColor.toLowerCase() !== 'none';
             const teamClass = hasTeamColor ? `team-${p.teamColor.toLowerCase()}` : '';
             const fighterObj = api.getFighterDetails(p.character) || {};
@@ -2191,6 +2191,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Trigger custom html/css dynamic renderings
     renderMostPlayedFighters("most-played-fighters-container", stats.characters, matches);
     renderFightersByPlayers("most-popular-fighters-container", stats.characters, matches);
+    renderDominantTeamBox(matches);
     // Initialize timeline multi-select filters dynamically
     const allStats = await window.Database.getStatsAsync();
     const playerNames = allStats.players.map(p => p.name).sort();
@@ -2235,6 +2236,130 @@ document.addEventListener("DOMContentLoaded", () => {
       await new Promise(resolve => setTimeout(resolve, 250 - elapsed));
     }
     hideSectionLoader(telemetryLayout);
+  }
+
+  function renderDominantTeamBox(matches) {
+    const box = document.getElementById("dominant-team-box");
+    const container = document.getElementById("dominant-team-container");
+    if (!box || !container) return;
+
+    // Verify if we should display/calculate the team wins (Teams filter or All match types)
+    const isTeamFilterSelected = (currentInsightsMatchType === "all" || currentInsightsMatchType === "teams");
+    if (!isTeamFilterSelected) {
+      container.innerHTML = `
+        <div class="chart-empty" style="font-family: var(--font-arcade); font-size: 10px; opacity: 0.6; text-transform: uppercase; text-align: center; line-height: 1.4;">
+          There are no matches found.
+        </div>
+      `;
+      return;
+    }
+
+    // Track duo wins: Key is alphabetically sorted names e.g. "Jack & Polo", value is number of wins
+    const winCounts = {};
+
+    matches.forEach(m => {
+      const style = (m.gameStyle || m.matchType || "").toLowerCase().trim();
+      if (style === 'teams' || style === 'team') {
+        // Group players with placement === 1 by their teamColor
+        const winningPlayersByTeam = {};
+        let hasTeamColors = false;
+
+        if (m.players) {
+          m.players.forEach(p => {
+            if (p.placement === 1) {
+              const color = (p.teamColor || "").trim();
+              if (color && color.toLowerCase() !== 'none') {
+                hasTeamColors = true;
+                if (!winningPlayersByTeam[color]) {
+                  winningPlayersByTeam[color] = [];
+                }
+                winningPlayersByTeam[color].push(p.playerName);
+              }
+            }
+          });
+        }
+
+        if (!hasTeamColors) {
+          // If no team colors are set (e.g. they are all "None"), treat all winning players as on the same team
+          const winners = m.players ? m.players.filter(p => p.placement === 1).map(p => p.playerName) : [];
+          if (winners.length >= 2) {
+            winners.sort();
+            for (let i = 0; i < winners.length; i++) {
+              for (let j = i + 1; j < winners.length; j++) {
+                const duoKey = `${winners[i]} & ${winners[j]}`;
+                winCounts[duoKey] = (winCounts[duoKey] || 0) + 1;
+              }
+            }
+          }
+        } else {
+          // Iterate over each winning team
+          for (const color in winningPlayersByTeam) {
+            const teamPlayers = winningPlayersByTeam[color];
+            if (teamPlayers.length >= 2) {
+              teamPlayers.sort();
+              for (let i = 0; i < teamPlayers.length; i++) {
+                for (let j = i + 1; j < teamPlayers.length; j++) {
+                  const duoKey = `${teamPlayers[i]} & ${teamPlayers[j]}`;
+                  winCounts[duoKey] = (winCounts[duoKey] || 0) + 1;
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Find the duo with the highest win count
+    let bestDuo = null;
+    let maxWins = 0;
+
+    for (const duo in winCounts) {
+      if (winCounts[duo] > maxWins) {
+        maxWins = winCounts[duo];
+        bestDuo = duo;
+      }
+    }
+
+    if (!bestDuo || maxWins === 0) {
+      container.innerHTML = `
+        <div class="chart-empty" style="font-family: var(--font-arcade); font-size: 10px; opacity: 0.6; text-transform: uppercase; text-align: center; line-height: 1.4;">
+          There are no matches found.
+        </div>
+      `;
+      return;
+    }
+
+    // Split the duo back into individual player names for rendering and linking
+    const players = bestDuo.split(" & ");
+    const player1 = players[0];
+    const player2 = players[1];
+
+    // Build the redirect hashes
+    const p1Hash = `#player/${player1.toLowerCase().replace(/\s+/g, '-')}`;
+    const p2Hash = `#player/${player2.toLowerCase().replace(/\s+/g, '-')}`;
+
+    // Render beautiful neon style co-victory content
+    container.innerHTML = `
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; width: 100%; text-align: center;">
+        <div style="display: flex; align-items: center; gap: 8px; justify-content: center;">
+          <span style="font-size: 20px; text-shadow: 0 0 10px var(--color-neon-cyan); animation: pulse 2s infinite; display: inline-block;">👥</span>
+          <div style="font-family: var(--font-arcade); font-size: 13px; letter-spacing: 0.5px; white-space: nowrap;">
+            <span class="player-link text-glow-cyan" style="color: var(--color-neon-cyan); cursor: pointer; transition: color 0.2s, text-shadow 0.2s;" 
+                  onclick="window.location.hash = '${p1Hash}'"
+                  onmouseover="this.style.color='var(--color-neon-yellow)'; this.style.textShadow='0 0 8px var(--color-neon-yellow)';"
+                  onmouseout="this.style.color='var(--color-neon-cyan)'; this.style.textShadow='0 0 5px var(--color-neon-cyan)';">${player1.toUpperCase()}</span>
+            <span style="color: #8a8d9a; font-size: 11px; margin: 0 3px;">&amp;</span>
+            <span class="player-link text-glow-cyan" style="color: var(--color-neon-cyan); cursor: pointer; transition: color 0.2s, text-shadow 0.2s;" 
+                  onclick="window.location.hash = '${p2Hash}'"
+                  onmouseover="this.style.color='var(--color-neon-yellow)'; this.style.textShadow='0 0 8px var(--color-neon-yellow)';"
+                  onmouseout="this.style.color='var(--color-neon-cyan)'; this.style.textShadow='0 0 5px var(--color-neon-cyan)';">${player2.toUpperCase()}</span>
+          </div>
+        </div>
+        <div class="panel-beveled neon-yellow" style="padding: 4px 10px; font-family: var(--font-arcade); font-size: 9px; color: var(--color-neon-yellow); text-shadow: 0 0 5px var(--color-neon-yellow); border: 1px solid var(--color-neon-yellow); background: rgba(255, 230, 0, 0.05); min-height: auto; border-radius: 4px; box-shadow: 0 0 8px rgba(255, 230, 0, 0.2); white-space: nowrap; margin-top: 2px;">
+          ${maxWins} ${maxWins === 1 ? 'VICTORY' : 'VICTORIES'}
+        </div>
+      </div>
+    `;
   }
 
   function renderMostPlayedFighters(containerId, characters, matches) {
