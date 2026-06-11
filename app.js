@@ -2046,7 +2046,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       placedMarkers[sideKey].push({ pct: safePct, stagger: staggerIndex });
       
-      const markerColor = isAbove ? 'var(--color-neon-cyan)' : 'var(--color-neon-magenta)';
+      const markerColor = (mode === 'players') ? 'var(--color-neon-cyan)' : 'var(--color-neon-magenta)';
       const offsetSize = 15 + staggerIndex * 35; // staggers are spaced out vertically
       
       markersHtml += `
