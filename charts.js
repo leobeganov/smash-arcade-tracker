@@ -280,7 +280,7 @@ const Charts = {
           </div>
           <div class="gauge-details">
             <span class="gauge-name">${player.name}</span>
-            <span class="gauge-gp">${player.wins}W / ${player.games}G</span>
+            <span class="gauge-gp">${player.wins} Wins / ${player.games} Games</span>
           </div>
         </div>
       `;

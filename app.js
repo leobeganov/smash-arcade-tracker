@@ -1726,6 +1726,9 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="v-bar-icon-bubble" style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--color-neon-magenta); background: var(--color-bg-dark); box-shadow: 0 0 8px rgba(255,0,127,0.4); display: flex; align-items: center; justify-content: center; overflow: hidden; margin-top: 8px; flex-shrink: 0; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">
             <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${c.name}">
           </div>
+          
+          <!-- Character name centered underneath -->
+          <span class="v-bar-char-name font-stats">${c.name}</span>
         </div>
       `;
     });
