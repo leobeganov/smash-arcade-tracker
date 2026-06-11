@@ -171,6 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if (target === "player") {
       currentPlayerTimeframe = "alltime";
       currentPlayerMatchType = "all";
+      currentPlayerFighterFilters = [];
       await renderPlayerProfile(id);
     } else if (target === "fighter") {
       currentFighterTimeframe = "alltime";
