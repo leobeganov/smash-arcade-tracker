@@ -2079,6 +2079,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (window.Charts) {
       window.Charts.renderWinRateGauge("win-rate-gauges-container", stats.players);
       window.Charts.renderPlayerPlacements("outcomes-stacked-bar-container", stats.players);
+      window.Charts.renderDailyPeakTimeline("daily-peak-timeline-container", matches);
     }
 
     // Trigger custom html/css dynamic renderings
