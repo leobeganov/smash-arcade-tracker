@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentFighterTimeframe = "alltime";
   let currentInsightsTimeframe = "alltime";
   let currentInsightsMatchType = "all";
+  let currentInsightsPlacementLimit = 5;
   let currentFighterId = null;
   let currentProfilePlayerId = null;
   let currentVariantIndex = 0;
@@ -166,6 +167,63 @@ document.addEventListener("DOMContentLoaded", () => {
     isSearchDropdownsInitialized = false;
   }
 
+  function clearAllLeaderboardFilters() {
+    // 1. Reset state variables
+    currentLeaderboardMode = "players";
+    currentLeaderboardTimeframe = "alltime";
+    currentSortBy = "wins";
+
+    // 2. Reset toggle buttons active classes
+    const togglePlayers = document.getElementById("toggle-btn-players");
+    const toggleFighters = document.getElementById("toggle-btn-fighters");
+    if (togglePlayers) togglePlayers.classList.add("active");
+    if (toggleFighters) toggleFighters.classList.remove("active");
+
+    const leaderboardTimeframeFilters = document.getElementById("leaderboard-timeframe-filters");
+    if (leaderboardTimeframeFilters) {
+      leaderboardTimeframeFilters.querySelectorAll(".toggle-btn").forEach(b => {
+        if (b.getAttribute("data-timeframe") === "alltime") {
+          b.classList.add("active");
+        } else {
+          b.classList.remove("active");
+        }
+      });
+    }
+
+    // 3. Reset all games style select hidden input
+    const leaderboardStyleSelect = document.getElementById("leaderboard-style-select");
+    if (leaderboardStyleSelect) {
+      leaderboardStyleSelect.value = "all";
+    }
+
+    // 4. Reset custom select dropdown UI
+    const styleContainer = document.getElementById("leaderboard-multi-select-style-container");
+    if (styleContainer) {
+      const btn = styleContainer.querySelector(".retro-multi-select-btn");
+      const selectedTextEl = btn ? btn.querySelector(".selected-text") : null;
+      if (selectedTextEl) selectedTextEl.textContent = "ALL GAMES";
+      if (btn) btn.classList.remove("active-selection");
+
+      const dropdown = styleContainer.querySelector(".retro-multi-select-dropdown");
+      if (dropdown) dropdown.classList.add("dropdown-hidden");
+
+      const rows = styleContainer.querySelectorAll(".retro-multi-option-row");
+      rows.forEach(r => {
+        const val = r.getAttribute("data-value");
+        if (val === "all") {
+          r.classList.add("active-selection");
+          const chk = r.querySelector(".leaderboard-style-checkbox");
+          if (chk) chk.checked = true;
+        } else {
+          r.classList.remove("active-selection");
+          const chk = r.querySelector(".leaderboard-style-checkbox");
+          if (chk) chk.checked = false;
+        }
+      });
+    }
+  }
+
+
 
   // ==========================================
   // Client Router
@@ -234,10 +292,12 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if (target === "fighters") {
       await renderFightersLibrary();
     } else if (target === "leaderboard") {
+      clearAllLeaderboardFilters();
       await renderLeaderboard();
     } else if (target === "scanner") {
       await renderScanner();
     } else if (target === "insights") {
+      currentInsightsPlacementLimit = 5;
       await renderInsights();
     } else if (target === "settings") {
       await renderSettings();
@@ -249,6 +309,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // Bind router and trigger initial routing
   window.addEventListener("hashchange", router);
   router();
+
+  const leaderboardNavTab = document.getElementById("nav-tab-leaderboard");
+  if (leaderboardNavTab) {
+    leaderboardNavTab.addEventListener("click", () => {
+      if (window.location.hash === "#leaderboard") {
+        clearAllLeaderboardFilters();
+        renderLeaderboard();
+      }
+    });
+  }
 
   // Dynamic bidirectional hover highlighting between timeline and player rows
   const historyMatchesListEl = document.getElementById("history-matches-list");
@@ -2196,6 +2266,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Insights Dashboard View Controllers
   // ==========================================
   async function renderInsights() {
+    currentInsightsPlacementLimit = 5;
     const telemetryLayout = document.querySelector("#insights-view .telemetry-view-layout");
     showSectionLoader(telemetryLayout, "cyan");
     const startTime = Date.now();
@@ -2287,8 +2358,27 @@ document.addEventListener("DOMContentLoaded", () => {
     // Trigger SVG Renderings
     if (window.Charts) {
       window.Charts.renderWinRateGauge("win-rate-gauges-container", stats.players);
-      window.Charts.renderPlayerPlacements("outcomes-stacked-bar-container", stats.players);
+      window.Charts.renderPlayerPlacements("outcomes-stacked-bar-container", stats.players, currentInsightsPlacementLimit);
       window.Charts.renderDailyPeakTimeline("daily-peak-timeline-container", matches);
+    }
+
+    // Show more placements button
+    const btnShowMorePlacements = document.getElementById("btn-show-more-placements");
+    if (btnShowMorePlacements) {
+      if (stats.players && stats.players.length > currentInsightsPlacementLimit) {
+        btnShowMorePlacements.style.display = "inline-block";
+        btnShowMorePlacements.onclick = () => {
+          currentInsightsPlacementLimit += 5;
+          if (window.Charts) {
+            window.Charts.renderPlayerPlacements("outcomes-stacked-bar-container", stats.players, currentInsightsPlacementLimit);
+          }
+          if (stats.players.length <= currentInsightsPlacementLimit) {
+            btnShowMorePlacements.style.display = "none";
+          }
+        };
+      } else {
+        btnShowMorePlacements.style.display = "none";
+      }
     }
 
     // Trigger custom html/css dynamic renderings
