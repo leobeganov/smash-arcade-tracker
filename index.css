@@ -82,6 +82,7 @@ body {
 /* --- Scrollbar Customization --- */
 ::-webkit-scrollbar {
   width: 10px;
+  height: 10px;
 }
 ::-webkit-scrollbar-track {
   background: var(--bg-obsidian);
@@ -4437,6 +4438,32 @@ body.theme-retro .btn-arcade {
 
   .telemetry-view-layout {
     gap: 25px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .telemetry-grid {
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .tel-chart-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .chart-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
   }
 
   .tel-kpi-card {
@@ -4457,20 +4484,143 @@ body.theme-retro .btn-arcade {
     font-size: 11px !important;
   }
 
+  #outcomes-stacked-bar-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box !important;
+  }
+
+  #outcomes-stacked-bar-container .bar-chart-container {
+    min-width: 480px !important;
+  }
+
   #most-played-fighters-container,
   #most-popular-fighters-container {
     justify-content: flex-start !important;
     overflow-x: auto !important;
-    gap: 12px;
-    padding-left: 10px;
-    padding-right: 10px;
+    overflow-y: hidden !important;
+    gap: 12px !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
     -webkit-overflow-scrolling: touch;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Explicitly style horizontal scrollbars on mobile so they are visible and match the theme */
+  #outcomes-stacked-bar-container::-webkit-scrollbar,
+  #most-played-fighters-container::-webkit-scrollbar,
+  #most-popular-fighters-container::-webkit-scrollbar,
+  .timeline-section-wrapper::-webkit-scrollbar {
+    height: 6px !important;
+    display: block !important;
+  }
+
+  #outcomes-stacked-bar-container::-webkit-scrollbar-track,
+  #most-played-fighters-container::-webkit-scrollbar-track,
+  #most-popular-fighters-container::-webkit-scrollbar-track,
+  .timeline-section-wrapper::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border-radius: 3px !important;
+  }
+
+  #outcomes-stacked-bar-container::-webkit-scrollbar-thumb,
+  #most-played-fighters-container::-webkit-scrollbar-thumb,
+  #most-popular-fighters-container::-webkit-scrollbar-thumb,
+  .timeline-section-wrapper::-webkit-scrollbar-thumb {
+    background: var(--color-neon-magenta) !important;
+    border-radius: 3px !important;
+    border: none !important;
+    box-shadow: 0 0 5px var(--color-neon-magenta) !important;
+  }
+
+  #outcomes-stacked-bar-container::-webkit-scrollbar-thumb:hover,
+  #most-played-fighters-container::-webkit-scrollbar-thumb:hover,
+  #most-popular-fighters-container::-webkit-scrollbar-thumb:hover,
+  .timeline-section-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #ff3399 !important;
+  }
+
+  .v-bar-col {
+    width: 40px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .v-bar-track {
+    width: 16px !important;
+  }
+
+  .v-bar-icon-bubble {
+    width: 26px !important;
+    height: 26px !important;
+    margin-top: 6px !important;
+  }
+
+  .v-bar-char-name {
+    font-size: 8px !important;
+    max-width: 40px !important;
+  }
+
+  .v-bar-value {
+    font-size: 10px !important;
+    margin-bottom: 4px !important;
+  }
+
+  /* Compacting Win Rate Performance Gauges for standard mobile/tablet screens */
+  .gauges-grid {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 10px !important;
+    justify-content: space-around !important;
+  }
+
+  .gauge-card {
+    min-width: 0 !important;
+    flex: 1 1 0 !important;
+    padding: 8px 4px !important;
+    gap: 8px !important;
+  }
+
+  .gauge-svg-wrapper {
+    width: 100% !important;
+    max-width: 85px !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1 !important;
+  }
+
+  .gauge-text {
+    font-size: 9px !important;
+  }
+
+  .gauge-number {
+    font-size: 12px !important;
+  }
+
+  .gauge-name {
+    font-size: 10px !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .gauge-gp {
+    font-size: 8px !important;
+    white-space: nowrap !important;
   }
 
   .timeline-section-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
     overflow-x: auto !important;
+    overflow-y: hidden !important;
     padding-bottom: 25px !important;
     -webkit-overflow-scrolling: touch;
+    box-sizing: border-box !important;
   }
 
   .average-timeline-card {
@@ -4481,11 +4631,6 @@ body.theme-retro .btn-arcade {
   /* Prevent overlapping labels on daily activity graph */
   .hour-label:nth-of-type(even) {
     display: none !important;
-  }
-
-  /* Prevent vertical columns from shrinking inside horizontally-scrolling charts */
-  .v-bar-col {
-    flex-shrink: 0 !important;
   }
 
   /* Disable hover tooltips on mobile/touch viewports to prevent overflow clipping */
@@ -4618,7 +4763,7 @@ body.theme-retro .btn-arcade {
   .gauges-grid {
     display: flex !important;
     flex-wrap: nowrap !important;
-    gap: 6px !important;
+    gap: 4px !important;
     justify-content: space-around !important;
   }
 
@@ -4626,23 +4771,27 @@ body.theme-retro .btn-arcade {
   .gauge-card {
     min-width: 0 !important;
     flex: 1 1 0 !important;
-    padding: 6px 2px !important;
-    gap: 6px !important;
+    padding: 4px 2px !important;
+    gap: 4px !important;
   }
   .gauge-svg-wrapper {
     width: 100% !important;
-    max-width: 80px !important;
+    max-width: 70px !important;
     height: auto !important;
     aspect-ratio: 1 / 1 !important;
   }
   .gauge-text {
-    font-size: 9px !important;
+    font-size: 7.5px !important;
   }
   .gauge-number {
-    font-size: 11px !important;
+    font-size: 10px !important;
+  }
+  .gauge-label {
+    font-size: 5.5px !important;
+    margin-top: 1px !important;
   }
   .gauge-name {
-    font-size: 9px !important;
+    font-size: 8.5px !important;
     max-width: 100% !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
@@ -4651,6 +4800,8 @@ body.theme-retro .btn-arcade {
   .gauge-gp {
     font-size: 7px !important;
   }
+
+
   .kpi-value {
     font-size: var(--font-size-xl) !important;
   }
