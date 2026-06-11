@@ -49,33 +49,64 @@
     <main class="view-container active" id="home-view">
       <div class="home-view-layout">
 
-        <!-- Centered Champions Title -->
-        <div class="podium-champions-title-container" style="position: relative;">
-          <h2 class="podium-champions-title">CHAMPIONS</h2>
-          <div class="retro-loader" id="podium-loader" style="display: none; position: absolute; right: 0; top: 50%; transform: translateY(-50%);">
-            <span class="loader-led"></span>
-            <span class="loader-text">RECALCULATING...</span>
-          </div>
-        </div>
+
 
         <!-- Podium Header and Timeframe Filter -->
         <div class="podium-header-row">
           <div class="podium-filters-group">
-            <!-- Style Filters -->
-            <div class="podium-style-wrapper">
-              <select class="retro-dropdown-select" id="podium-style-select">
-                <option value="all">ALL GAMES</option>
-                <option value="1v1">1v1</option>
-                <option value="free-for-all">FFA</option>
-                <option value="teams">Teams</option>
-              </select>
+            <!-- Timeframe Filter -->
+            <div class="podium-filter-wrapper">
+              <div class="toggle-switch-beveled" id="podium-timeframe-filters">
+                <button class="toggle-btn" data-timeframe="today">Today</button>
+                <button class="toggle-btn active" data-timeframe="7days">7 Days</button>
+                <button class="toggle-btn" data-timeframe="30days">30 Days</button>
+              </div>
+            </div>
+
+            <!-- Custom Single-select Style Dropdown -->
+            <div class="retro-multi-select-container" id="multi-select-style-container">
+              <button type="button" class="retro-select retro-multi-select-btn" id="btn-multi-style">
+                <span class="selected-text">ALL GAMES</span>
+                <span class="dropdown-caret">▼</span>
+              </button>
+              <div class="retro-multi-select-dropdown dropdown-hidden" id="dropdown-multi-style">
+                <div class="retro-multi-option-row all-option active-selection" data-value="all">
+                  <label class="retro-checkbox-wrapper">
+                    <input type="checkbox" class="retro-checkbox-input style-checkbox" checked disabled style="pointer-events: none;">
+                    <span class="retro-checkbox-box"></span>
+                  </label>
+                  <span class="option-label">ALL GAMES</span>
+                </div>
+                <div class="retro-multi-option-row" data-value="1v1">
+                  <label class="retro-checkbox-wrapper">
+                    <input type="checkbox" class="retro-checkbox-input style-checkbox" disabled style="pointer-events: none;">
+                    <span class="retro-checkbox-box"></span>
+                  </label>
+                  <span class="option-label">1V1</span>
+                </div>
+                <div class="retro-multi-option-row" data-value="free-for-all">
+                  <label class="retro-checkbox-wrapper">
+                    <input type="checkbox" class="retro-checkbox-input style-checkbox" disabled style="pointer-events: none;">
+                    <span class="retro-checkbox-box"></span>
+                  </label>
+                  <span class="option-label">FFA</span>
+                </div>
+                <div class="retro-multi-option-row" data-value="teams">
+                  <label class="retro-checkbox-wrapper">
+                    <input type="checkbox" class="retro-checkbox-input style-checkbox" disabled style="pointer-events: none;">
+                    <span class="retro-checkbox-box"></span>
+                  </label>
+                  <span class="option-label">TEAMS</span>
+                </div>
+              </div>
+              <input type="hidden" id="podium-style-select" value="all">
             </div>
 
             <!-- Custom Multi-select Player Dropdown -->
             <div class="retro-multi-select-container" id="multi-select-players-container">
-              <button type="button" class="retro-select retro-multi-select-btn" id="btn-multi-players" style="min-width: 220px; font-size: 11px; height: 32px; text-align: left; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--color-border-dark); background: var(--color-bg-dark); color: #fff; padding: 0 10px; font-family: var(--font-stats); letter-spacing: 0.5px;">
+              <button type="button" class="retro-select retro-multi-select-btn" id="btn-multi-players">
                 <span class="selected-text">ALL PLAYERS</span>
-                <span class="dropdown-caret" style="font-size: 9px; opacity: 0.7;">▼</span>
+                <span class="dropdown-caret">▼</span>
               </button>
               <div class="retro-multi-select-dropdown dropdown-hidden" id="dropdown-multi-players">
                 <!-- Dynamic JS options -->
@@ -84,21 +115,12 @@
 
             <!-- Custom Multi-select Fighter Dropdown -->
             <div class="retro-multi-select-container" id="multi-select-fighters-container">
-              <button type="button" class="retro-select retro-multi-select-btn" id="btn-multi-fighters" style="min-width: 220px; font-size: 11px; height: 32px; text-align: left; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--color-border-dark); background: var(--color-bg-dark); color: #fff; padding: 0 10px; font-family: var(--font-stats); letter-spacing: 0.5px;">
+              <button type="button" class="retro-select retro-multi-select-btn" id="btn-multi-fighters">
                 <span class="selected-text">ALL FIGHTERS</span>
-                <span class="dropdown-caret" style="font-size: 9px; opacity: 0.7;">▼</span>
+                <span class="dropdown-caret">▼</span>
               </button>
               <div class="retro-multi-select-dropdown dropdown-hidden" id="dropdown-multi-fighters">
                 <!-- Dynamic JS options -->
-              </div>
-            </div>
-
-            <!-- Timeframe Filter -->
-            <div class="podium-filter-wrapper">
-              <div class="toggle-switch-beveled" id="podium-timeframe-filters">
-                <button class="toggle-btn" data-timeframe="today">Today</button>
-                <button class="toggle-btn active" data-timeframe="7days">7 Days</button>
-                <button class="toggle-btn" data-timeframe="30days">30 Days</button>
               </div>
             </div>
           </div>
@@ -161,7 +183,7 @@
         </div>
 
         <!-- Merged Match list container -->
-        <div class="history-list-container" id="history-matches-list" style="width: 100%; max-width: 1125px; margin-top: 20px; margin-bottom: 40px;">
+        <div class="history-list-container" id="history-matches-list">
           <!-- Dynamic listing of match panels -->
         </div>
 
@@ -186,9 +208,10 @@
         <div class="profile-content-area">
           
           <!-- Timeframe Selector -->
-          <div class="profile-timeframe-row" style="display: flex; align-items: center; justify-content: flex-end; margin-bottom: 15px;">
-            <div class="timeframe-filter-wrapper">
-              <span class="mode-toggle-label">TIMEFRAME:</span>
+          <div class="profile-timeframe-row" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+            <h2 class="profile-section-title text-glow-magenta" style="font-family: var(--font-arcade); font-size: var(--font-size-xs); margin: 0; letter-spacing: 1px; text-transform: uppercase;">PLAYER SPECS</h2>
+            <div class="timeframe-filter-wrapper" style="display: flex; align-items: center; gap: 10px;">
+              <span class="mode-toggle-label" style="font-size: 10px; color: var(--color-neon-magenta); letter-spacing: 0.5px; font-family: var(--font-arcade);">TIMEFRAME:</span>
               <div class="toggle-switch-beveled" id="player-timeframe-filters">
                 <button class="toggle-btn" data-timeframe="today">Today</button>
                 <button class="toggle-btn" data-timeframe="7days">7 Days</button>
@@ -203,7 +226,7 @@
             <div class="stat-cell-retro">
               <div class="stat-title" id="player-stat-wins-title">Rating</div>
               <div class="stat-num text-glow-yellow" id="player-stat-wins">-</div>
-              <div class="stat-sub-label" id="player-stat-wins-raw" style="font-size: 13px; opacity: 0.6; font-family: var(--font-stats); margin-top: 4px;">-</div>
+              <div class="stat-sub-label" id="player-stat-wins-raw">-</div>
             </div>
             <div class="stat-cell-retro">
               <div class="stat-title">Losses</div>
@@ -303,7 +326,7 @@
             <div class="stat-cell-retro">
               <div class="stat-title" id="fighter-stat-wins-title">Rating</div>
               <div class="stat-num text-glow-yellow" id="fighter-stat-wins">-</div>
-              <div class="stat-sub-label" id="fighter-stat-wins-raw" style="font-size: 13px; opacity: 0.6; font-family: var(--font-stats); margin-top: 4px;">-</div>
+              <div class="stat-sub-label" id="fighter-stat-wins-raw">-</div>
             </div>
             <div class="stat-cell-retro">
               <div class="stat-title">Fighter Losses</div>
@@ -373,19 +396,47 @@
           </div>
           
           <div class="leaderboard-filters-group">
-            <!-- Style Filters -->
-            <div class="style-filter-wrapper">
-              <span class="mode-toggle-label">STYLE:</span>
-              <div class="toggle-switch-beveled" id="leaderboard-style-filters">
-                <button class="toggle-btn active" data-style="1v1">1v1</button>
-                <button class="toggle-btn active" data-style="free-for-all">FFA</button>
-                <button class="toggle-btn active" data-style="teams">Teams</button>
+            <!-- Custom Single-select Style Dropdown -->
+            <div class="retro-multi-select-container" id="leaderboard-multi-select-style-container">
+              <button type="button" class="retro-select retro-multi-select-btn" id="btn-leaderboard-multi-style">
+                <span class="selected-text">ALL GAMES</span>
+                <span class="dropdown-caret">▼</span>
+              </button>
+              <div class="retro-multi-select-dropdown dropdown-hidden" id="dropdown-leaderboard-multi-style">
+                <div class="retro-multi-option-row all-option active-selection" data-value="all">
+                  <label class="retro-checkbox-wrapper">
+                    <input type="checkbox" class="retro-checkbox-input leaderboard-style-checkbox" checked disabled style="pointer-events: none;">
+                    <span class="retro-checkbox-box"></span>
+                  </label>
+                  <span class="option-label">ALL GAMES</span>
+                </div>
+                <div class="retro-multi-option-row" data-value="1v1">
+                  <label class="retro-checkbox-wrapper">
+                    <input type="checkbox" class="retro-checkbox-input leaderboard-style-checkbox" disabled style="pointer-events: none;">
+                    <span class="retro-checkbox-box"></span>
+                  </label>
+                  <span class="option-label">1V1</span>
+                </div>
+                <div class="retro-multi-option-row" data-value="free-for-all">
+                  <label class="retro-checkbox-wrapper">
+                    <input type="checkbox" class="retro-checkbox-input leaderboard-style-checkbox" disabled style="pointer-events: none;">
+                    <span class="retro-checkbox-box"></span>
+                  </label>
+                  <span class="option-label">FFA</span>
+                </div>
+                <div class="retro-multi-option-row" data-value="teams">
+                  <label class="retro-checkbox-wrapper">
+                    <input type="checkbox" class="retro-checkbox-input leaderboard-style-checkbox" disabled style="pointer-events: none;">
+                    <span class="retro-checkbox-box"></span>
+                  </label>
+                  <span class="option-label">TEAMS</span>
+                </div>
               </div>
+              <input type="hidden" id="leaderboard-style-select" value="all">
             </div>
 
             <!-- Timeframe Filter -->
             <div class="timeframe-filter-wrapper">
-              <span class="mode-toggle-label">TIMEFRAME:</span>
               <div class="toggle-switch-beveled" id="leaderboard-timeframe-filters">
                 <button class="toggle-btn" data-timeframe="today">Today</button>
                 <button class="toggle-btn" data-timeframe="7days">7 Days</button>
@@ -396,7 +447,6 @@
 
             <!-- Mode Toggle -->
             <div class="mode-toggle-wrapper">
-              <span class="mode-toggle-label">MODE:</span>
               <div class="toggle-switch-beveled">
                 <button class="toggle-btn active" id="toggle-btn-players">Players</button>
                 <button class="toggle-btn" id="toggle-btn-fighters">Fighters</button>
@@ -417,10 +467,6 @@
               <!-- Rows injected by JS -->
             </tbody>
           </table>
-        </div>
-
-        <div class="back-button-footer">
-          <button class="btn-arcade cyan btn-back-home">&lt; HOME</button>
         </div>
 
       </div>
@@ -530,23 +576,20 @@
     <!-- ========================================== -->
     <main class="view-container" id="telemetry-view">
       <div class="telemetry-view-layout">
-        <div class="panel-beveled neon-magenta stats-dashboard-header">
-          <h2 class="text-glow-magenta font-arcade">INTERACTIVE TELEMETRY</h2>
-          <p class="cabinet-subtitle">DATA-DRIVEN PERFORMANCE GAUGES</p>
-          
-          <div class="telemetry-stats-row">
-            <div class="tel-kpi-box">
-              <div class="kpi-title">TOTAL MATCHES</div>
-              <div class="kpi-value text-glow-cyan" id="tel-kpi-matches">0</div>
-            </div>
-            <div class="tel-kpi-box">
-              <div class="kpi-title">TOP PLAYER</div>
-              <div class="kpi-value text-glow-yellow" id="tel-kpi-player">N/A</div>
-            </div>
-            <div class="tel-kpi-box">
-              <div class="kpi-title">DOMINANT FIGHTER</div>
-              <div class="kpi-value text-glow-magenta" id="tel-kpi-character">N/A</div>
-            </div>
+
+
+        <div class="telemetry-kpis-grid">
+          <div class="panel-beveled neon-cyan tel-kpi-card">
+            <div class="kpi-title">TOTAL MATCHES</div>
+            <div class="kpi-value text-glow-cyan" id="tel-kpi-matches">0</div>
+          </div>
+          <div class="panel-beveled neon-yellow tel-kpi-card">
+            <div class="kpi-title">TOP PLAYER</div>
+            <div class="kpi-value text-glow-yellow" id="tel-kpi-player">N/A</div>
+          </div>
+          <div class="panel-beveled neon-magenta tel-kpi-card">
+            <div class="kpi-title">DOMINANT FIGHTER</div>
+            <div class="kpi-value text-glow-magenta" id="tel-kpi-character">N/A</div>
           </div>
         </div>
 
@@ -596,10 +639,10 @@
             </div>
             
             <div class="panel-beveled spec-inner-box">
-              <label class="font-arcade text-glow-cyan" style="display: block; margin-bottom: 12px; font-size: 13px;">GEMINI API KEY</label>
+              <label class="font-arcade text-glow-cyan" style="display: block; margin-bottom: 12px; font-size: var(--font-size-sm);">GEMINI API KEY</label>
               <input type="password" id="settings-api-key" class="retro-input" placeholder="ENTER YOUR API KEY..." style="width: 100%; margin-bottom: 15px;">
               <button class="btn-arcade cyan" id="btn-save-api-key" style="width: 100%;">MOUNT ENCRYPTION KEY</button>
-              <p class="input-tip text-glow-yellow" style="margin-top: 12px; font-size: 13px; font-family: var(--font-stats); line-height: 1.4;">YOUR KEY SECURELY BINDS LOCALLY IN CLIENT STORAGE. IT NEVER ENTERS NETWORK LOGS.</p>
+              <p class="input-tip text-glow-yellow" style="margin-top: 12px; font-size: var(--font-size-sm); font-family: var(--font-stats); line-height: 1.4;">YOUR KEY SECURELY BINDS LOCALLY IN CLIENT STORAGE. IT NEVER ENTERS NETWORK LOGS.</p>
             </div>
           </div>
 
@@ -611,38 +654,38 @@
             </div>
 
             <div class="panel-beveled spec-inner-box diagnostics-actions">
-              <button class="btn-arcade cyan" id="btn-export-db" style="width: 100%; margin-bottom: 12px; font-size: 11px;">DUMP DATABASE (.JSON)</button>
+              <button class="btn-arcade cyan" id="btn-export-db" style="width: 100%; margin-bottom: 12px; font-size: var(--font-size-xs);">DUMP DATABASE (.JSON)</button>
               
               <div class="import-wrapper" style="position: relative; margin-bottom: 12px;">
                 <input type="file" id="import-db-file" accept=".json" style="display: none;">
-                <button class="btn-arcade magenta" id="btn-trigger-import" style="width: 100%; font-size: 11px;">MOUNT DUMP ARCHIVE</button>
+                <button class="btn-arcade magenta" id="btn-trigger-import" style="width: 100%; font-size: var(--font-size-xs);">MOUNT DUMP ARCHIVE</button>
               </div>
 
-              <button class="btn-arcade yellow" id="btn-reset-db" style="width: 100%; margin-bottom: 12px; font-size: 11px;">RESTORE FACTORY SEEDS</button>
-              <button class="btn-arcade magenta" id="btn-clear-db" style="width: 100%; background-color: rgba(255,0,127,0.15); border-color: var(--color-neon-magenta); font-size: 11px;">CLEAR ALL LOGS</button>
+              <button class="btn-arcade yellow" id="btn-reset-db" style="width: 100%; margin-bottom: 12px; font-size: var(--font-size-xs);">RESTORE FACTORY SEEDS</button>
+              <button class="btn-arcade magenta" id="btn-clear-db" style="width: 100%; background-color: rgba(255,0,127,0.15); border-color: var(--color-neon-magenta); font-size: var(--font-size-xs);">CLEAR ALL LOGS</button>
             </div>
           </div>
         </div>
 
         <!-- Theme config -->
         <div class="panel-beveled neon-cyan settings-theme-row" style="margin-top: 25px;">
-          <h3 class="font-arcade text-glow-cyan" style="font-size: 13px; margin-bottom: 15px;">CABINET PALETTE</h3>
+          <h3 class="font-arcade text-glow-cyan" style="font-size: var(--font-size-sm); margin-bottom: 15px;">CABINET PALETTE</h3>
           <div class="theme-swatches">
             <div class="theme-swatch swatch-storm active" data-theme="storm" title="Cyber Storm">
               <div class="swatch-color" style="background: linear-gradient(135deg, #00f0ff, #ff007f);"></div>
-              <span style="font-family: var(--font-arcade); font-size: 10px;">STORM</span>
+              <span>STORM</span>
             </div>
             <div class="theme-swatch swatch-vapor" data-theme="vapor" title="Vapor neon">
               <div class="swatch-color" style="background: linear-gradient(135deg, #ffe600, #ff007f);"></div>
-              <span style="font-family: var(--font-arcade); font-size: 10px;">VAPOR</span>
+              <span>VAPOR</span>
             </div>
             <div class="theme-swatch swatch-cyber" data-theme="cyber" title="Matrix Grid">
               <div class="swatch-color" style="background: linear-gradient(135deg, #00ff66, #001100);"></div>
-              <span style="font-family: var(--font-arcade); font-size: 10px;">GRID</span>
+              <span>GRID</span>
             </div>
             <div class="theme-swatch swatch-retro" data-theme="retro" title="N64 Classic">
               <div class="swatch-color" style="background: linear-gradient(135deg, #7a7a7a, #333333);"></div>
-              <span style="font-family: var(--font-arcade); font-size: 10px;">N64</span>
+              <span>N64</span>
             </div>
           </div>
         </div>
