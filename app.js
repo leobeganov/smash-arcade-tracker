@@ -42,6 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let selectedSearchLoserPlayer = null;
   let isSearchDropdownsInitialized = false;
   let shouldScrollToMatchList = false;
+  let skipClearFiltersOnHome = false;
 
   // --- Fighters Library State ---
   let fightersSearchQuery = "";
@@ -117,6 +118,51 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function clearAllHomeFilters() {
+    // 1. Reset to 30 days
+    currentPodiumTimeframe = "30days";
+
+    // 2. Reset all games (style select)
+    const podiumStyleSelect = document.getElementById("podium-style-select");
+    if (podiumStyleSelect) {
+      podiumStyleSelect.value = "all";
+    }
+    
+    const styleContainer = document.getElementById("multi-select-style-container");
+    if (styleContainer) {
+      const btn = styleContainer.querySelector(".retro-multi-select-btn");
+      const selectedTextEl = btn ? btn.querySelector(".selected-text") : null;
+      if (selectedTextEl) selectedTextEl.textContent = "ALL GAMES";
+      if (btn) btn.classList.remove("active-selection");
+
+      const rows = styleContainer.querySelectorAll(".retro-multi-option-row");
+      rows.forEach(r => {
+        const val = r.getAttribute("data-value");
+        if (val === "all") {
+          r.classList.add("active-selection");
+          const chk = r.querySelector(".style-checkbox");
+          if (chk) chk.checked = true;
+        } else {
+          r.classList.remove("active-selection");
+          const chk = r.querySelector(".style-checkbox");
+          if (chk) chk.checked = false;
+        }
+      });
+    }
+
+    // 3. Reset all players & fighters
+    selectedSearchPlayers.length = 0;
+    selectedSearchFighters.length = 0;
+
+    // 4. Wipe winner/loser filters ("wins only" / "losses only" sections)
+    selectedSearchWinnerPlayer = null;
+    selectedSearchWinnerFighter = null;
+    selectedSearchLoserPlayer = null;
+
+    // 5. Force search multi-select dropdowns & sync state to re-initialize next time renderHomeMatchesList runs
+    isSearchDropdownsInitialized = false;
+  }
+
 
   // ==========================================
   // Client Router
@@ -166,6 +212,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Render corresponding view data
     if (target === "home") {
+      if (!skipClearFiltersOnHome) {
+        clearAllHomeFilters();
+      }
+      skipClearFiltersOnHome = false; // Reset flag for subsequent navigations
       isSearchDropdownsInitialized = false;
       await renderHome();
     } else if (target === "player") {
@@ -773,6 +823,7 @@ document.addEventListener("DOMContentLoaded", () => {
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
         syncHomePageStyleWithPlayerFilter();
+        skipClearFiltersOnHome = true;
         window.location.hash = "#home";
       };
     }
@@ -790,6 +841,7 @@ document.addEventListener("DOMContentLoaded", () => {
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
         syncHomePageStyleWithPlayerFilter();
+        skipClearFiltersOnHome = true;
         window.location.hash = "#home";
       };
     }
@@ -807,6 +859,7 @@ document.addEventListener("DOMContentLoaded", () => {
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
         syncHomePageStyleWithPlayerFilter();
+        skipClearFiltersOnHome = true;
         window.location.hash = "#home";
       };
     }
@@ -1344,6 +1397,7 @@ document.addEventListener("DOMContentLoaded", () => {
         currentPodiumTimeframe = "30days";
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
+        skipClearFiltersOnHome = true;
         window.location.hash = "#home";
       };
     }
@@ -1360,6 +1414,7 @@ document.addEventListener("DOMContentLoaded", () => {
         currentPodiumTimeframe = "30days";
         shouldScrollToMatchList = true;
         isSearchDropdownsInitialized = false; // force dropdown re-initialization
+        skipClearFiltersOnHome = true;
         window.location.hash = "#home";
       };
     }
@@ -1731,6 +1786,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Generate markers for the timeline with collision avoidance (separated by above/below direction to avoid double-height lines for simultaneous opposite knockouts)
       const staggerCounts = { above: {}, below: {} };
+      let maxStaggerAbove = -1;
+      let maxStaggerBelow = -1;
       let markersHtml = "";
       let winnersHtml = "";
       let markerIdx = 0;
@@ -1755,11 +1812,11 @@ document.addEventListener("DOMContentLoaded", () => {
               winnersHtml += `
                 <div class="winner-sidebar-row" data-player-name="${p.playerName.toLowerCase()}" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
                   <!-- Dot marker (Character head-icon bubble in gold) -->
-                  <div class="winner-icon-bubble" style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid var(--color-neon-yellow); box-shadow: 0 0 8px var(--color-neon-yellow); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+                  <div class="winner-icon-bubble" style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid var(--color-neon-yellow); box-shadow: 0 0 8px var(--color-neon-yellow); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onclick="window.location.hash = '#player/${p.playerName.toLowerCase().replace(/\s+/g, '-')}'" onmouseover="this.style.transform='scale(1.15)'; this.style.boxShadow='0 0 14px var(--color-neon-yellow)';" onmouseout="this.style.transform=''; this.style.boxShadow='';" >
                     <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${p.character}" />
                   </div>
                   <!-- Name/Details in a panel-beveled gold border box -->
-                  <div class="panel-beveled winner-name-box ${filterClass}" style="white-space: nowrap; background: var(--color-bg-dark); border: 1px solid var(--color-neon-yellow); padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px;">
+                  <div class="panel-beveled winner-name-box ${filterClass}" style="white-space: nowrap; background: var(--color-bg-dark); border: 1px solid var(--color-neon-yellow); padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s;" onclick="window.location.hash = '#player/${p.playerName.toLowerCase().replace(/\s+/g, '-')}'" onmouseover="this.style.borderColor='#fff'; this.style.boxShadow='0 0 12px var(--color-neon-yellow)';" onmouseout="this.style.borderColor=''; this.style.boxShadow='';" >
                     <span style="font-weight: bold; color: #fff; text-shadow: 0 0 2px rgba(255,255,255,0.5);">${p.playerName} 🏆</span>
                   </div>
                 </div>
@@ -1768,11 +1825,11 @@ document.addEventListener("DOMContentLoaded", () => {
               winnersHtml += `
                 <div class="winner-sidebar-row sudden-death-row" data-player-name="${p.playerName.toLowerCase()}" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; opacity: 0.65;">
                   <!-- Dot marker (Character head-icon bubble in grey) -->
-                  <div class="winner-icon-bubble sudden-death-icon" style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid #555; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; filter: grayscale(0.8);">
+                  <div class="winner-icon-bubble sudden-death-icon" style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid #555; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; filter: grayscale(0.8); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;" onclick="window.location.hash = '#player/${p.playerName.toLowerCase().replace(/\s+/g, '-')}'" onmouseover="this.style.transform='scale(1.15)'; this.style.boxShadow='0 0 14px #aaa'; this.style.filter='grayscale(0)';" onmouseout="this.style.transform=''; this.style.boxShadow=''; this.style.filter='grayscale(0.8)';" >
                     <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${p.character}" />
                   </div>
                   <!-- Name/Details in a panel-beveled grey border box -->
-                  <div class="panel-beveled winner-name-box sudden-death-name-box ${filterClass}" style="white-space: nowrap; background: var(--color-bg-dark); border: 1px solid #444; padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); border-radius: 4px; display: flex; flex-direction: column; gap: 1px; box-shadow: 0 0 4px rgba(0,0,0,0.5);">
+                  <div class="panel-beveled winner-name-box sudden-death-name-box ${filterClass}" style="white-space: nowrap; background: var(--color-bg-dark); border: 1px solid #444; padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); border-radius: 4px; display: flex; flex-direction: column; gap: 1px; box-shadow: 0 0 4px rgba(0,0,0,0.5); cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s;" onclick="window.location.hash = '#player/${p.playerName.toLowerCase().replace(/\s+/g, '-')}'" onmouseover="this.style.borderColor='#fff'; this.style.boxShadow='0 0 12px #aaa';" onmouseout="this.style.borderColor=''; this.style.boxShadow='';" >
                     <span style="font-weight: bold; color: #aaa;">${p.playerName}</span>
                     <span style="font-size: 8px; color: #777; font-weight: bold; letter-spacing: 0.5px; line-height: 1;">SUDDEN DEATH</span>
                   </div>
@@ -1793,6 +1850,12 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             const staggerIndex = staggerCounts[sideKey][pctKey]++;
             
+            if (isAbove) {
+              maxStaggerAbove = Math.max(maxStaggerAbove, staggerIndex);
+            } else {
+              maxStaggerBelow = Math.max(maxStaggerBelow, staggerIndex);
+            }
+            
             const markerColor = isWinner ? 'var(--color-neon-yellow)' : 'var(--color-neon-magenta)';
             const textColor = isWinner ? 'var(--color-neon-yellow)' : 'var(--color-neon-magenta)';
             
@@ -1802,13 +1865,13 @@ document.addEventListener("DOMContentLoaded", () => {
              markersHtml += `
                <div class="timeline-marker" data-player-name="${p.playerName.toLowerCase()}" style="position: absolute; left: ${safePct}%; top: 50%; transform: translate(-50%, -50%); width: 24px; height: 24px; z-index: 10;">
                  <!-- Dot marker (Character head-icon bubble centered on timeline) -->
-                 <div class="timeline-dot" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid ${markerColor}; box-shadow: 0 0 8px ${markerColor}; z-index: 11; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                 <div class="timeline-dot" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid ${markerColor}; box-shadow: 0 0 8px ${markerColor}; z-index: 11; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onclick="window.location.hash = '#player/${p.playerName.toLowerCase().replace(/\s+/g, '-')}'" onmouseover="this.style.transform='scale(1.15)'; this.style.boxShadow='0 0 14px ${markerColor}';" onmouseout="this.style.transform=''; this.style.boxShadow='';" >
                    <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${p.character}" />
                  </div>
                  <!-- Connector line coming out of the bubble -->
                  <div class="timeline-connector" style="position: absolute; left: 11px; ${isAbove ? `bottom: 24px` : `top: 24px`}; width: 2px; height: ${offsetSize}px; background: ${markerColor}; opacity: 0.8; z-index: 9;"></div>
                  <!-- Player details box -->
-                 <div class="timeline-player-info panel-beveled ${filterClass}" style="position: absolute; left: 12px; ${isAbove ? `bottom: ${24 + offsetSize}px` : `top: ${24 + offsetSize}px`}; transform: translateX(-50%); text-align: center; white-space: nowrap; background: var(--color-bg-dark); border: 1px solid ${markerColor}; padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px; pointer-events: auto; user-select: none; z-index: 10;">
+                 <div class="timeline-player-info panel-beveled ${filterClass}" style="position: absolute; left: 12px; ${isAbove ? `bottom: ${24 + offsetSize}px` : `top: ${24 + offsetSize}px`}; transform: translateX(-50%); text-align: center; white-space: nowrap; background: var(--color-bg-dark); border: 1px solid ${markerColor}; padding: 3px 8px; font-size: 10px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px; pointer-events: auto; user-select: none; z-index: 10; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s;" onclick="window.location.hash = '#player/${p.playerName.toLowerCase().replace(/\s+/g, '-')}'" onmouseover="this.style.borderColor='#fff'; this.style.boxShadow='0 0 12px ${markerColor}';" onmouseout="this.style.borderColor=''; this.style.boxShadow='';" >
                    <span style="font-weight: bold; color: #fff; text-shadow: 0 0 2px rgba(255,255,255,0.5);">${p.playerName}${isWinner ? ' 🏆' : ''}</span>
                    <span class="hover-time" style="color: ${textColor}; font-weight: bold; text-shadow: 0 0 4px ${textColor};">(${displayTime})</span>
                  </div>
@@ -1864,7 +1927,11 @@ document.addEventListener("DOMContentLoaded", () => {
         <button class="delete-match-btn" data-id="${m.id}" title="Delete Record">🗑️</button>
         <div class="match-timeline-drawer" id="timeline-drawer-${m.id}">
           <!-- Timeline Track Column -->
-          <div class="timeline-track-column">
+          <%
+            const pTop = maxStaggerAbove >= 0 ? Math.max(50, 75 + maxStaggerAbove * 30) : 50;
+            const pBottom = maxStaggerBelow >= 0 ? Math.max(40, 75 + maxStaggerBelow * 30) : 40;
+          %>
+          <div class="timeline-track-column" style="padding-top: ${pTop}px; padding-bottom: ${pBottom}px;">
             <div class="timeline-track-container">
               <div class="timeline-track-glow"></div>
               <div class="timeline-label start">0:00 (START)</div>
@@ -2591,14 +2658,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Logo home button clicks
   document.getElementById("nav-logo-home").onclick = () => {
-    window.location.hash = "#home";
+    if (window.location.hash === "#home" || window.location.hash === "") {
+      clearAllHomeFilters();
+      renderHome();
+    } else {
+      window.location.hash = "#home";
+    }
   };
 
   // "Back to Select Select" / Home clicks
   const backButtons = document.getElementsByClassName("btn-back-home");
   for (let i = 0; i < backButtons.length; i++) {
     backButtons[i].onclick = () => {
-      window.location.hash = "#home";
+      if (window.location.hash === "#home" || window.location.hash === "") {
+        clearAllHomeFilters();
+        renderHome();
+      } else {
+        window.location.hash = "#home";
+      }
     };
   }
 
@@ -3214,51 +3291,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnClearAllFilters = document.getElementById("btn-clear-all-filters");
   if (btnClearAllFilters) {
     btnClearAllFilters.onclick = () => {
-      // 1. Reset to 30 days
-      currentPodiumTimeframe = "30days";
-
-      // 2. Reset all games (style select)
-      const podiumStyleSelect = document.getElementById("podium-style-select");
-      if (podiumStyleSelect) {
-        podiumStyleSelect.value = "all";
-      }
-      
-      const styleContainer = document.getElementById("multi-select-style-container");
-      if (styleContainer) {
-        const btn = styleContainer.querySelector(".retro-multi-select-btn");
-        const selectedTextEl = btn ? btn.querySelector(".selected-text") : null;
-        if (selectedTextEl) selectedTextEl.textContent = "ALL GAMES";
-        if (btn) btn.classList.remove("active-selection");
-
-        const rows = styleContainer.querySelectorAll(".retro-multi-option-row");
-        rows.forEach(r => {
-          const val = r.getAttribute("data-value");
-          if (val === "all") {
-            r.classList.add("active-selection");
-            const chk = r.querySelector(".style-checkbox");
-            if (chk) chk.checked = true;
-          } else {
-            r.classList.remove("active-selection");
-            const chk = r.querySelector(".style-checkbox");
-            if (chk) chk.checked = false;
-          }
-        });
-      }
-
-      // 3. Reset all players & fighters
-      selectedSearchPlayers.length = 0;
-      selectedSearchFighters.length = 0;
-
-      // 4. Wipe winner/loser filters ("wins only" / "losses only" sections)
-      selectedSearchWinnerPlayer = null;
-      selectedSearchWinnerFighter = null;
-      selectedSearchLoserPlayer = null;
-
-      // 5. Reinitialize search multi-select dropdowns & sync state
-      initSearchDropdowns();
-      updateSearchBadge();
-      
-      // 6. Rerender home
+      clearAllHomeFilters();
       renderHome();
     };
   }

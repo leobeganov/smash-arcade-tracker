@@ -3480,7 +3480,7 @@ body.theme-retro .btn-arcade {
   display: flex !important;
   gap: 30px;
   align-items: stretch;
-  padding: 40px 15px 30px 15px;
+  padding: 20px 15px;
   margin-top: 20px;
   border-top: 1px solid var(--color-border-dark);
   overflow: visible;
@@ -3492,6 +3492,7 @@ body.theme-retro .btn-arcade {
   display: flex;
   align-items: center;
   position: relative;
+  padding: 0 50px; /* Resizes track from edges so markers and labels always stay inside the main box */
 }
 
 .timeline-track-container {
