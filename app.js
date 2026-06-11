@@ -279,9 +279,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const qrImg = document.getElementById("qr-code-img");
     if (!qrImg) return;
 
-    const currentUrl = window.location.href;
+    const targetUrl = "https://smash-arcade-tracker-wine.vercel.app/#home";
     // Set the QR image source using the free, fast qrserver API
-    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&color=000000&bgcolor=ffffff&data=${encodeURIComponent(currentUrl)}`;
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&color=000000&bgcolor=ffffff&data=${encodeURIComponent(targetUrl)}`;
   }
 
 
