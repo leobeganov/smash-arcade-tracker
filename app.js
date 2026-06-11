@@ -15,6 +15,9 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentLeaderboardTimeframe = "alltime";
   let currentPlayerTimeframe = "alltime";
   let currentFighterTimeframe = "alltime";
+  let currentFighterId = null;
+  let currentVariantIndex = 0;
+  let currentFighterStats = null;
   let selectedSearchPlayers = [];
   let selectedSearchFighters = [];
   let selectedSearchWinnerPlayer = null;
@@ -520,6 +523,179 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.hash = "#home";
       };
     }
+  }  // Helper to update active variant display
+  function updateVariantDisplayGlobal() {
+    if (!currentFighterStats) return;
+    const variants = currentFighterStats.fighter.variants || [];
+    const currentVariant = variants[currentVariantIndex];
+    if (!currentVariant) return;
+
+    // Find and update image
+    const matchingAlt = currentFighterStats.fighter.alts ? currentFighterStats.fighter.alts.find(alt => alt.variant === currentVariant.name) : null;
+    const variantImg = matchingAlt ? matchingAlt.image : currentFighterStats.fighter.img;
+    document.getElementById("fighter-profile-img").src = variantImg;
+    
+    // Update Variant Subtitle Badge
+    const variantBadge = document.getElementById("fighter-profile-variant-badge");
+    if (variantBadge) {
+      variantBadge.textContent = `${currentVariant.name.toUpperCase()}${currentVariant.boxing_ring_title ? ' // ' + currentVariant.boxing_ring_title.toUpperCase() : ''}`;
+      variantBadge.style.display = "inline-block";
+    }
+    
+    // Filter and update Backstory tips
+    let backstoryText = "";
+    if (currentFighterStats.fighter.tips) {
+      const relevantTips = currentFighterStats.fighter.tips.filter(t => 
+        t.variant_name && t.variant_name.toLowerCase() === currentVariant.name.toLowerCase()
+      );
+      if (relevantTips.length > 0) {
+        backstoryText = relevantTips.map(t => t.description).join("\n\n");
+      } else {
+        const originTips = currentFighterStats.fighter.tips.filter(t => t.type === "origin" && !t.variant_name);
+        backstoryText = originTips.map(t => t.description).join("\n\n") || currentFighterStats.fighter.bio;
+      }
+    } else {
+      backstoryText = currentFighterStats.fighter.bio;
+    }
+    document.getElementById("fighter-profile-bio").textContent = backstoryText;
+  }
+
+  // ==========================================
+  // Helper to render Switch Button Combos
+  // ==========================================
+  function getSwitchButtonsHtml(moveText) {
+    if (!moveText) return "";
+    const move = moveText.trim().toLowerCase();
+
+    // Helpers to build styled spans
+    const btnDir = (dir) => {
+      const isAny = dir === "✥" || dir.toLowerCase().includes("any");
+      const title = isAny ? "Any Direction" : dir;
+      const displayChar = isAny ? "✥" : dir;
+      const extraClass = isAny ? " btn-dir-any" : "";
+      return `<span class="switch-btn btn-dir${extraClass}" title="${title}">${displayChar}</span>`;
+    };
+    const btnAction = (char, cls, title) => `<span class="switch-btn ${cls}" title="${title || char}">${char}</span>`;
+    const plus = `<span class="switch-plus">+</span>`;
+    const arrow = `<span class="switch-arrow">→</span>`;
+
+    // Grabs, Throws & Pummels
+    if (move.includes("grab") || move.includes("throw") || move.includes("pummel")) {
+      if (move === "grab") {
+        return btnAction("ZR", "btn-trigger", "Grab Button");
+      }
+      if (move.includes("grab attack") || move.includes("pummel")) {
+        return btnAction("ZR", "btn-trigger", "Grab") + arrow + btnAction("A", "btn-a", "Attack");
+      }
+      // Directional Throws
+      let dir = "";
+      if (move.includes("forward") || move.includes("front")) dir = "▶";
+      else if (move.includes("back") || move.includes("backward")) dir = "◀";
+      else if (move.includes("up") || move.includes("upward")) dir = "▲";
+      else if (move.includes("down") || move.includes("downward")) dir = "▼";
+      else if (move.includes("direction") || move.includes("any") || move.includes("choice") || move.includes("throw")) dir = "✥";
+
+      if (dir) {
+        return btnAction("ZR", "btn-trigger", "Grab") + arrow + btnDir(dir);
+      }
+      return btnAction("ZR", "btn-trigger", "Grab");
+    }
+
+    // Special Attacks (B Button)
+    if (move.includes("special")) {
+      let dir = "";
+      if (move.includes("up")) dir = "▲";
+      else if (move.includes("down")) dir = "▼";
+      else if (move.includes("side") || move.includes("forward") || move.includes("backward") || move.includes("back") || move.includes("tilt")) dir = "◀/▶";
+      else if (move.includes("direction") || move.includes("any") || move.includes("choice") || move.includes("stick") || move.includes("joypad") || move.includes("joystick")) dir = "✥";
+
+      let heavy = move.includes("heavy") ? " (HEAVY)" : "";
+
+      let finalHtml = "";
+      if (dir) {
+        finalHtml = btnDir(dir) + plus + btnAction("B", "btn-b", "Special Button");
+      } else {
+        finalHtml = btnAction("B", "btn-b", "Special Button");
+      }
+      if (heavy) {
+        finalHtml += `<span class="btn-modifier">${heavy}</span>`;
+      }
+      return finalHtml;
+    }
+
+    // Smash Attacks (A Button Hard or C-Stick)
+    if (move.includes("smash")) {
+      let dir = "";
+      if (move.includes("up")) dir = "▲";
+      else if (move.includes("down")) dir = "▼";
+      else if (move.includes("side") || move.includes("forward")) dir = "◀/▶";
+      else if (move.includes("direction") || move.includes("any") || move.includes("choice") || move.includes("stick") || move.includes("joypad") || move.includes("joystick")) dir = "✥";
+
+      if (dir) {
+        return btnDir(dir) + plus + btnAction("A", "btn-a", "Attack Button") + `<span class="btn-modifier"> (HARD)</span>`;
+      }
+      return btnAction("A", "btn-a", "Attack Button") + `<span class="btn-modifier"> (HARD)</span>`;
+    }
+
+    // Aerial Attacks (Air + A Button)
+    if (move.includes("air")) {
+      let dir = "";
+      if (move.includes("up")) dir = "▲";
+      else if (move.includes("down")) dir = "▼";
+      else if (move.includes("forward") || move.includes("front")) dir = "▶";
+      else if (move.includes("back")) dir = "◀";
+      else if (move.includes("direction") || move.includes("any") || move.includes("choice") || move.includes("stick") || move.includes("joypad") || move.includes("joystick")) dir = "✥";
+
+      let airBadge = `<span class="btn-modifier btn-air-badge">MIDAIR</span> `;
+      if (dir) {
+        return airBadge + btnDir(dir) + plus + btnAction("A", "btn-a", "Attack Button");
+      }
+      return airBadge + btnAction("A", "btn-a", "Attack Button");
+    }
+
+    // Tilts, Jabs & Ground Attacks
+    if (move.includes("tilt") || move.includes("attack") || move.includes("ground") || move.includes("jab") || move.includes("neutral")) {
+      let dir = "";
+      if (move.includes("up")) dir = "▲";
+      else if (move.includes("down")) dir = "▼";
+      else if (move.includes("side") || move.includes("forward") || move.includes("back") || move.includes("tilt")) dir = "◀/▶";
+      else if (move.includes("direction") || move.includes("any") || move.includes("choice") || move.includes("stick") || move.includes("joypad") || move.includes("joystick")) dir = "✥";
+
+      let isDash = move.includes("dash");
+      let isHeavy = move.includes("heavy") ? " (HEAVY)" : "";
+      let isLight = move.includes("light") ? " (LIGHT)" : "";
+
+      let finalHtml = "";
+      if (isDash) {
+        finalHtml = `<span class="btn-modifier">DASH</span>` + plus + btnAction("A", "btn-a", "Attack Button");
+      } else if (dir) {
+        finalHtml = btnDir(dir) + plus + btnAction("A", "btn-a", "Attack Button");
+      } else {
+        finalHtml = btnAction("A", "btn-a", "Attack Button");
+      }
+
+      if (isHeavy) finalHtml += `<span class="btn-modifier">${isHeavy}</span>`;
+      if (isLight) finalHtml += `<span class="btn-modifier">${isLight}</span>`;
+      return finalHtml;
+    }
+
+    // Final Smash
+    if (move.includes("final smash")) {
+      return btnAction("B", "btn-b", "Special Button") + `<span class="btn-modifier"> (FS METER / BALL)</span>`;
+    }
+
+    // Command-Input Special Mechanics
+    if (move.includes("command")) {
+      return `<span class="btn-modifier">COMMAND INPUT</span>`;
+    }
+
+    // General Directional or Joystick fallbacks
+    if (move.includes("direction") || move.includes("stick") || move.includes("joypad") || move.includes("joystick")) {
+      return btnDir("✥");
+    }
+
+    // Fallback default
+    return `<span class="btn-modifier">${moveText.toUpperCase()}</span>`;
   }
 
 
@@ -557,7 +733,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const stats = await api.getFighterProfile(fighterId, matches);
     if (!stats) return;
 
-    // Set dynamic series background watermark
+    // Track active IDs and assign global stats for variants
+    if (currentFighterId !== fighterId) {
+      currentVariantIndex = 0;
+      currentFighterId = fighterId;
+    }
+    currentFighterStats = stats;
+
+    // Set dynamic series background watermark for entire view
     const backdropEl = document.getElementById("fighter-profile-backdrop");
     if (backdropEl) {
       const seriesIcon = stats.fighter.series && stats.fighter.series.icon ? stats.fighter.series.icon : "";
@@ -570,32 +753,51 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Render Series Brand Badge
-    const seriesContainer = document.getElementById("fighter-profile-series-container");
-    const seriesImg = document.getElementById("fighter-profile-series-img");
-    const seriesName = document.getElementById("fighter-profile-series-name");
-    
-    if (stats.fighter.series) {
-      if (stats.fighter.series.icon) {
-        seriesImg.src = stats.fighter.series.icon;
-        seriesImg.style.display = "block";
+    // Set dynamic series image backdrop specifically behind the character
+    const seriesImgBackdrop = document.getElementById("fighter-series-image-backdrop");
+    if (seriesImgBackdrop) {
+      const seriesIcon = stats.fighter.series && stats.fighter.series.icon ? stats.fighter.series.icon : "";
+      if (seriesIcon) {
+        seriesImgBackdrop.style.backgroundImage = `url('${seriesIcon}')`;
+        seriesImgBackdrop.style.display = "block";
       } else {
-        seriesImg.style.display = "none";
+        seriesImgBackdrop.style.backgroundImage = "none";
+        seriesImgBackdrop.style.display = "none";
       }
-      seriesName.textContent = stats.fighter.series.name.toUpperCase();
-      seriesContainer.style.display = "flex";
-    } else {
-      seriesContainer.style.display = "none";
+    }
+
+    // Update Backstory Series Pill
+    const seriesPill = document.getElementById("fighter-backstory-series-pill");
+    if (seriesPill) {
+      if (stats.fighter.series) {
+        seriesPill.textContent = stats.fighter.series.name.toUpperCase();
+        seriesPill.style.display = "inline-block";
+      } else {
+        seriesPill.style.display = "none";
+      }
     }
 
     // Sidebar Portrait and Backstory
-    document.getElementById("fighter-profile-img").src = stats.fighter.img;
     document.getElementById("fighter-profile-name").textContent = stats.fighter.name;
 
-    // Extract backstory (origin tips) or fallback to standard bio
-    const originTips = stats.fighter.tips ? stats.fighter.tips.filter(t => t.type === "origin") : [];
-    const backstoryText = originTips.map(t => t.description).join("\n\n") || stats.fighter.bio;
-    document.getElementById("fighter-profile-bio").textContent = backstoryText;
+    // Handle variant arrow button visibility and initial state
+    const variants = stats.fighter.variants || [];
+    const btnPrev = document.getElementById("btn-variant-prev");
+    const btnNext = document.getElementById("btn-variant-next");
+    const variantBadge = document.getElementById("fighter-profile-variant-badge");
+
+    if (variants.length > 1) {
+      if (btnPrev) btnPrev.style.display = "block";
+      if (btnNext) btnNext.style.display = "block";
+      updateVariantDisplayGlobal();
+    } else {
+      if (btnPrev) btnPrev.style.display = "none";
+      if (btnNext) btnNext.style.display = "none";
+      if (variantBadge) variantBadge.style.display = "none";
+      document.getElementById("fighter-profile-img").src = stats.fighter.img;
+      const originTips = stats.fighter.tips ? stats.fighter.tips.filter(t => t.type === "origin" && !t.variant_name) : [];
+      document.getElementById("fighter-profile-bio").textContent = originTips.map(t => t.description).join("\n\n") || stats.fighter.bio;
+    }
 
     // Stat grids
     document.getElementById("fighter-stat-wins").textContent = stats.adjustedWins;
@@ -650,7 +852,7 @@ document.addEventListener("DOMContentLoaded", () => {
       topPlayersContainer.innerHTML = `<div style="font-family: var(--font-stats); opacity: 0.6; font-size: 13px;">NO BATTLE RECORD</div>`;
     }
 
-    // Render Moves Registry List
+    // Render Moves Library List
     const movesContainer = document.getElementById("fighter-moves-list");
     movesContainer.innerHTML = "";
 
@@ -669,68 +871,99 @@ document.addEventListener("DOMContentLoaded", () => {
     const sortedCategories = [
       "Standard Ground Attacks",
       "Aerial Attacks",
-      "Smash Attacks",
-      "Throws & Grabs",
       "Standard Special Moves",
-      "Special Variant Combinations"
+      "Smash Attacks",
+      "Special Variant Combinations",
+      "Throws & Grabs"
     ];
 
+    // Find any other categories not in sortedCategories
+    const allCategoriesInTips = Object.keys(categories);
+    const extraCategories = allCategoriesInTips.filter(cat => !sortedCategories.includes(cat));
+    const finalCategoryOrder = [...sortedCategories, ...extraCategories];
+
     let hasAnyMoves = false;
-    sortedCategories.forEach(catName => {
+
+    // Create the unified retro table
+    const table = document.createElement("table");
+    table.className = "moves-table-retro";
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th style="width: 25%; text-align: left;">INPUT COMMAND</th>
+          <th style="width: 25%; text-align: left;">MOVE NAME</th>
+          <th style="width: 50%; text-align: left;">EFFECT & TACTICAL ADVICE</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    `;
+    const tbody = table.querySelector("tbody");
+
+    finalCategoryOrder.forEach(catName => {
       const moves = categories[catName];
       if (!moves || moves.length === 0) return;
       hasAnyMoves = true;
 
-      const catBlock = document.createElement("div");
-      catBlock.className = "moves-category-group";
-      catBlock.style.display = "flex";
-      catBlock.style.flexDirection = "column";
-      catBlock.style.gap = "12px";
-
-      catBlock.innerHTML = `
-        <h4 class="moves-category-title" style="font-family: var(--font-arcade); font-size: 11px; color: var(--color-neon-yellow); margin: 15px 0 5px 0; letter-spacing: 0.5px; border-left: 3px solid var(--color-neon-cyan); padding-left: 8px;">${catName.toUpperCase()}</h4>
-        <div class="moves-grid" style="display: grid; grid-template-columns: 1fr; gap: 12px;">
-        </div>
+      // Add Category Row Header
+      const headerRow = document.createElement("tr");
+      headerRow.className = "category-header-row";
+      headerRow.innerHTML = `
+        <td colspan="3">${catName.toUpperCase()}</td>
       `;
+      tbody.appendChild(headerRow);
 
-      const grid = catBlock.querySelector(".moves-grid");
-
+      // Add Move Rows
       moves.forEach(m => {
-        const moveCard = document.createElement("div");
-        moveCard.className = "move-card-retro";
-        moveCard.style.background = "rgba(0, 10, 20, 0.45)";
-        moveCard.style.border = "1px solid rgba(0, 240, 255, 0.2)";
-        moveCard.style.padding = "15px";
-        moveCard.style.display = "flex";
-        moveCard.style.flexDirection = "column";
-        moveCard.style.gap = "8px";
-        moveCard.style.transition = "border-color 0.2s ease, box-shadow 0.2s ease";
+        const moveRow = document.createElement("tr");
+        moveRow.className = "move-row";
 
-        moveCard.innerHTML = `
-          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-            <span class="move-name text-glow-cyan" style="font-family: var(--font-header); font-size: 13px; color: #fff; text-shadow: 0 0 5px rgba(0, 240, 255, 0.4);">${m.name}</span>
-            <span class="move-command-badge" style="font-family: var(--font-arcade); font-size: 9px; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--color-neon-cyan); color: var(--color-neon-cyan); padding: 4px 10px; border-radius: 4px; box-shadow: 0 0 5px rgba(0, 240, 255, 0.2);">${m.move.toUpperCase()}</span>
-          </div>
-          <p class="move-desc" style="font-family: monospace; font-size: 12px; color: #c4c6d0; opacity: 0.9; margin: 0; line-height: 1.5; text-align: left;">${m.description}</p>
+        // Parse buttons HTML
+        const buttonsHtml = getSwitchButtonsHtml(m.move);
+
+        // Parse nested sub-tips
+        let subtipsHtml = "";
+        if (m.extra_info && m.extra_info.length > 0) {
+          subtipsHtml += `<div class="move-subtips-container">`;
+          m.extra_info.forEach(sub => {
+            const lvlClass = (sub.level || "").toLowerCase();
+            subtipsHtml += `
+              <div class="move-subtip-item">
+                <div class="subtip-header">
+                  <span class="subtip-level-badge ${lvlClass}">${(sub.level || "TIPS").toUpperCase()}</span>
+                  <span class="subtip-name">${sub.name}</span>
+                </div>
+                <p class="subtip-desc">${sub.description}</p>
+              </div>
+            `;
+          });
+          subtipsHtml += `</div>`;
+        }
+
+        moveRow.innerHTML = `
+          <td>
+            <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+              ${buttonsHtml}
+            </div>
+          </td>
+          <td>
+            <span class="move-name-text text-glow-cyan" style="font-family: var(--font-header); font-size: 13px; color: #fff; text-shadow: 0 0 5px rgba(0, 240, 255, 0.4); text-transform: uppercase;">${m.name}</span>
+          </td>
+          <td>
+            <div style="display: flex; flex-direction: column; text-align: left;">
+              <p class="move-desc" style="font-family: monospace; font-size: 12px; color: #c4c6d0; opacity: 0.95; margin: 0; line-height: 1.5;">${m.description}</p>
+              ${subtipsHtml}
+            </div>
+          </td>
         `;
 
-        moveCard.onmouseover = () => {
-          moveCard.style.borderColor = "var(--color-neon-cyan)";
-          moveCard.style.boxShadow = "0 0 10px rgba(0, 240, 255, 0.2)";
-        };
-        moveCard.onmouseout = () => {
-          moveCard.style.borderColor = "rgba(0, 240, 255, 0.2)";
-          moveCard.style.boxShadow = "none";
-        };
-
-        grid.appendChild(moveCard);
+        tbody.appendChild(moveRow);
       });
-
-      movesContainer.appendChild(catBlock);
     });
 
-    if (!hasAnyMoves) {
-      movesContainer.innerHTML = `<div style="font-family: var(--font-stats); opacity: 0.6; font-size: 13px;">NO MOVES REGISTERED FOR THIS FIGHTER</div>`;
+    if (hasAnyMoves) {
+      movesContainer.appendChild(table);
+    } else {
+      movesContainer.innerHTML = `<div style="font-family: var(--font-stats); opacity: 0.6; font-size: 13px; text-align: center; padding: 20px;">NO MOVES REGISTERED FOR THIS FIGHTER</div>`;
     }
 
     // See all matches button integration
@@ -1533,6 +1766,29 @@ document.addEventListener("DOMContentLoaded", () => {
       if (parts[0] === "#fighter" && parts[1]) {
         renderFighterProfile(parts[1]);
       }
+    });
+  }
+
+  // Variant Navigation Click Listeners
+  const btnPrev = document.getElementById("btn-variant-prev");
+  if (btnPrev) {
+    btnPrev.addEventListener("click", () => {
+      if (!currentFighterStats) return;
+      const variants = currentFighterStats.fighter.variants || [];
+      if (variants.length <= 1) return;
+      currentVariantIndex = (currentVariantIndex - 1 + variants.length) % variants.length;
+      updateVariantDisplayGlobal();
+    });
+  }
+
+  const btnNext = document.getElementById("btn-variant-next");
+  if (btnNext) {
+    btnNext.addEventListener("click", () => {
+      if (!currentFighterStats) return;
+      const variants = currentFighterStats.fighter.variants || [];
+      if (variants.length <= 1) return;
+      currentVariantIndex = (currentVariantIndex + 1) % variants.length;
+      updateVariantDisplayGlobal();
     });
   }
 

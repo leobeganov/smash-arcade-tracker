@@ -831,18 +831,34 @@ body {
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
-  opacity: 0.12;
+  opacity: 0.06;
   pointer-events: none;
   z-index: 0;
   transition: background-image 0.4s ease-in-out;
-  filter: grayscale(0.5) contrast(1.2);
+  filter: invert(1) grayscale(0.5) contrast(1.2);
+}
+
+.fighter-series-image-backdrop {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 320px;
+  height: 320px;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 1;
+  filter: invert(1) drop-shadow(0 0 10px rgba(0, 240, 255, 0.5));
 }
 
 #fighter-profile-view .fighter-view-layout {
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: 1.2fr 2fr;
+  grid-template-columns: 360px 1fr;
   gap: 40px;
   padding: 20px;
   align-items: start;
@@ -852,6 +868,237 @@ body {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+/* Sidebar Stats Shifting and Adaptive Formatting */
+#fighter-profile-view .profile-sidebar .stats-grid-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+}
+
+#fighter-profile-view .profile-sidebar .profile-meta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+}
+
+#fighter-profile-view .profile-sidebar .stat-cell-retro {
+  background: rgba(0, 10, 20, 0.45);
+  border: 1px solid var(--color-neon-cyan);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#fighter-profile-view .profile-sidebar .meta-card {
+  padding: 15px 20px !important;
+}
+
+/* Nintendo Switch Controller Button Badges */
+.switch-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-family: var(--font-arcade), monospace;
+  font-size: 11px;
+  font-weight: bold;
+  background: rgba(0, 10, 20, 0.8);
+  border: 1.5px solid var(--color-neon-cyan);
+  color: var(--color-neon-cyan);
+  box-shadow: 0 0 5px rgba(0, 240, 255, 0.3);
+  vertical-align: middle;
+  user-select: none;
+}
+
+.switch-btn.btn-dir {
+  border-color: var(--color-neon-yellow);
+  color: var(--color-neon-yellow);
+  box-shadow: 0 0 5px rgba(255, 230, 0, 0.3);
+}
+
+.switch-btn.btn-dir.btn-dir-any {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.switch-btn.btn-a {
+  border-color: #ff0055;
+  color: #ff0055;
+  box-shadow: 0 0 5px rgba(255, 0, 85, 0.3);
+}
+
+.switch-btn.btn-b {
+  border-color: #00ff66;
+  color: #00ff66;
+  box-shadow: 0 0 5px rgba(0, 255, 102, 0.3);
+}
+
+.switch-btn.btn-trigger {
+  width: auto;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 4px;
+  font-size: 9px;
+  border-color: #bf55ec;
+  color: #bf55ec;
+  box-shadow: 0 0 5px rgba(191, 85, 236, 0.3);
+}
+
+.switch-plus, .switch-arrow {
+  margin: 0 5px;
+  color: rgba(255, 255, 255, 0.4);
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: bold;
+  vertical-align: middle;
+}
+
+.btn-modifier {
+  font-family: var(--font-arcade);
+  font-size: 8px;
+  color: rgba(0, 240, 255, 0.6);
+  background: rgba(0, 240, 255, 0.05);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  padding: 1px 5px;
+  border-radius: 2px;
+  margin-left: 5px;
+  vertical-align: middle;
+  letter-spacing: 0.5px;
+  display: inline-block;
+}
+
+.btn-air-badge {
+  color: var(--color-neon-yellow);
+  background: rgba(255, 230, 0, 0.05);
+  border-color: rgba(255, 230, 0, 0.2);
+  margin-right: 5px;
+  margin-left: 0;
+}
+
+/* Unified Retro Moves Table */
+.moves-table-retro {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-family: monospace;
+  background: rgba(0, 10, 20, 0.2);
+}
+
+.moves-table-retro th {
+  font-family: var(--font-arcade);
+  font-size: 11px;
+  color: var(--color-neon-cyan);
+  text-shadow: 0 0 5px rgba(0, 240, 255, 0.5);
+  text-align: left;
+  padding: 12px 15px;
+  border-bottom: 2px solid var(--color-neon-cyan);
+  letter-spacing: 1px;
+  background: rgba(0, 240, 255, 0.05);
+}
+
+.moves-table-retro td {
+  padding: 15px;
+  vertical-align: top;
+  border-bottom: 1px dotted rgba(0, 240, 255, 0.2);
+}
+
+.moves-table-retro tr.category-header-row td {
+  background: rgba(0, 240, 255, 0.08);
+  font-family: var(--font-arcade);
+  color: var(--color-neon-yellow);
+  font-size: 11px;
+  letter-spacing: 1px;
+  padding: 10px 15px;
+  border-left: 4px solid var(--color-neon-cyan);
+  text-shadow: 0 0 5px rgba(255, 230, 0, 0.4);
+  border-bottom: 1px solid rgba(0, 240, 255, 0.3);
+}
+
+.moves-table-retro tr.move-row {
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.moves-table-retro tr.move-row:hover {
+  background-color: rgba(0, 240, 255, 0.04);
+}
+
+/* Moves Library Sub-tips List */
+.move-subtips-container {
+  margin-top: 10px;
+  border-top: 1px dashed rgba(0, 240, 255, 0.15);
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.move-subtip-item {
+  background: rgba(0, 240, 255, 0.02);
+  border-left: 2px solid var(--color-neon-cyan);
+  padding: 8px 12px;
+  border-radius: 0;
+}
+
+.subtip-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.subtip-level-badge {
+  font-family: var(--font-arcade);
+  font-size: 7px;
+  padding: 1px 4px;
+  border-radius: 2px;
+  border: 1px solid currentColor;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  line-height: 1;
+}
+
+.subtip-level-badge.beginner {
+  color: #00ff66;
+  background: rgba(0, 255, 102, 0.05);
+}
+
+.subtip-level-badge.intermediate {
+  color: #ffe600;
+  background: rgba(255, 230, 0, 0.05);
+}
+
+.subtip-level-badge.advanced {
+  color: #ff0055;
+  background: rgba(255, 0, 85, 0.05);
+}
+
+.subtip-name {
+  font-family: var(--font-header), sans-serif;
+  font-size: 11px;
+  color: #fff;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.subtip-desc {
+  font-family: monospace;
+  font-size: 11px;
+  color: #9da0aa;
+  line-height: 1.4;
+  margin: 0;
+  text-align: left;
 }
 
 #fighter-profile-view .fighter-card-box {
@@ -867,16 +1114,17 @@ body {
   position: relative;
 }
 
-#fighter-profile-view .fighter-card-box::before {
-  content: "FIGHTER-SPEC // 01";
-  position: absolute;
-  top: 6px;
-  right: 10px;
-  font-family: monospace;
-  font-size: 9px;
-  color: var(--color-neon-cyan);
-  opacity: 0.7;
-  letter-spacing: 1px;
+
+
+.variant-arrow-btn {
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.variant-arrow-btn:hover {
+  color: var(--color-neon-yellow) !important;
+  text-shadow: 0 0 12px var(--color-neon-yellow) !important;
+  transform: scale(1.3);
 }
 
 #fighter-profile-view .fighter-card-img {
@@ -2802,6 +3050,25 @@ body.theme-retro .btn-arcade {
   box-shadow: 0 0 20px var(--color-neon-yellow), inset 0 0 10px rgba(255, 230, 0, 0.3) !important;
 }
 
+/* Maintain Team Color Borders even when Filter/Hover Highlighted */
+.history-player-row.team-red.filter-highlighted,
+.history-player-row.team-red.hover-highlighted {
+  border-left-color: #ff4136 !important;
+}
+.history-player-row.team-blue.filter-highlighted,
+.history-player-row.team-blue.hover-highlighted {
+  border-left-color: #0074d9 !important;
+}
+.history-player-row.team-green.filter-highlighted,
+.history-player-row.team-green.hover-highlighted {
+  border-left-color: #2ecc40 !important;
+}
+.history-player-row.team-yellow.filter-highlighted,
+.history-player-row.team-yellow.hover-highlighted {
+  border-left-color: #ffdc00 !important;
+}
+
+
 /* Elevate the timeline elements when matching card element is hovered */
 .timeline-marker.hover-highlighted {
   z-index: 120 !important;
@@ -2844,32 +3111,9 @@ body.theme-retro .btn-arcade {
   box-shadow: 0 0 15px rgba(255, 0, 127, 0.6) !important;
 }
 
-/* Custom Profile page Timeframe override styles */
-#player-timeframe-filters .toggle-btn.active {
-  color: #fff !important;
-  background-color: var(--color-neon-magenta) !important;
-  box-shadow: 0 0 10px var(--color-neon-magenta) !important;
-}
 
-#player-timeframe-filters .toggle-btn:not(.active):hover {
-  color: var(--color-neon-magenta) !important;
-  text-shadow: 0 0 5px var(--color-neon-magenta) !important;
-  background-color: rgba(255, 0, 128, 0.1) !important;
-}
 
-#fighter-timeframe-filters .toggle-btn.active {
-  color: #000 !important;
-  background-color: var(--color-neon-cyan) !important;
-  box-shadow: 0 0 10px var(--color-neon-cyan) !important;
-}
-
-#fighter-timeframe-filters .toggle-btn:not(.active):hover {
-  color: var(--color-neon-cyan) !important;
-  text-shadow: 0 0 5px var(--color-neon-cyan) !important;
-  background-color: rgba(0, 240, 255, 0.1) !important;
-}
-
-/* Moves Registry layout and interactive card styling */
+/* Moves Library layout and interactive card styling */
 .moves-list-wrapper {
   margin-top: 15px;
 }
