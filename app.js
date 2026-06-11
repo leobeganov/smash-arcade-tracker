@@ -2365,18 +2365,22 @@ document.addEventListener("DOMContentLoaded", () => {
     // Show more placements button
     const btnShowMorePlacements = document.getElementById("btn-show-more-placements");
     if (btnShowMorePlacements) {
+      console.log("[ShowMore Placements] stats.players:", stats.players ? stats.players.length : 0, "limit:", currentInsightsPlacementLimit);
       if (stats.players && stats.players.length > currentInsightsPlacementLimit) {
         btnShowMorePlacements.style.display = "inline-block";
         btnShowMorePlacements.onclick = () => {
           currentInsightsPlacementLimit += 5;
+          console.log("[ShowMore Placements] Button clicked! Increasing limit to:", currentInsightsPlacementLimit);
           if (window.Charts) {
             window.Charts.renderPlayerPlacements("outcomes-stacked-bar-container", stats.players, currentInsightsPlacementLimit);
           }
           if (stats.players.length <= currentInsightsPlacementLimit) {
+            console.log("[ShowMore Placements] Reached the end of players list. Hiding button.");
             btnShowMorePlacements.style.display = "none";
           }
         };
       } else {
+        console.log("[ShowMore Placements] stats.players length <= limit. Hiding button.");
         btnShowMorePlacements.style.display = "none";
       }
     }

@@ -4459,7 +4459,6 @@ body.theme-retro .btn-arcade {
     max-width: 100% !important;
     min-width: 0 !important;
     box-sizing: border-box !important;
-    overflow: hidden !important;
   }
 
   .tel-kpi-card {
