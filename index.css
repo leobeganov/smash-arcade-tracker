@@ -439,6 +439,7 @@ body {
   max-width: 1125px; /* Scaled from 900px */
   height: 480px;     /* Redesigned to fit completely within desktop viewports */
   position: relative;
+  margin-top: 40px;  /* Ensure the gold crown on first place has plenty of headroom and does not get cropped under the sticky header */
 }
 
 .podium-column {
@@ -4154,7 +4155,7 @@ body.theme-retro .btn-arcade {
   /* 5. Olympic 3D Podium proportional scaling */
   .podium-stage {
     height: 400px;
-    margin-top: 10px;
+    margin-top: 30px;
     margin-bottom: 10px;
     gap: 10px;
   }
@@ -4657,7 +4658,7 @@ body.theme-retro .btn-arcade {
   /* 1. Olympic 3D Podium proportional scaling on small screens */
   .podium-stage {
     height: 300px;
-    margin-top: 15px;
+    margin-top: 25px;
   }
 
   .podium-fighter-container {

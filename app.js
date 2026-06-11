@@ -387,6 +387,32 @@ document.addEventListener("DOMContentLoaded", () => {
     // Sync dynamic QR code link
     initQrCode();
 
+    // Dynamically update total player count inside the welcome accordion
+    try {
+      const matches = await window.Database.getMatchesAsync();
+      const playersSet = new Set();
+      if (matches && Array.isArray(matches)) {
+        matches.forEach(m => {
+          if (m.players && Array.isArray(m.players)) {
+            m.players.forEach(p => {
+              if (p.playerName) {
+                const name = p.playerName.trim();
+                if (name) {
+                  playersSet.add(name.toLowerCase());
+                }
+              }
+            });
+          }
+        });
+      }
+      const welcomeCountEl = document.getElementById("welcome-ferocian-count");
+      if (welcomeCountEl) {
+        welcomeCountEl.textContent = playersSet.size;
+      }
+    } catch (err) {
+      console.error("Error setting welcome player count:", err);
+    }
+
     const podiumStage = document.querySelector(".podium-stage");
     const matchesList = document.getElementById("history-matches-list");
     showSectionLoader(podiumStage, "yellow");
