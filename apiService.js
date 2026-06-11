@@ -79,7 +79,8 @@ function getFighterDetails(fighterNameOrId) {
         icon: foundRoster.icon,
         series: foundRoster.series,
         tips: foundRoster.tips,
-        variants: foundRoster.variants
+        variants: foundRoster.variants,
+        alts: foundRoster.alts
       };
     }
   }

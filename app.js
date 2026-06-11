@@ -578,10 +578,15 @@ document.addEventListener("DOMContentLoaded", () => {
       if (isAny) {
         svgHtml = `
           <svg class="joypad-svg joypad-any" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="10" y1="14" x2="16" y2="8" />
-            <circle cx="16" cy="8" r="3" fill="currentColor" />
-            <path d="M 6,12 A 6,6 0 0,0 12,18" stroke-width="1.8" />
-            <path d="M 9,18 L 12,18 L 12,15" stroke-width="1.8" />
+            <line x1="12" y1="12" x2="12" y2="5" />
+            <line x1="12" y1="12" x2="12" y2="19" />
+            <line x1="12" y1="12" x2="4" y2="12" />
+            <line x1="12" y1="12" x2="20" y2="12" />
+            <path d="M 9,8 L 12,5 L 15,8" stroke-width="1.8" />
+            <path d="M 9,16 L 12,19 L 15,16" stroke-width="1.8" />
+            <path d="M 7,9 L 4,12 L 7,15" stroke-width="1.8" />
+            <path d="M 17,9 L 20,12 L 17,15" stroke-width="1.8" />
+            <circle cx="12" cy="12" r="3" fill="currentColor" />
           </svg>
         `;
       } else if (dir === "▲") {
