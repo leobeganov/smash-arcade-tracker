@@ -170,7 +170,7 @@ const POC_SEED_MATCHES = [
   },
   {
     id: "match-seed-11",
-    timestamp: Date.now() - 1000 * 60 * 60 * 144, // 6 days ago
+    timestamp: new Date('2026-06-11T16:25:00').getTime(),
     screenType: "EndScreen",
     stage: "Small Battlefield",
     rules: "3 Stock, 5:00",
@@ -181,6 +181,19 @@ const POC_SEED_MATCHES = [
       { playerNumber: "P2", playerName: "Leo", character: "Joker", placement: 1, kos: 2, falls: -2, sds: 0, outAt: "---", teamColor: "Red" },
       { playerNumber: "P3", playerName: "Polo", character: "Ness", placement: 2, kos: 1, falls: -3, sds: 0, outAt: "4:15", teamColor: "Blue" },
       { playerNumber: "P4", playerName: "Jack", character: "Donkey Kong", placement: 2, kos: 0, falls: -3, sds: -1, outAt: "3:20", teamColor: "Blue" }
+    ]
+  },
+  {
+    id: "match-seed-sudden-death-1",
+    timestamp: new Date('2026-06-11T18:30:00').getTime(),
+    screenType: "EndScreen",
+    stage: "Battlefield",
+    rules: "3 Stock, 5:00",
+    gameMode: "1v1",
+    gameStyle: "1v1",
+    players: [
+      { playerNumber: "P1", playerName: "Matt", character: "Pikachu", placement: 1, kos: 3, falls: -2, sds: 0, outAt: "---", teamColor: "None", damageDealt: 280, damageTaken: 220 },
+      { playerNumber: "P2", playerName: "Leo", character: "Joker", placement: 2, kos: 2, falls: -2, sds: 0, outAt: "---", teamColor: "None", damageDealt: 215, damageTaken: 275 }
     ]
   },
   {
@@ -1010,7 +1023,43 @@ const Database = {
       return this.resetToSeeds();
     }
     try {
-      return JSON.parse(matchesJson).sort((a, b) => b.timestamp - a.timestamp);
+      let matches = JSON.parse(matchesJson);
+      let updated = false;
+
+      // Ensure match-seed-11 occurs on June 11th, 2026
+      const targetTime11 = new Date('2026-06-11T16:25:00').getTime();
+      const m11 = matches.find(m => m.id === "match-seed-11");
+      if (m11 && m11.timestamp !== targetTime11) {
+        m11.timestamp = targetTime11;
+        updated = true;
+      }
+
+      // Ensure the new Sudden Death match is present
+      const suddenDeathId = "match-seed-sudden-death-1";
+      const hasSuddenDeath = matches.some(m => m.id === suddenDeathId);
+      if (!hasSuddenDeath) {
+        const sdMatch = {
+          id: suddenDeathId,
+          timestamp: new Date('2026-06-11T18:30:00').getTime(),
+          screenType: "EndScreen",
+          stage: "Battlefield",
+          rules: "3 Stock, 5:00",
+          gameMode: "1v1",
+          gameStyle: "1v1",
+          players: [
+            { playerNumber: "P1", playerName: "Matt", character: "Pikachu", placement: 1, kos: 3, falls: -2, sds: 0, outAt: "---", teamColor: "None", damageDealt: 280, damageTaken: 220 },
+            { playerNumber: "P2", playerName: "Leo", character: "Joker", placement: 2, kos: 2, falls: -2, sds: 0, outAt: "---", teamColor: "None", damageDealt: 215, damageTaken: 275 }
+          ]
+        };
+        matches.push(sdMatch);
+        updated = true;
+      }
+
+      if (updated) {
+        this.saveMatches(matches);
+      }
+
+      return matches.sort((a, b) => b.timestamp - a.timestamp);
     } catch (e) {
       console.error('Failed to parse matches from localStorage', e);
       return [];
