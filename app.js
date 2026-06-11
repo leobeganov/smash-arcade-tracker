@@ -33,6 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentInsightsTimeframe = "alltime";
   let currentInsightsMatchType = "all";
   let currentFighterId = null;
+  let currentProfilePlayerId = null;
   let currentVariantIndex = 0;
   let currentFighterStats = null;
   let selectedSearchPlayers = [];
@@ -710,7 +711,30 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     document.getElementById("player-profile-name").textContent = stats.player.name;
 
-    // Stat grids
+    // Profile metadata panel initialization & Last Played calculation
+    const isNewPlayer = (playerId.toLowerCase() !== (currentProfilePlayerId || "").toLowerCase());
+    currentProfilePlayerId = playerId;
+
+    if (isNewPlayer) {
+      const profileNameInput = document.getElementById("profile-input-name");
+      const profileSlackInput = document.getElementById("profile-input-slack");
+      const profileTeamInput = document.getElementById("profile-input-team");
+      if (profileNameInput) profileNameInput.value = stats.player.name;
+      if (profileSlackInput) profileSlackInput.value = "";
+      if (profileTeamInput) profileTeamInput.value = "";
+    }
+
+    const playerAllMatches = allMatchesForPlayerName.filter(m => m.players && m.players.some(p => p.playerName.toLowerCase() === playerName.toLowerCase()));
+    let lastPlayedStr = "Never";
+    if (playerAllMatches.length > 0) {
+      playerAllMatches.sort((a, b) => b.timestamp - a.timestamp);
+      const latestMatch = playerAllMatches[0];
+      lastPlayedStr = `${new Date(latestMatch.timestamp).toLocaleDateString()} ${new Date(latestMatch.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+    }
+    const lastPlayedEl = document.getElementById("profile-text-lastplayed");
+    if (lastPlayedEl) {
+      lastPlayedEl.textContent = lastPlayedStr;
+    }
     document.getElementById("player-stat-games").textContent = stats.totalMatches;
     document.getElementById("player-stat-wins").textContent = stats.wins;
     document.getElementById("player-stat-wins-raw").textContent = `RATING: ${stats.adjustedWins}`;
@@ -2165,7 +2189,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Trigger custom html/css dynamic renderings
     renderMostPlayedFighters("most-played-fighters-container", stats.characters, matches);
     renderFightersByPlayers("most-popular-fighters-container", stats.characters, matches);
-    renderPlayerCombatOutcomes("player-combat-outcomes-container", stats.players);
     // Initialize timeline multi-select filters dynamically
     const allStats = await window.Database.getStatsAsync();
     const playerNames = allStats.players.map(p => p.name).sort();

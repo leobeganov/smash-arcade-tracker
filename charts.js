@@ -172,8 +172,10 @@ const Charts = {
       return;
     }
 
-    // Limit to top 5 players
-    const topPlayers = [...playersData].slice(0, 5);
+    // Sort by win rate (descending) and games (descending), limit to top 5 players
+    const topPlayers = [...playersData]
+      .sort((a, b) => b.winRate - a.winRate || b.games - a.games)
+      .slice(0, 5);
 
     let html = '<div class="bar-chart-container">';
 
@@ -321,11 +323,16 @@ const Charts = {
     }
 
     const maxVal = Math.max(...bins);
-    const yMax = maxVal > 0 ? maxVal : 5; // default scale if no matches
+    let step = 5;
+    if (maxVal > 25) {
+      const rawStep = maxVal / 4;
+      step = Math.ceil(rawStep / 5) * 5;
+    }
+    const yMax = Math.ceil(maxVal / step) * step || 5;
 
     const width = 1000;
     const height = 250;
-    const padding = { top: 30, right: 30, bottom: 40, left: 50 };
+    const padding = { top: 30, right: 30, bottom: 40, left: 70 };
     const chartWidth = width - padding.left - padding.right;
     const chartHeight = height - padding.top - padding.bottom;
 
@@ -348,27 +355,30 @@ const Charts = {
     for (let h = 0; h <= 10; h++) {
       const idx = h * 6;
       const x = padding.left + (idx / 60) * chartWidth;
-      const hourStr = String(8 + h).padStart(2, '0') + ':00';
+      const hour24 = 8 + h;
+      const ampm = hour24 >= 12 ? 'PM' : 'AM';
+      let hour12 = hour24 % 12;
+      if (hour12 === 0) hour12 = 12;
+      const hourStr = `${hour12}:00 ${ampm}`;
       
       gridLinesHtml += `
         <line x1="${x}" y1="${padding.top}" x2="${x}" y2="${padding.top + chartHeight}" stroke="rgba(255, 255, 255, 0.08)" stroke-dasharray="3 3" />
-        <text x="${x}" y="${padding.top + chartHeight + 20}" text-anchor="middle" fill="#8a8d9a" font-size="10px" font-family="var(--font-arcade)">${hourStr}</text>
+        <text x="${x}" y="${padding.top + chartHeight + 20}" text-anchor="middle" fill="#8a8d9a" font-size="8.5px" font-family="var(--font-arcade)">${hourStr}</text>
       `;
     }
 
     // Y Axis labels and grid lines (horizontal grid)
     let yGridHtml = "";
-    const yTicks = 4;
-    for (let i = 0; i <= yTicks; i++) {
-      const ratio = i / yTicks;
+    for (let val = 0; val <= yMax; val += step) {
+      const ratio = val / yMax;
       const y = padding.top + chartHeight - ratio * chartHeight;
-      const val = Math.round(ratio * yMax);
       
       yGridHtml += `
         <line x1="${padding.left}" y1="${y}" x2="${padding.left + chartWidth}" y2="${y}" stroke="rgba(255, 255, 255, 0.08)" />
-        <text x="${padding.left - 10}" y="${y + 3}" text-anchor="end" fill="#8a8d9a" font-size="10px" font-family="var(--font-stats)">${val}</text>
+        <text x="${padding.left - 12}" y="${y + 3}" text-anchor="end" fill="#8a8d9a" font-size="10px" font-family="var(--font-stats)">${val}</text>
       `;
     }
+
 
     // Outer container wrapper HTML
     let containerHtml = `
@@ -390,6 +400,9 @@ const Charts = {
             ${gridLinesHtml}
             ${yGridHtml}
           </g>
+
+          <!-- Y-axis Heading: Matches -->
+          <text x="20" y="${padding.top + chartHeight / 2}" transform="rotate(-90, 20, ${padding.top + chartHeight / 2})" text-anchor="middle" fill="#8a8d9a" font-size="8.5px" font-family="var(--font-arcade)" letter-spacing="1.5px">MATCHES</text>
 
           <!-- Filled area under path -->
           ${matchedInWindow > 0 ? `<path d="${areaD}" fill="url(#peak-area-grad)" style="pointer-events: none;" />` : ''}
