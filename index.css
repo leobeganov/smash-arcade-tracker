@@ -1902,6 +1902,25 @@ body.theme-retro .btn-arcade {
   transform: translateX(3px);
 }
 
+#nav-tab-fighters {
+  border: 3px outset rgba(255, 230, 0, 0.4);
+  color: #a3a6b5;
+  box-shadow: inset 0 0 5px rgba(255, 230, 0, 0.1);
+}
+
+#nav-tab-fighters .btn-nav-decor {
+  color: var(--color-neon-yellow);
+}
+
+#nav-tab-fighters:hover,
+#nav-tab-fighters.active {
+  border: 3px outset var(--color-neon-yellow);
+  background-color: rgba(255, 230, 0, 0.1);
+  color: #fff;
+  box-shadow: 0 0 15px rgba(255, 230, 0, 0.4), inset 0 0 10px rgba(255, 230, 0, 0.2);
+  text-shadow: 0 0 8px rgba(255, 230, 0, 0.8);
+}
+
 #nav-tab-leaderboard {
   border: 3px outset rgba(0, 240, 255, 0.4);
   color: #a3a6b5;
@@ -3769,5 +3788,9 @@ body.theme-retro .btn-arcade {
   padding: 2px 6px;
   border-radius: 3px;
   text-shadow: 0 0 4px rgba(255, 230, 0, 0.2);
+}
+
+#fighters-search-box {
+  padding-left: 35px !important;
 }
 
