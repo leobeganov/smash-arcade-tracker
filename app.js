@@ -569,11 +569,68 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Helpers to build styled spans
     const btnDir = (dir) => {
-      const isAny = dir === "✥" || dir.toLowerCase().includes("any");
+      const lowerDir = dir.toLowerCase();
+      const isAny = dir === "✥" || lowerDir.includes("any") || lowerDir.includes("direction");
       const title = isAny ? "Any Direction" : dir;
-      const displayChar = isAny ? "✥" : dir;
       const extraClass = isAny ? " btn-dir-any" : "";
-      return `<span class="switch-btn btn-dir${extraClass}" title="${title}">${displayChar}</span>`;
+      
+      let svgHtml = "";
+      if (isAny) {
+        svgHtml = `
+          <svg class="joypad-svg joypad-any" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="10" y1="14" x2="16" y2="8" />
+            <circle cx="16" cy="8" r="3" fill="currentColor" />
+            <path d="M 6,12 A 6,6 0 0,0 12,18" stroke-width="1.8" />
+            <path d="M 9,18 L 12,18 L 12,15" stroke-width="1.8" />
+          </svg>
+        `;
+      } else if (dir === "▲") {
+        svgHtml = `
+          <svg class="joypad-svg joypad-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="15" x2="12" y2="7" />
+            <circle cx="12" cy="7" r="3" fill="currentColor" />
+            <path d="M 9,10 L 12,7 L 15,10" stroke-width="1.8" />
+          </svg>
+        `;
+      } else if (dir === "▼") {
+        svgHtml = `
+          <svg class="joypad-svg joypad-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="9" x2="12" y2="17" />
+            <circle cx="12" cy="17" r="3" fill="currentColor" />
+            <path d="M 9,14 L 12,17 L 15,14" stroke-width="1.8" />
+          </svg>
+        `;
+      } else if (dir === "◀") {
+        svgHtml = `
+          <svg class="joypad-svg joypad-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="15" y1="12" x2="7" y2="12" />
+            <circle cx="7" cy="12" r="3" fill="currentColor" />
+            <path d="M 10,9 L 7,12 L 10,15" stroke-width="1.8" />
+          </svg>
+        `;
+      } else if (dir === "▶") {
+        svgHtml = `
+          <svg class="joypad-svg joypad-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="9" y1="12" x2="17" y2="12" />
+            <circle cx="17" cy="12" r="3" fill="currentColor" />
+            <path d="M 14,9 L 17,12 L 14,15" stroke-width="1.8" />
+          </svg>
+        `;
+      } else if (dir === "◀/▶") {
+        svgHtml = `
+          <svg class="joypad-svg joypad-side" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="7" y1="12" x2="17" y2="12" />
+            <circle cx="7" cy="12" r="2.2" fill="currentColor" />
+            <circle cx="17" cy="12" r="2.2" fill="currentColor" />
+            <path d="M 10,9 L 7,12 L 10,15" stroke-width="1.8" />
+            <path d="M 14,9 L 17,12 L 14,15" stroke-width="1.8" />
+          </svg>
+        `;
+      } else {
+        svgHtml = dir;
+      }
+      
+      return `<span class="switch-btn btn-dir${extraClass}" title="${title}">${svgHtml}</span>`;
     };
     const btnAction = (char, cls, title) => `<span class="switch-btn ${cls}" title="${title || char}">${char}</span>`;
     const plus = `<span class="switch-plus">+</span>`;

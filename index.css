@@ -927,9 +927,11 @@ body {
   box-shadow: 0 0 5px rgba(255, 230, 0, 0.3);
 }
 
-.switch-btn.btn-dir.btn-dir-any {
-  font-size: 14px;
-  line-height: 1;
+.switch-btn .joypad-svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+  flex-shrink: 0;
 }
 
 .switch-btn.btn-a {
