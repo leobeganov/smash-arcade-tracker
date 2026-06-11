@@ -2667,7 +2667,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btnTrainingConfirm.addEventListener("click", () => {
       const name = trainingPlayerNameInput ? trainingPlayerNameInput.value.trim() : "";
       if (!name) {
-        alert("PLEASE ENTER YOUR NAME TO REQUEST TRAINING.");
+        alert("PLEASE ENTER YOUR NAME TO REQUEST A TUTORIAL.");
         return;
       }
       if (modalStepInput) modalStepInput.style.display = "none";
@@ -2695,6 +2695,32 @@ document.addEventListener("DOMContentLoaded", () => {
     customLearnModal.addEventListener("click", (e) => {
       if (e.target === customLearnModal) {
         customLearnModal.classList.remove("active");
+      }
+    });
+  }
+
+  // --- New Player Collapsible (Accordion) Toggle Coordinator ---
+  const welcomePanelToggle = document.getElementById("welcome-panel-toggle");
+  const welcomePanelContent = document.getElementById("welcome-panel-content");
+  const welcomeCaret = document.getElementById("welcome-caret");
+
+  if (welcomePanelToggle && welcomePanelContent) {
+    welcomePanelToggle.addEventListener("click", () => {
+      const isExpanded = welcomePanelContent.style.maxHeight && welcomePanelContent.style.maxHeight !== "0px";
+      if (isExpanded) {
+        // Collapse
+        welcomePanelContent.style.maxHeight = "0px";
+        welcomePanelContent.style.padding = "0 25px";
+        if (welcomeCaret) welcomeCaret.style.transform = "rotate(0deg)";
+        welcomePanelToggle.style.backgroundColor = "transparent";
+        welcomePanelToggle.style.borderBottomColor = "rgba(255, 230, 0, 0)";
+      } else {
+        // Expand
+        welcomePanelContent.style.maxHeight = welcomePanelContent.scrollHeight + "px";
+        welcomePanelContent.style.padding = "0 25px 25px 25px";
+        if (welcomeCaret) welcomeCaret.style.transform = "rotate(180deg)";
+        welcomePanelToggle.style.backgroundColor = "rgba(255, 230, 0, 0.05)";
+        welcomePanelToggle.style.borderBottomColor = "rgba(255, 230, 0, 0.2)";
       }
     });
   }

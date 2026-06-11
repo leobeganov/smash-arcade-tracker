@@ -51,43 +51,55 @@
     <!-- ========================================== -->
     <main class="view-container active" id="home-view">
       <div class="home-view-layout">
-        <!-- New Player Initiation Area (Always Present on Home Page) -->
-        <div class="panel-beveled neon-yellow home-welcome-panel" style="width: 100%; max-width: 1125px; box-sizing: border-box; display: flex; flex-direction: column; gap: 15px; background: rgba(12, 13, 18, 0.7); backdrop-filter: blur(10px); margin-bottom: -15px;">
-          <!-- Header of the panel -->
-          <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid rgba(255, 230, 0, 0.3); padding-bottom: 10px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <span style="font-size: 20px; text-shadow: 0 0 8px var(--color-neon-yellow);">🎮</span>
-              <h3 class="font-arcade text-glow-yellow" style="font-size: var(--font-size-md); margin: 0; letter-spacing: 1px;">TRAINING INITIATION PROTOCOL</h3>
+        <!-- New Player Initiation Area (Collapsible, Always Present on Home Page) -->
+        <div class="panel-beveled neon-yellow home-welcome-panel" style="width: 100%; max-width: 1125px; box-sizing: border-box; display: flex; flex-direction: column; background: rgba(12, 13, 18, 0.7); backdrop-filter: blur(10px); margin-bottom: -15px; padding: 0; overflow: hidden; border-radius: 4px;">
+          <!-- Accordion Toggle Header -->
+          <div id="welcome-panel-toggle" style="display: flex; align-items: center; justify-content: space-between; padding: 15px 25px; cursor: pointer; user-select: none; border-bottom: 2px solid rgba(255, 230, 0, 0); transition: border-color 0.3s, background-color 0.2s;" onmouseover="this.style.backgroundColor='rgba(255, 230, 0, 0.03)'" onmouseout="if(!document.getElementById('welcome-panel-content').style.maxHeight || document.getElementById('welcome-panel-content').style.maxHeight === '0px') this.style.backgroundColor='transparent';">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 18px; text-shadow: 0 0 8px var(--color-neon-yellow);" id="welcome-toggle-icon">❓</span>
+              <h3 class="font-arcade text-glow-yellow" style="font-size: var(--font-size-md); margin: 0; letter-spacing: 1px;">NEW PLAYER?</h3>
             </div>
-            <span class="font-arcade" style="font-size: 10px; color: rgba(255, 230, 0, 0.6);">SYSTEM STATUS: ONLINE</span>
+            <span id="welcome-caret" class="font-arcade" style="font-size: 12px; color: var(--color-neon-yellow); transition: transform 0.3s ease; transform: rotate(0deg);">▼</span>
           </div>
 
-          <!-- Content of the panel -->
-          <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; align-items: center;">
-            <div style="flex: 1; min-width: 280px; font-family: var(--font-stats); color: #cdd1e4; line-height: 1.6;">
-              <p style="margin: 0 0 10px 0; font-size: var(--font-size-md);">
-                Welcome, Smasher! Prepare to rise through the local ranks. Connect with your peers, share tech, and coordinate scrims in our dedicated Slack channel:
-              </p>
-              <div style="display: inline-flex; align-items: center; background: rgba(0, 240, 255, 0.1); border: 1px dashed var(--color-neon-cyan); padding: 5px 12px; border-radius: 4px; box-shadow: 0 0 8px rgba(0,240,255,0.15);">
-                <span style="color: var(--color-neon-cyan); font-weight: bold; margin-right: 6px;">#</span>
-                <a href="slack://channel?id=gaming-smash-bros" class="font-arcade" style="color: var(--color-neon-cyan); text-decoration: none; font-size: 11px; text-shadow: 0 0 4px var(--color-neon-cyan); transition: text-shadow 0.2s ease, color 0.2s;" id="slack-link-welcome">gaming-smash-bros</a>
+          <!-- Collapsible Accordion Content -->
+          <div id="welcome-panel-content" style="max-height: 0px; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.35s ease; padding: 0 25px;">
+            <div style="padding-top: 15px; padding-bottom: 25px; display: flex; flex-direction: column; gap: 20px;">
+              <!-- Main Description and Slack link -->
+              <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; align-items: center;">
+                <div style="flex: 1; min-width: 280px; font-family: var(--font-stats); color: #cdd1e4; line-height: 1.6;">
+                  <p style="margin: 0 0 15px 0; font-size: var(--font-size-md);">
+                    Welcome! Super Smash Bros. Ultimate is a fighting game played on the Nintendo Switch. Over 85 fighters can be played in free-for-all or team matches. This app automatically shows match insights and player leaderboards.
+                  </p>
+                  
+                  <div style="display: flex; align-items: center; gap: 12px; margin-top: 5px;">
+                    <span style="font-family: var(--font-stats); font-size: 11px; color: #8a8d9a; letter-spacing: 0.5px;">COMMUNITY SLACK:</span>
+                    <div style="display: inline-flex; align-items: center; background: rgba(0, 240, 255, 0.1); border: 1px dashed var(--color-neon-cyan); padding: 5px 12px; border-radius: 4px; box-shadow: 0 0 8px rgba(0,240,255,0.15); gap: 8px;">
+                      <!-- Inline Slack SVG Icon -->
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="color: var(--color-neon-cyan); flex-shrink: 0; filter: drop-shadow(0 0 2px var(--color-neon-cyan));">
+                        <path d="M1.77 8.87a1.18 1.18 0 1 0 0 2.36h1.18v-2.36H1.77zm1.77 0a1.18 1.18 0 0 0 1.18 1.18v2.36a1.18 1.18 0 1 0 0-2.36H3.54v-1.18zm0-3.54a1.18 1.18 0 1 0-2.36 0v1.18h2.36V5.33zm0 1.77a1.18 1.18 0 0 0 1.18-1.18V1.77a1.18 1.18 0 1 0-2.36 0v3.55H3.54v1.78zm3.54-5.33a1.18 1.18 0 1 0 0-2.36H5.91v2.36h1.17zm0 1.77a1.18 1.18 0 0 0 1.18-1.18V1.18a1.18 1.18 0 1 0-2.36 0v2.36H7.08v1.18zm3.54 0a1.18 1.18 0 1 0 2.36 0V1.77H10.62v2.36zm-1.77 0a1.18 1.18 0 0 0-1.18 1.18v4.14a1.18 1.18 0 1 0 2.36 0V5.31a1.18 1.18 0 0 0-1.18-1.18zm3.55 3.54a1.18 1.18 0 1 0 0 2.36h1.18V8.85h-1.18zm-1.78 0a1.18 1.18 0 0 0-1.18 1.18v2.36a1.18 1.18 0 1 0 0-2.36H10.62V8.85z"/>
+                      </svg>
+                      <a href="slack://channel?id=gaming-smash-bros" class="font-arcade" style="color: var(--color-neon-cyan); text-decoration: none; font-size: 11px; text-shadow: 0 0 4px var(--color-neon-cyan); transition: text-shadow 0.2s ease, color 0.2s;" id="slack-link-welcome">#gaming-smash-bros</a>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tutorial CTA Button (No icon) -->
+                <div style="display: flex; flex-direction: column; gap: 10px; align-items: flex-start; justify-content: center; min-width: 230px;">
+                  <button class="btn-arcade yellow" id="btn-learn-to-play" style="font-size: 11px; padding: 12px 20px; border-radius: 4px; font-family: var(--font-arcade); font-weight: bold; width: 100%;">
+                    ASK FOR A TUTORIAL
+                  </button>
+                </div>
+              </div>
+
+              <!-- Tip section -->
+              <div style="background: rgba(12, 13, 18, 0.9); border-left: 4px solid var(--color-neon-yellow); padding: 10px 15px; margin-top: 5px; font-family: var(--font-stats); display: flex; align-items: center; gap: 10px; box-shadow: inset 0 0 6px rgba(0,0,0,0.5);">
+                <span style="font-size: 16px;">💡</span>
+                <span style="font-size: 12px; color: #a3a6b5;">
+                  <strong>PRO-TIP:</strong> Visit the <a href="#fighters" style="color: var(--color-neon-yellow); text-decoration: none; border-bottom: 1px dashed var(--color-neon-yellow); font-weight: bold; text-shadow: 0 0 4px rgba(255, 230, 0, 0.3);" id="tip-fighters-link">Fighters Library</a> to explore detailed characters and learn their moves.
+                </span>
               </div>
             </div>
-
-            <!-- Actions area -->
-            <div style="display: flex; flex-direction: column; gap: 10px; align-items: flex-start; justify-content: center; min-width: 250px;">
-              <button class="btn-arcade yellow" id="btn-learn-to-play" style="font-size: 11px; padding: 12px 20px; border-radius: 4px; font-family: var(--font-arcade); font-weight: bold; width: 100%;">
-                ⚡ I'D LIKE TO LEARN HOW TO PLAY
-              </button>
-            </div>
-          </div>
-
-          <!-- Tip section -->
-          <div style="background: rgba(12, 13, 18, 0.9); border-left: 4px solid var(--color-neon-yellow); padding: 10px 15px; margin-top: 5px; font-family: var(--font-stats); display: flex; align-items: center; gap: 10px; box-shadow: inset 0 0 6px rgba(0,0,0,0.5);">
-            <span style="font-size: 16px;">💡</span>
-            <span style="font-size: 12px; color: #a3a6b5;">
-              <strong>PRO-TIP:</strong> Looking for a main? Visit the <a href="#fighters" style="color: var(--color-neon-yellow); text-decoration: none; border-bottom: 1px dashed var(--color-neon-yellow); font-weight: bold; text-shadow: 0 0 4px rgba(255, 230, 0, 0.3);" id="tip-fighters-link">Fighters Library</a> to explore detailed profiles, series backdrops, play counts, and variants.
-            </span>
           </div>
         </div>
 
