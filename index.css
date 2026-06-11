@@ -944,8 +944,8 @@ body {
 }
 
 #fighter-profile-view .profile-sidebar .profile-meta-row {
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 15px;
   width: 100%;
   box-sizing: border-box;
@@ -954,7 +954,7 @@ body {
 #fighter-profile-view .profile-sidebar .stat-cell-retro {
   background: rgba(0, 10, 20, 0.45);
   border: 1px solid var(--color-neon-cyan);
-  padding: 15px 20px !important; /* Uniform padding aligned with meta-card */
+  padding: 15px 12px !important; /* Slightly more compact padding to prevent column stretching */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -962,6 +962,20 @@ body {
   text-align: center;
   width: 100%;
   box-sizing: border-box;
+}
+
+#fighter-profile-view .profile-sidebar .stat-cell-retro .stat-title {
+  font-size: 11px !important;
+  margin-bottom: 8px !important;
+  letter-spacing: 0.5px !important;
+}
+
+#fighter-profile-view .profile-sidebar .stat-cell-retro .stat-num {
+  font-size: 22px !important;
+}
+
+#fighter-profile-view .profile-sidebar .stat-cell-retro .stat-sub-label {
+  font-size: 11px !important;
 }
 
 #fighter-profile-view .profile-sidebar .meta-card {
@@ -4312,6 +4326,10 @@ body.theme-retro .btn-arcade {
     gap: 12px;
   }
 
+  #fighter-profile-view .profile-sidebar .meta-card {
+    grid-column: span 1 !important;
+  }
+
   /* 9. Fighters Library view search controls & grids */
   .fighters-controls-row {
     flex-direction: column;
@@ -4792,3 +4810,46 @@ body.theme-retro .btn-arcade {
   border-color: var(--color-neon-magenta) !important;
   box-shadow: 0 0 6px var(--color-neon-magenta) !important;
 }
+
+/* Custom responsive wrap for home page filter row on medium/shorter screens */
+@media (max-width: 1125px) and (min-width: 769px) {
+  .podium-filters-group {
+    display: grid !important;
+    grid-template-columns: repeat(6, auto) !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 12px 15px !important;
+    width: 100% !important;
+  }
+
+  .podium-filters-group > .podium-filter-wrapper {
+    grid-row: 1 !important;
+    grid-column: span 3 !important;
+    justify-self: end !important;
+  }
+
+  .podium-filters-group > #multi-select-style-container {
+    grid-row: 1 !important;
+    grid-column: span 3 !important;
+    justify-self: start !important;
+  }
+
+  .podium-filters-group > #multi-select-players-container {
+    grid-row: 2 !important;
+    grid-column: span 2 !important;
+    justify-self: end !important;
+  }
+
+  .podium-filters-group > #multi-select-fighters-container {
+    grid-row: 2 !important;
+    grid-column: span 2 !important;
+    justify-self: center !important;
+  }
+
+  .podium-filters-group > #btn-clear-all-filters {
+    grid-row: 2 !important;
+    grid-column: span 2 !important;
+    justify-self: start !important;
+  }
+}
+

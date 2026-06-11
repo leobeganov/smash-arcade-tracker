@@ -218,16 +218,6 @@ const Charts = {
       `;
     });
 
-    // Add index guide legend
-    html += `
-      <div class="chart-guide-legend">
-        <div class="guide-item"><span class="guide-dot placement-1"></span> 1ST</div>
-        <div class="guide-item"><span class="guide-dot placement-2"></span> 2ND</div>
-        <div class="guide-item"><span class="guide-dot placement-3"></span> 3RD</div>
-        <div class="guide-item"><span class="guide-dot placement-4"></span> OTHER</div>
-      </div>
-    `;
-
     html += '</div>';
     container.innerHTML = html;
   },
