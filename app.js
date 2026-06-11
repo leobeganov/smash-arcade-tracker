@@ -2717,7 +2717,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         // Expand
         welcomePanelContent.style.maxHeight = welcomePanelContent.scrollHeight + "px";
-        welcomePanelContent.style.padding = "0 25px 25px 25px";
+        welcomePanelContent.style.padding = "0 25px 0 25px";
         if (welcomeCaret) welcomeCaret.style.transform = "rotate(180deg)";
         welcomePanelToggle.style.backgroundColor = "rgba(255, 230, 0, 0.05)";
         welcomePanelToggle.style.borderBottomColor = "rgba(255, 230, 0, 0.2)";
