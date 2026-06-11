@@ -1905,16 +1905,37 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // 3. Search Filters (Player and Character - Multi-select)
-    if (selectedSearchPlayers && selectedSearchPlayers.length > 0) {
-      const lowerPlayers = selectedSearchPlayers.map(p => p.toLowerCase().trim());
-      matches = matches.filter(m => m.players && m.players.some(p => lowerPlayers.includes(p.playerName.toLowerCase().trim())));
-    }
-    if (selectedSearchFighters && selectedSearchFighters.length > 0) {
-      const lowerFighters = selectedSearchFighters.map(f => f.toLowerCase().trim());
-      matches = matches.filter(m => m.players && m.players.some(p => {
-        const fighterObj = api.getFighterDetails(p.character);
-        return lowerFighters.includes(p.character.toLowerCase().trim()) || lowerFighters.includes(fighterObj.id.toLowerCase().trim());
-      }));
+    const hasPlayersFilter = selectedSearchPlayers && selectedSearchPlayers.length > 0;
+    const hasFightersFilter = selectedSearchFighters && selectedSearchFighters.length > 0;
+
+    if (hasPlayersFilter || hasFightersFilter) {
+      const lowerPlayers = hasPlayersFilter ? selectedSearchPlayers.map(p => p.toLowerCase().trim()) : [];
+      const lowerFighters = hasFightersFilter ? selectedSearchFighters.map(f => f.toLowerCase().trim()) : [];
+
+      matches = matches.filter(m => {
+        if (!m.players) return false;
+
+        if (hasPlayersFilter && hasFightersFilter) {
+          // Joint AND: some player must match both the player filter AND the character filter in this match
+          return m.players.some(p => {
+            const playerMatch = lowerPlayers.includes(p.playerName.toLowerCase().trim());
+            const fighterObj = api.getFighterDetails(p.character);
+            const fighterMatch = lowerFighters.includes(p.character.toLowerCase().trim()) || 
+                                 (fighterObj && lowerFighters.includes(fighterObj.id.toLowerCase().trim()));
+            return playerMatch && fighterMatch;
+          });
+        } else if (hasPlayersFilter) {
+          // Player filter only
+          return m.players.some(p => lowerPlayers.includes(p.playerName.toLowerCase().trim()));
+        } else {
+          // Fighter filter only
+          return m.players.some(p => {
+            const fighterObj = api.getFighterDetails(p.character);
+            return lowerFighters.includes(p.character.toLowerCase().trim()) || 
+                   (fighterObj && lowerFighters.includes(fighterObj.id.toLowerCase().trim()));
+          });
+        }
+      });
     }
 
     if (selectedSearchWinnerPlayer) {
@@ -1975,7 +1996,14 @@ document.addEventListener("DOMContentLoaded", () => {
           const isFighterFiltered = (selectedSearchFighters && selectedSearchFighters.some(sf => sf.toLowerCase() === p.character.toLowerCase())) || 
                                     (selectedSearchWinnerFighter && selectedSearchWinnerFighter.toLowerCase() === p.character.toLowerCase()) ||
                                     (selectedSearchLoserFighter && selectedSearchLoserFighter.toLowerCase() === p.character.toLowerCase());
-          const isFilteredMatch = isPlayerFiltered || isFighterFiltered;
+          
+          let isFilteredMatch = false;
+          if (hasPlayersFilter && hasFightersFilter) {
+            isFilteredMatch = (selectedSearchPlayers.some(sp => sp.toLowerCase() === p.playerName.toLowerCase()) &&
+                               selectedSearchFighters.some(sf => sf.toLowerCase() === p.character.toLowerCase()));
+          } else {
+            isFilteredMatch = isPlayerFiltered || isFighterFiltered;
+          }
           const filterClass = isFilteredMatch ? 'filter-highlighted' : '';
 
           if (hasNoKnockoutTime) {
@@ -2078,7 +2106,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const isFighterFiltered = (selectedSearchFighters && selectedSearchFighters.some(sf => sf.toLowerCase() === p.character.toLowerCase())) || 
                                       (selectedSearchWinnerFighter && selectedSearchWinnerFighter.toLowerCase() === p.character.toLowerCase()) ||
                                       (selectedSearchLoserFighter && selectedSearchLoserFighter.toLowerCase() === p.character.toLowerCase());
-            const isFilteredMatch = isPlayerFiltered || isFighterFiltered;
+            
+            let isFilteredMatch = false;
+            if (hasPlayersFilter && hasFightersFilter) {
+              isFilteredMatch = (selectedSearchPlayers.some(sp => sp.toLowerCase() === p.playerName.toLowerCase()) &&
+                                 selectedSearchFighters.some(sf => sf.toLowerCase() === p.character.toLowerCase()));
+            } else {
+              isFilteredMatch = isPlayerFiltered || isFighterFiltered;
+            }
             const filterClass = isFilteredMatch ? 'filter-highlighted' : '';
 
             return `
@@ -2697,17 +2732,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Filter matches based on the selected players and fighters to affect the dataset being analyzed
     let timelineMatches = [...matches];
-    if (Array.isArray(selectedPlayers) && selectedPlayers.length > 0) {
-      const lowerPlayers = selectedPlayers.map(p => p.toLowerCase().trim());
-      timelineMatches = timelineMatches.filter(m => 
-        m.players && m.players.some(p => lowerPlayers.includes(p.playerName.toLowerCase().trim()))
-      );
-    }
-    if (Array.isArray(selectedFighters) && selectedFighters.length > 0) {
-      const lowerFighters = selectedFighters.map(f => f.toLowerCase().trim());
-      timelineMatches = timelineMatches.filter(m => 
-        m.players && m.players.some(p => lowerFighters.includes(p.character.toLowerCase().trim()))
-      );
+    const hasTimelinePlayers = Array.isArray(selectedPlayers) && selectedPlayers.length > 0;
+    const hasTimelineFighters = Array.isArray(selectedFighters) && selectedFighters.length > 0;
+
+    if (hasTimelinePlayers || hasTimelineFighters) {
+      const lowerPlayers = hasTimelinePlayers ? selectedPlayers.map(p => p.toLowerCase().trim()) : [];
+      const lowerFighters = hasTimelineFighters ? selectedFighters.map(f => f.toLowerCase().trim()) : [];
+
+      timelineMatches = timelineMatches.filter(m => {
+        if (!m.players) return false;
+
+        if (hasTimelinePlayers && hasTimelineFighters) {
+          // Joint AND: some player must match both the player filter AND the character filter in this match
+          return m.players.some(p => {
+            const playerMatch = lowerPlayers.includes(p.playerName.toLowerCase().trim());
+            const fighterMatch = lowerFighters.includes(p.character.toLowerCase().trim());
+            return playerMatch && fighterMatch;
+          });
+        } else if (hasTimelinePlayers) {
+          // Player filter only
+          return m.players.some(p => lowerPlayers.includes(p.playerName.toLowerCase().trim()));
+        } else {
+          // Fighter filter only
+          return m.players.some(p => lowerFighters.includes(p.character.toLowerCase().trim()));
+        }
+      });
     }
 
     const lowerSelectedPlayers = (selectedPlayers || []).map(p => p.toLowerCase().trim());
@@ -3458,6 +3507,95 @@ document.addEventListener("DOMContentLoaded", () => {
 
     dropdown.innerHTML = "";
 
+    // 1. Create Search Box
+    const searchContainer = document.createElement("div");
+    searchContainer.className = "retro-multi-select-search-container";
+    searchContainer.style.cssText = `
+      position: sticky;
+      top: 0;
+      background: var(--color-bg-dark);
+      padding: 8px;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 10;
+      box-sizing: border-box;
+    `;
+    
+    if (dropdown.classList.contains("magenta-theme")) {
+      searchContainer.style.borderBottomColor = "rgba(255, 0, 127, 0.2)";
+    }
+
+    const searchInput = document.createElement("input");
+    searchInput.type = "text";
+    searchInput.className = "retro-multi-select-search-input";
+    searchInput.placeholder = "SEARCH...";
+    searchInput.style.cssText = `
+      background: rgba(12, 13, 18, 0.9);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      color: #fff;
+      font-family: var(--font-stats);
+      font-size: 10px;
+      letter-spacing: 1px;
+      padding: 6px 26px 6px 8px;
+      border-radius: 4px;
+      width: 100%;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    `;
+    
+    if (dropdown.classList.contains("magenta-theme")) {
+      searchInput.style.borderColor = "rgba(255, 0, 127, 0.35)";
+    }
+
+    searchInput.onfocus = () => {
+      if (dropdown.classList.contains("magenta-theme")) {
+        searchInput.style.borderColor = "var(--color-neon-magenta, #ff007f)";
+        searchInput.style.boxShadow = "0 0 8px rgba(255, 0, 127, 0.35)";
+      } else {
+        searchInput.style.borderColor = "var(--color-neon-cyan, #00f0ff)";
+        searchInput.style.boxShadow = "0 0 8px rgba(0, 240, 255, 0.35)";
+      }
+    };
+    searchInput.onblur = () => {
+      if (dropdown.classList.contains("magenta-theme")) {
+        searchInput.style.borderColor = "rgba(255, 0, 127, 0.35)";
+      } else {
+        searchInput.style.borderColor = "rgba(0, 240, 255, 0.35)";
+      }
+      searchInput.style.boxShadow = "none";
+    };
+
+    const clearBtn = document.createElement("button");
+    clearBtn.className = "retro-multi-select-search-clear";
+    clearBtn.innerHTML = "✕";
+    clearBtn.style.cssText = `
+      position: absolute;
+      right: 14px;
+      background: none;
+      border: none;
+      color: #a3a6b5;
+      cursor: pointer;
+      font-size: 11px;
+      display: none;
+      padding: 4px;
+      line-height: 1;
+      outline: none;
+      transition: color 0.2s ease;
+    `;
+    clearBtn.onmouseover = () => {
+      clearBtn.style.color = dropdown.classList.contains("magenta-theme") ? "var(--color-neon-magenta, #ff007f)" : "var(--color-neon-cyan, #00f0ff)";
+    };
+    clearBtn.onmouseout = () => {
+      clearBtn.style.color = "#a3a6b5";
+    };
+
+    searchContainer.appendChild(searchInput);
+    searchContainer.appendChild(clearBtn);
+    dropdown.appendChild(searchContainer);
+
     // "ALL" Option Row
     const allRow = document.createElement("div");
     allRow.className = "retro-multi-option-row all-option";
@@ -3474,10 +3612,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Other Options
     const itemCheckboxes = [];
+    const rowElements = [];
     options.forEach(optVal => {
       const isChecked = selectedValues.includes(optVal);
       const row = document.createElement("div");
       row.className = "retro-multi-option-row";
+      row.setAttribute("data-value", optVal);
       row.innerHTML = `
         <label class="retro-checkbox-wrapper">
           <input type="checkbox" class="retro-checkbox-input item-checkbox" value="${optVal}" ${isChecked ? "checked" : ""}>
@@ -3486,10 +3626,41 @@ document.addEventListener("DOMContentLoaded", () => {
         <span class="option-label">${optVal.toUpperCase()}</span>
       `;
       dropdown.appendChild(row);
+      rowElements.push(row);
 
       const checkbox = row.querySelector(".item-checkbox");
       itemCheckboxes.push(checkbox);
     });
+
+    // Filter functionality
+    const filterOptions = () => {
+      const query = searchInput.value.toLowerCase().trim();
+      if (query === "") {
+        clearBtn.style.display = "none";
+        allRow.style.display = "flex";
+        rowElements.forEach(r => r.style.display = "flex");
+      } else {
+        clearBtn.style.display = "block";
+        allRow.style.display = "none";
+        rowElements.forEach(r => {
+          const val = r.getAttribute("data-value").toLowerCase();
+          if (val.includes(query)) {
+            r.style.display = "flex";
+          } else {
+            r.style.display = "none";
+          }
+        });
+      }
+    };
+
+    searchInput.oninput = filterOptions;
+
+    clearBtn.onclick = (e) => {
+      e.stopPropagation();
+      searchInput.value = "";
+      filterOptions();
+      searchInput.focus();
+    };
 
     // Toggle dropdown visibility
     btn.onclick = (e) => {
@@ -3497,7 +3668,14 @@ document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(".retro-multi-select-dropdown").forEach(d => {
         if (d !== dropdown) d.classList.add("dropdown-hidden");
       });
+      const isOpening = dropdown.classList.contains("dropdown-hidden");
       dropdown.classList.toggle("dropdown-hidden");
+
+      if (isOpening) {
+        searchInput.value = "";
+        filterOptions();
+        setTimeout(() => searchInput.focus(), 50);
+      }
     };
 
     dropdown.onclick = (e) => {
@@ -3545,7 +3723,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Row clicks trigger checkbox toggle
     dropdown.querySelectorAll(".retro-multi-option-row").forEach(row => {
       row.onclick = (e) => {
-        if (e.target.tagName !== "INPUT") {
+        if (e.target.tagName !== "INPUT" && e.target.tagName !== "LABEL" && !e.target.classList.contains("retro-checkbox-box")) {
           const input = row.querySelector("input");
           input.checked = !input.checked;
           input.dispatchEvent(new Event("change"));

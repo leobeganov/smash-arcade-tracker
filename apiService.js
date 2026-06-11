@@ -168,19 +168,38 @@ const apiService = {
       matches = matches.filter(m => m.players && m.players.some(p => p.character.toLowerCase().trim() === wfLower && p.placement === 1));
     }
 
-    // Apply player selection filtering (if any specified)
-    if (selectedPlayers && selectedPlayers.length > 0) {
-      const lowerPlayers = selectedPlayers.map(p => p.toLowerCase().trim());
-      matches = matches.filter(m => m.players && m.players.some(p => lowerPlayers.includes(p.playerName.toLowerCase().trim())));
-    }
+    // Apply player and fighter selection filtering (using joint AND logic if both are active)
+    const hasPlayersFilter = selectedPlayers && selectedPlayers.length > 0;
+    const hasFightersFilter = selectedFighters && selectedFighters.length > 0;
 
-    // Apply fighter selection filtering (if any specified)
-    if (selectedFighters && selectedFighters.length > 0) {
-      const lowerFighters = selectedFighters.map(f => f.toLowerCase().trim());
-      matches = matches.filter(m => m.players && m.players.some(p => {
-        const fighterObj = getFighterDetails(p.character);
-        return lowerFighters.includes(p.character.toLowerCase().trim()) || lowerFighters.includes(fighterObj.id.toLowerCase().trim());
-      }));
+    if (hasPlayersFilter || hasFightersFilter) {
+      const lowerPlayers = hasPlayersFilter ? selectedPlayers.map(p => p.toLowerCase().trim()) : [];
+      const lowerFighters = hasFightersFilter ? selectedFighters.map(f => f.toLowerCase().trim()) : [];
+
+      matches = matches.filter(m => {
+        if (!m.players) return false;
+
+        if (hasPlayersFilter && hasFightersFilter) {
+          // Joint AND: some player must match both the player filter AND the fighter filter in this match
+          return m.players.some(p => {
+            const playerMatch = lowerPlayers.includes(p.playerName.toLowerCase().trim());
+            const fighterObj = getFighterDetails(p.character);
+            const fighterMatch = lowerFighters.includes(p.character.toLowerCase().trim()) || 
+                                 (fighterObj && lowerFighters.includes(fighterObj.id.toLowerCase().trim()));
+            return playerMatch && fighterMatch;
+          });
+        } else if (hasPlayersFilter) {
+          // Player filter only
+          return m.players.some(p => lowerPlayers.includes(p.playerName.toLowerCase().trim()));
+        } else {
+          // Fighter filter only
+          return m.players.some(p => {
+            const fighterObj = getFighterDetails(p.character);
+            return lowerFighters.includes(p.character.toLowerCase().trim()) || 
+                   (fighterObj && lowerFighters.includes(fighterObj.id.toLowerCase().trim()));
+          });
+        }
+      });
     }
 
     const playersList = getPlayersList(allMatches);
@@ -189,19 +208,32 @@ const apiService = {
     matches.forEach(match => {
       if (!match.players) return;
       match.players.forEach(p => {
-        // If a player filter is active, only aggregate for the searched players
-        if (selectedPlayers && selectedPlayers.length > 0) {
-          const isSelected = selectedPlayers.some(sp => sp.toLowerCase().trim() === p.playerName.toLowerCase().trim());
-          if (!isSelected) return;
-        }
-        // If a fighter filter is active, only aggregate for the searched fighters
-        if (selectedFighters && selectedFighters.length > 0) {
+        const hasPlayers = selectedPlayers && selectedPlayers.length > 0;
+        const hasFighters = selectedFighters && selectedFighters.length > 0;
+
+        if (hasPlayers && hasFighters) {
+          // Joint AND: only aggregate stats for the selected player if they played one of the selected fighters
+          const isPlayerSelected = selectedPlayers.some(sp => sp.toLowerCase().trim() === p.playerName.toLowerCase().trim());
           const fighterObj = getFighterDetails(p.character);
-          const isSelected = selectedFighters.some(sf => 
+          const isFighterSelected = selectedFighters.some(sf => 
             sf.toLowerCase().trim() === p.character.toLowerCase().trim() ||
-            sf.toLowerCase().trim() === fighterObj.id.toLowerCase().trim()
+            (fighterObj && sf.toLowerCase().trim() === fighterObj.id.toLowerCase().trim())
           );
-          if (!isSelected) return;
+          if (!isPlayerSelected || !isFighterSelected) return;
+        } else {
+          // Single filter active
+          if (hasPlayers) {
+            const isSelected = selectedPlayers.some(sp => sp.toLowerCase().trim() === p.playerName.toLowerCase().trim());
+            if (!isSelected) return;
+          }
+          if (hasFighters) {
+            const fighterObj = getFighterDetails(p.character);
+            const isSelected = selectedFighters.some(sf => 
+              sf.toLowerCase().trim() === p.character.toLowerCase().trim() ||
+              (fighterObj && sf.toLowerCase().trim() === fighterObj.id.toLowerCase().trim())
+            );
+            if (!isSelected) return;
+          }
         }
 
         const playerName = p.playerName;
