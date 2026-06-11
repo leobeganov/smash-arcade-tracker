@@ -374,7 +374,7 @@ const Database = {
    * Handles filtering.
    */
   getStats(filters = {}) {
-    let matches = this.getMatches();
+    let matches = filters.matches || this.getMatches();
 
     // Apply filters
     if (filters.gameMode && filters.gameMode !== 'All') {

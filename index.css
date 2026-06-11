@@ -1940,18 +1940,18 @@ body.theme-retro .btn-arcade {
   text-shadow: 0 0 8px rgba(0, 240, 255, 0.8);
 }
 
-#nav-tab-telemetry {
+#nav-tab-insights {
   border: 3px outset rgba(255, 0, 127, 0.4);
   color: #a3a6b5;
   box-shadow: inset 0 0 5px rgba(255, 0, 127, 0.1);
 }
 
-#nav-tab-telemetry .btn-nav-decor {
+#nav-tab-insights .btn-nav-decor {
   color: var(--color-neon-magenta);
 }
 
-#nav-tab-telemetry:hover,
-#nav-tab-telemetry.active {
+#nav-tab-insights:hover,
+#nav-tab-insights.active {
   border: 3px outset var(--color-neon-magenta);
   background-color: rgba(255, 0, 127, 0.1);
   color: #fff;
@@ -2998,6 +2998,92 @@ body.theme-retro .btn-arcade {
   }
 }
 
+/* ==========================================================
+   INSIGHTS VIEW STYLES & INTERACTIVE GLOW EFFECTS
+   ========================================================== */
+
+/* --- Insights Page - Vertical Bar Hover & Tooltip Animations --- */
+.v-bar-col .fighter-hover-tooltip {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.25s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.25s cubic-bezier(0.165, 0.84, 0.44, 1), visibility 0.25s ease !important;
+}
+
+.v-bar-col:hover .fighter-hover-tooltip {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateX(-50%) translateY(0) !important;
+}
+
+.v-bar-col:hover .v-bar-icon-bubble {
+  transform: scale(1.15) !important;
+  box-shadow: 0 0 15px var(--color-neon-magenta) !important;
+  border-color: #fff !important;
+}
+
+.v-bar-col:hover .v-bar-track {
+  filter: brightness(1.2);
+  box-shadow: 0 0 15px var(--color-neon-magenta) !important;
+}
+
+/* --- Insights Page - Timeline Marker Hover & Premium Animation --- */
+.timeline-marker {
+  transition: transform 0.25s cubic-bezier(0.165, 0.84, 0.44, 1), z-index 0.2s ease;
+}
+
+.timeline-marker:hover {
+  transform: translate(-50%, -50%) scale(1.25) !important;
+  z-index: 999 !important;
+}
+
+.timeline-marker:hover .timeline-dot {
+  box-shadow: 0 0 18px currentColor, inset 0 0 8px rgba(255, 255, 255, 0.2) !important;
+  border-color: #fff !important;
+}
+
+.timeline-marker:hover .timeline-connector {
+  opacity: 1 !important;
+  width: 3px !important;
+}
+
+.timeline-marker:hover .timeline-player-info {
+  filter: brightness(1.15);
+  box-shadow: 0 0 12px currentColor !important;
+  transform: translateX(-50%) scale(1.05) !important;
+}
+
+/* --- Insights Page - Timeframe Filter Toolbar Styles --- */
+#insights-timeframe-filters .toggle-btn {
+  font-family: var(--font-arcade);
+  letter-spacing: 0.5px;
+  font-size: 10px;
+  padding: 0 12px;
+  height: 30px;
+  transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+#insights-timeframe-filters .toggle-btn.active {
+  background: var(--color-neon-cyan);
+  color: #000;
+  box-shadow: 0 0 10px var(--color-neon-cyan);
+  text-shadow: none;
+}
+
+/* --- Insights Page - Player Combat Outcomes Progress Bar Animation --- */
+.player-combat-row {
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.player-combat-row:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+  transform: translateX(4px);
+}
+
+.combat-progress-fill {
+  transition: width 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
 /* --- Spec Config (Settings) Tab --- */
 .cabinet-spec-panel {
   display: flex;
@@ -3842,4 +3928,448 @@ body.theme-retro .btn-arcade {
   box-shadow: 0 0 15px rgba(255, 230, 0, 0.8);
   color: #000;
 }
+
+
+/* ==========================================================
+   MOBILE & TABLET RESPONSIVE SUITE (UP TO 768px)
+   ========================================================== */
+@media (max-width: 768px) {
+  /* 1. Core Container Adjustments */
+  #app-container {
+    padding: 12px 16px;
+  }
+
+  /* 2. Main Header & Navigation Stacking */
+  .main-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .logo-container {
+    justify-content: center;
+    flex: none;
+  }
+
+  .centered-search {
+    max-width: 100%;
+    flex-grow: 1;
+  }
+
+  .header-nav-buttons {
+    justify-content: center;
+    flex: none;
+    width: 100%;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .btn-nav {
+    height: 38px;
+    padding: 0 12px;
+    font-size: 11px;
+    justify-content: center;
+  }
+
+  .btn-nav-decor {
+    display: none; /* Hide the arrow decor on mobile to keep it super clean */
+  }
+
+  /* 3. Welcome / New Player Accordion */
+  .home-welcome-panel {
+    margin-bottom: -5px !important;
+  }
+  
+  #welcome-panel-toggle {
+    padding: 12px 18px !important;
+  }
+
+  #welcome-panel-content {
+    padding: 0 18px !important;
+  }
+
+  /* 4. Home Filters and Dropdowns Row */
+  .podium-header-row {
+    padding: 10px;
+    margin-left: 0;
+    top: 0;
+  }
+
+  .podium-filters-group {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .retro-multi-select-container,
+  .podium-filter-wrapper,
+  .retro-multi-select-btn {
+    width: 100%;
+  }
+
+  .retro-multi-select-btn {
+    min-width: 100%;
+  }
+
+  .toggle-switch-beveled {
+    width: 100%;
+  }
+
+  .toggle-switch-beveled .toggle-btn {
+    flex: 1;
+    padding: 0 8px;
+    font-size: 10px;
+  }
+
+  /* 5. Olympic 3D Podium proportional scaling */
+  .podium-stage {
+    height: 400px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    gap: 10px;
+  }
+
+  .podium-column {
+    width: 32%;
+  }
+
+  .podium-fighter-container {
+    height: 220px;
+    margin-bottom: -10px;
+  }
+
+  .podium-fighter-container::after {
+    width: 100px;
+    height: 12px;
+  }
+
+  .podium-column.tier-1 .podium-fighter-container::before {
+    top: -28px;
+    font-size: var(--font-size-xl);
+  }
+
+  .tier-1 .podium-block {
+    height: 140px;
+  }
+
+  .tier-2 .podium-block {
+    height: 110px;
+  }
+
+  .tier-3 .podium-block {
+    height: 85px;
+  }
+
+  .podium-num {
+    font-size: var(--font-size-xl);
+    transform: translateY(6px);
+  }
+
+  .podium-floating-info {
+    margin-top: 10px;
+  }
+
+  .podium-player-name {
+    font-size: 10px;
+    letter-spacing: 0.5px;
+  }
+
+  .podium-combo-stat {
+    font-size: var(--font-size-xs);
+  }
+
+  /* 6. Profile layouts (Players & Fighters sidebars) */
+  #player-profile-view .profile-view-layout,
+  #fighter-profile-view .fighter-view-layout {
+    grid-template-columns: 1fr;
+    gap: 25px;
+    padding: 10px 0;
+  }
+
+  #fighter-profile-view .profile-sidebar {
+    gap: 15px;
+  }
+
+  /* 7. Moves Library Table transformation into custom cards */
+  .moves-table-retro,
+  .moves-table-retro thead,
+  .moves-table-retro tbody,
+  .moves-table-retro tr,
+  .moves-table-retro th,
+  .moves-table-retro td {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .moves-table-retro thead {
+    display: none; /* Hide standard headers */
+  }
+
+  .moves-table-retro tr.category-header-row td {
+    border-left: 4px solid var(--color-neon-cyan);
+    background: rgba(0, 240, 255, 0.12);
+    font-size: 11px;
+    padding: 10px 12px;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    text-shadow: 0 0 5px rgba(255, 230, 0, 0.4);
+  }
+
+  .moves-table-retro tr.move-row {
+    border: 1px solid rgba(0, 240, 255, 0.15);
+    background: rgba(13, 15, 20, 0.65);
+    margin-bottom: 15px;
+    border-radius: 6px;
+    padding: 8px 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  }
+
+  .moves-table-retro tr.move-row td {
+    border-bottom: none;
+    padding: 8px 0;
+  }
+
+  .moves-table-retro tr.move-row td:not(:last-child) {
+    border-bottom: 1px dashed rgba(0, 240, 255, 0.1);
+  }
+
+  .moves-table-retro tr.move-row td::before {
+    content: attr(data-label);
+    display: block;
+    font-family: var(--font-arcade);
+    font-size: 9px;
+    color: var(--color-neon-cyan);
+    margin-bottom: 5px;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 3px rgba(0, 240, 255, 0.3);
+  }
+
+  /* 8. Profile Grids Stacking */
+  #player-profile-view .profile-timeframe-row {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 12px !important;
+    margin-bottom: 20px !important;
+  }
+
+  #player-profile-view .profile-timeframe-row .timeframe-filter-wrapper {
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  #player-profile-view .profile-timeframe-row .mode-toggle-label {
+    text-align: center;
+  }
+
+  #player-profile-view .stats-grid-container {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+
+  #player-profile-view .stat-cell-retro {
+    padding: 15px 10px;
+  }
+
+  #player-profile-view .stat-cell-retro .stat-title {
+    font-size: 9px;
+    margin-bottom: 6px;
+  }
+
+  #player-profile-view .stat-cell-retro .stat-num {
+    font-size: var(--font-size-md);
+  }
+
+  .profile-meta-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  /* 9. Fighters Library view search controls & grids */
+  .fighters-controls-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px !important;
+    padding: 15px !important;
+  }
+
+  .fighters-control-item {
+    max-width: 100% !important;
+  }
+
+  /* 10. Floating settings icon adjustments */
+  .floating-settings-container {
+    bottom: 15px;
+    right: 15px;
+    z-index: 1000;
+  }
+
+  .btn-settings-cog {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* 11. Custom modal overlays */
+  .retro-modal-content {
+    width: 95%;
+    padding: 15px !important;
+  }
+
+  /* 12. Leaderboard Container and Form Actions */
+  .leaderboard-control-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+    padding: 15px 0;
+  }
+
+  .leaderboard-table-container {
+    padding: 10px;
+    border-width: 4px;
+  }
+
+  .leaderboard-table th, 
+  .leaderboard-table td {
+    padding: 10px 8px;
+    font-size: 11px;
+  }
+
+  .form-actions-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .form-actions-row .btn-arcade {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+  }
+
+  /* 13. Settings Layout and Grid Overrides */
+  .form-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ==========================================================
+   SMALL PHONE RESPONSIVE SUITE (UP TO 480px)
+   ========================================================== */
+@media (max-width: 480px) {
+  /* 1. Olympic 3D Podium proportional scaling on small screens */
+  .podium-stage {
+    height: 300px;
+    margin-top: 15px;
+  }
+
+  .podium-fighter-container {
+    height: 140px;
+    margin-bottom: -5px;
+  }
+
+  .podium-fighter-container::after {
+    width: 70px;
+    height: 8px;
+  }
+
+  .podium-column.tier-1 .podium-fighter-container::before {
+    top: -24px;
+    font-size: var(--font-size-md);
+  }
+
+  .tier-1 .podium-block {
+    height: 100px;
+  }
+
+  .tier-2 .podium-block {
+    height: 80px;
+  }
+
+  .tier-3 .podium-block {
+    height: 60px;
+  }
+
+  .podium-num {
+    font-size: var(--font-size-sm);
+    transform: translateY(4px);
+  }
+
+  .podium-player-name {
+    font-size: 8px;
+    letter-spacing: 0;
+  }
+
+  .podium-combo-stat {
+    font-size: 9px;
+  }
+
+  /* 2. Fighters Grid Selector 2-Columns Layout */
+  .fighters-library-grid {
+    grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .fighter-library-card {
+    height: 240px !important;
+  }
+
+  .card-portrait-wrapper {
+    background: linear-gradient(180deg, rgba(0, 240, 255, 0.05) 0%, rgba(0,0,0,0) 100%);
+  }
+
+  .card-info-footer {
+    padding: 8px 10px !important;
+  }
+
+  .card-fighter-name {
+    font-size: 10px !important;
+    letter-spacing: 0.5px !important;
+  }
+
+  .card-series-badge {
+    font-size: 7px !important;
+    padding: 1px 4px !important;
+  }
+
+  /* 3. Match History Items compacting */
+  .match-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .match-card-meta {
+    font-size: 10px;
+  }
+
+  .match-card-players-grid {
+    grid-template-columns: 1fr !important; /* Stack players as full-width rows under 480px */
+  }
+
+  .history-player-row {
+    padding: 8px 10px;
+  }
+
+  /* 4. Timeline Drawer overlay resizing */
+  .timeline-label {
+    font-size: 7px !important;
+    top: -18px !important;
+  }
+
+  .timeline-player-info {
+    font-size: 8px !important;
+    padding: 2px 4px !important;
+  }
+
+  /* 5. Telemetry chart stack adjustments */
+  .gauges-grid {
+    grid-template-columns: 1fr !important;
+    gap: 15px !important;
+  }
+}
+
 

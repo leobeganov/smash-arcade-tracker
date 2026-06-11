@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentLeaderboardTimeframe = "alltime";
   let currentPlayerTimeframe = "alltime";
   let currentFighterTimeframe = "alltime";
+  let currentInsightsTimeframe = "alltime";
   let currentFighterId = null;
   let currentVariantIndex = 0;
   let currentFighterStats = null;
@@ -53,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
     fighters: document.getElementById("fighters-view"),
     leaderboard: document.getElementById("leaderboard-view"),
     scanner: document.getElementById("scanner-view"),
-    telemetry: document.getElementById("telemetry-view"),
+    insights: document.getElementById("insights-view"),
     settings: document.getElementById("settings-view")
   };
 
@@ -91,11 +92,11 @@ document.addEventListener("DOMContentLoaded", () => {
     else if (route === "fighters") target = "fighters";
     else if (route === "leaderboard") target = "leaderboard";
     else if (route === "scanner") target = "scanner";
-    else if (route === "telemetry") target = "telemetry";
+    else if (route === "insights") target = "insights";
     else if (route === "settings") target = "settings";
 
     // Update active state in nav tabs
-    const navTabs = ["home", "fighters", "leaderboard", "scanner", "telemetry", "settings"];
+    const navTabs = ["home", "fighters", "leaderboard", "scanner", "insights", "settings"];
     navTabs.forEach(tab => {
       const el = document.getElementById(`nav-tab-${tab}`);
       if (el) {
@@ -135,8 +136,8 @@ document.addEventListener("DOMContentLoaded", () => {
       await renderLeaderboard();
     } else if (target === "scanner") {
       await renderScanner();
-    } else if (target === "telemetry") {
-      await renderTelemetry();
+    } else if (target === "insights") {
+      await renderInsights();
     } else if (target === "settings") {
       await renderSettings();
     }
@@ -1026,15 +1027,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         moveRow.innerHTML = `
-          <td>
+          <td data-label="INPUT COMMAND">
             <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
               ${buttonsHtml}
             </div>
           </td>
-          <td>
+          <td data-label="MOVE NAME">
             <span class="move-name-text text-glow-cyan" style="font-family: var(--font-header); font-size: 13px; color: #fff; text-shadow: 0 0 5px rgba(0, 240, 255, 0.4); text-transform: uppercase;">${m.name}</span>
           </td>
-          <td>
+          <td data-label="EFFECT & TACTICAL ADVICE">
             <div style="display: flex; flex-direction: column; text-align: left;">
               <p class="move-desc" style="font-family: monospace; font-size: 12px; color: #c4c6d0; opacity: 0.95; margin: 0; line-height: 1.5;">${m.description}</p>
               ${subtipsHtml}
@@ -1600,10 +1601,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   // ==========================================
-  // Telemetry Dashboard View Controllers
+  // Insights Dashboard View Controllers
   // ==========================================
-  async function renderTelemetry() {
-    const stats = await window.Database.getStatsAsync();
+  async function renderInsights() {
+    // Sync timeframe filter toggle buttons
+    const timeframeFilters = document.getElementById("insights-timeframe-filters");
+    if (timeframeFilters) {
+      timeframeFilters.querySelectorAll(".toggle-btn").forEach(btn => {
+        if (btn.getAttribute("data-timeframe") === currentInsightsTimeframe) {
+          btn.classList.add("active");
+        } else {
+          btn.classList.remove("active");
+        }
+      });
+    }
+
+    // Fetch and filter matches dynamically
+    let matches = await window.Database.getMatchesAsync();
+    const now = Date.now();
+    if (currentInsightsTimeframe === 'today') {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      matches = matches.filter(m => m.timestamp >= todayStart.getTime());
+    } else if (currentInsightsTimeframe === '7days') {
+      const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
+      matches = matches.filter(m => m.timestamp >= sevenDaysAgo);
+    } else if (currentInsightsTimeframe === '30days') {
+      const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
+      matches = matches.filter(m => m.timestamp >= thirtyDaysAgo);
+    }
+
+    // Request stats based on pre-filtered timeframe matches
+    const stats = await window.Database.getStatsAsync({ matches });
 
     // Populate KPI panels
     document.getElementById("tel-kpi-matches").textContent = stats.totalMatches;
@@ -1613,9 +1642,268 @@ document.addEventListener("DOMContentLoaded", () => {
     // Trigger SVG Renderings
     if (window.Charts) {
       window.Charts.renderWinRateGauge("win-rate-gauges-container", stats.players);
-      window.Charts.renderCharacterDonut("popularity-donut-chart-container", stats.characters);
       window.Charts.renderPlayerPlacements("outcomes-stacked-bar-container", stats.players);
     }
+
+    // Trigger custom html/css dynamic renderings
+    renderMostPlayedFighters("most-played-fighters-container", stats.characters, matches);
+    renderPlayerCombatOutcomes("player-combat-outcomes-container", stats.players);
+    renderAverageKOTimeline("player-average-timeline-markers", matches, "players");
+    renderAverageKOTimeline("character-average-timeline-markers", matches, "characters");
+  }
+
+  function renderMostPlayedFighters(containerId, characters, matches) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    // Filter characters with count > 0 and sort desc
+    const playedChars = characters.filter(c => c.games > 0);
+
+    if (playedChars.length === 0) {
+      container.innerHTML = `<div class="chart-empty" style="font-family: var(--font-arcade); font-size: 13px; opacity: 0.6; width: 100%; text-align: center; line-height: 100px;">NO ENCOUNTERS RECORDED</div>`;
+      return;
+    }
+
+    // Limit to top 8 most played characters
+    const topChars = playedChars.slice(0, 8);
+    const maxPlays = Math.max(...topChars.map(c => c.games), 1);
+
+    let html = "";
+    topChars.forEach(c => {
+      // Compute player breakdowns
+      const playerMap = {};
+      matches.forEach(m => {
+        if (m.players) {
+          m.players.forEach(p => {
+            if (p.character === c.name) {
+              if (!playerMap[p.playerName]) {
+                playerMap[p.playerName] = { games: 0, wins: 0, losses: 0 };
+              }
+              playerMap[p.playerName].games++;
+              if (p.placement === 1) {
+                playerMap[p.playerName].wins++;
+              } else {
+                playerMap[p.playerName].losses++;
+              }
+            }
+          });
+        }
+      });
+
+      const pct = (c.games / maxPlays) * 100;
+      const details = api.getFighterDetails(c.name) || {};
+      const iconUrl = details.icon || 'assets/mario.png';
+
+      // Build tooltip list
+      const tooltipRows = Object.entries(playerMap)
+        .sort((a, b) => b[1].games - a[1].games)
+        .map(([name, pStats]) => `
+          <div class="tooltip-player-row" style="display: flex; justify-content: space-between; gap: 15px; font-size: 9px; border-bottom: 1px dashed rgba(255,255,255,0.08); padding: 4px 0;">
+            <span class="tooltip-p-name" style="color: #fff; font-weight: bold;">${name}</span>
+            <span class="tooltip-p-stats" style="color: #ccc;">${pStats.games} plays <span style="color: var(--color-neon-yellow); font-weight: bold;">(${pStats.wins}W / ${pStats.losses}L)</span></span>
+          </div>
+        `).join('');
+
+      html += `
+        <div class="v-bar-col" style="display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; position: relative; width: 45px; overflow: visible;">
+          
+          <!-- Custom Retro Beveled Tooltip (CSS Hover Driven) -->
+          <div class="fighter-hover-tooltip panel-beveled neon-magenta" style="position: absolute; bottom: 65px; left: 50%; transform: translateX(-50%) translateY(10px); width: 200px; background: rgba(15, 17, 22, 0.95); border: 1px solid var(--color-neon-magenta); border-radius: 6px; box-shadow: 0 0 15px rgba(255,0,127,0.5); padding: 12px; box-sizing: border-box; display: flex; flex-direction: column; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease; z-index: 100;">
+            <div class="tooltip-header font-arcade text-glow-magenta" style="font-size: 11px; margin-bottom: 6px; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,0,127,0.3); padding-bottom: 6px;">${c.name.toUpperCase()}</div>
+            <div class="tooltip-subheader font-stats" style="font-size: 10px; margin-bottom: 8px; color: #8a8d9a;">TOTAL PICKS: <strong style="color: #fff;">${c.games}</strong></div>
+            <div class="tooltip-players-list" style="display: flex; flex-direction: column; gap: 2px;">
+              ${tooltipRows}
+            </div>
+          </div>
+          
+          <!-- Value Label -->
+          <span class="v-bar-value font-stats text-glow-cyan" style="font-size: 11px; margin-bottom: 6px; font-weight: bold; color: #fff; z-index: 2;">${c.games}</span>
+          
+          <!-- Animated vertical bar track -->
+          <div class="v-bar-track" style="width: 18px; height: calc(${pct}% - 35px); min-height: 4px; background: linear-gradient(180deg, var(--color-neon-magenta) 0%, rgba(255,0,127,0.2) 100%); border: 1px solid var(--color-neon-magenta); box-shadow: 0 0 10px rgba(255,0,127,0.3); border-radius: 4px 4px 0 0; cursor: pointer; transition: height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);"></div>
+          
+          <!-- Head icon bubble centered underneath -->
+          <div class="v-bar-icon-bubble" style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--color-neon-magenta); background: var(--color-bg-dark); box-shadow: 0 0 8px rgba(255,0,127,0.4); display: flex; align-items: center; justify-content: center; overflow: hidden; margin-top: 8px; flex-shrink: 0; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">
+            <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${c.name}">
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  function renderPlayerCombatOutcomes(containerId, players) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    if (!players || players.length === 0) {
+      container.innerHTML = `<div class="chart-empty" style="font-family: var(--font-arcade); font-size: 13px; opacity: 0.6; width: 100%; text-align: center; line-height: 100px;">NO ENCOUNTERS RECORDED</div>`;
+      return;
+    }
+
+    // Sort by games descending (most active)
+    const activePlayers = [...players].sort((a, b) => b.games - a.games).slice(0, 5);
+    const maxVal = Math.max(...activePlayers.map(p => Math.max(p.kos || 0, p.falls || 0, p.sds || 0)), 1);
+
+    let html = "";
+    activePlayers.forEach(p => {
+      const koPct = ((p.kos || 0) / maxVal) * 100;
+      const fallPct = ((p.falls || 0) / maxVal) * 100;
+      const sdPct = ((p.sds || 0) / maxVal) * 100;
+
+      html += `
+        <div class="player-combat-row" style="display: flex; flex-direction: column; gap: 6px; border-bottom: 1px dashed rgba(255,255,255,0.08); padding-bottom: 12px; margin-bottom: 4px; overflow: visible;">
+          <div class="player-combat-name font-arcade text-glow-cyan" style="font-size: 11px; color: #fff; letter-spacing: 0.5px; text-shadow: 0 0 4px rgba(0,240,255,0.3);">${p.name.toUpperCase()}</div>
+          
+          <div class="combat-bars-stack" style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
+            <!-- KOs Bar (Cyan) -->
+            <div class="combat-bar-item" style="display: flex; align-items: center; gap: 8px;">
+              <span class="combat-bar-label font-stats" style="width: 45px; font-size: 9px; color: var(--color-neon-cyan); font-weight: bold; letter-spacing: 0.5px;">KOS</span>
+              <div class="combat-progress-track" style="flex: 1; height: 6px; background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.15); border-radius: 3px; position: relative;">
+                <div class="combat-progress-fill" style="width: ${koPct}%; height: 100%; background: linear-gradient(90deg, rgba(0,240,255,0.4) 0%, var(--color-neon-cyan) 100%); box-shadow: 0 0 6px var(--color-neon-cyan); border-radius: 2px;"></div>
+              </div>
+              <span class="combat-bar-value font-stats" style="width: 25px; text-align: right; font-size: 10px; font-weight: bold; color: #fff;">${p.kos || 0}</span>
+            </div>
+            
+            <!-- Falls Bar (Magenta) -->
+            <div class="combat-bar-item" style="display: flex; align-items: center; gap: 8px;">
+              <span class="combat-bar-label font-stats" style="width: 45px; font-size: 9px; color: var(--color-neon-magenta); font-weight: bold; letter-spacing: 0.5px;">FALLS</span>
+              <div class="combat-progress-track" style="flex: 1; height: 6px; background: rgba(255, 0, 127, 0.05); border: 1px solid rgba(255, 0, 127, 0.15); border-radius: 3px; position: relative;">
+                <div class="combat-progress-fill" style="width: ${fallPct}%; height: 100%; background: linear-gradient(90deg, rgba(255,0,127,0.4) 0%, var(--color-neon-magenta) 100%); box-shadow: 0 0 6px var(--color-neon-magenta); border-radius: 2px;"></div>
+              </div>
+              <span class="combat-bar-value font-stats" style="width: 25px; text-align: right; font-size: 10px; font-weight: bold; color: #fff;">${p.falls || 0}</span>
+            </div>
+            
+            <!-- SDs Bar (Yellow) -->
+            <div class="combat-bar-item" style="display: flex; align-items: center; gap: 8px;">
+              <span class="combat-bar-label font-stats" style="width: 45px; font-size: 9px; color: var(--color-neon-yellow); font-weight: bold; letter-spacing: 0.5px;">SDS</span>
+              <div class="combat-progress-track" style="flex: 1; height: 6px; background: rgba(255, 230, 0, 0.05); border: 1px solid rgba(255, 230, 0, 0.15); border-radius: 3px; position: relative;">
+                <div class="combat-progress-fill" style="width: ${sdPct}%; height: 100%; background: linear-gradient(90deg, rgba(255,230,0,0.4) 0%, var(--color-neon-yellow) 100%); box-shadow: 0 0 6px var(--color-neon-yellow); border-radius: 2px;"></div>
+              </div>
+              <span class="combat-bar-value font-stats" style="width: 25px; text-align: right; font-size: 10px; font-weight: bold; color: #fff;">${p.sds || 0}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  function renderAverageKOTimeline(containerId, matches, mode) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    if (!matches || matches.length === 0) {
+      container.innerHTML = "";
+      return;
+    }
+
+    const parseOutAtToSeconds = (outAtStr) => {
+      if (!outAtStr || outAtStr.trim() === '---') return null;
+      const parts = outAtStr.trim().split(':');
+      if (parts.length !== 2) return null;
+      const mins = parseInt(parts[0], 10);
+      const secs = parseInt(parts[1], 10);
+      if (isNaN(mins) || isNaN(secs)) return null;
+      return mins * 60 + secs;
+    };
+
+    const formatSecondsToMMSS = (totalSeconds) => {
+      const mins = Math.floor(totalSeconds / 60);
+      const secs = Math.round(totalSeconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    const entities = {};
+    matches.forEach(m => {
+      if (m.players) {
+        m.players.forEach(p => {
+          const key = (mode === "players") ? p.playerName : p.character;
+          if (!key) return;
+          if (!entities[key]) {
+            entities[key] = { name: key, totalSecs: 0, count: 0, characters: {} };
+          }
+          const secs = parseOutAtToSeconds(p.outAt) ?? 300; // survivors set to 5:00 mark
+          entities[key].totalSecs += secs;
+          entities[key].count++;
+          
+          if (mode === "players") {
+            entities[key].characters[p.character] = (entities[key].characters[p.character] || 0) + 1;
+          }
+        });
+      }
+    });
+
+    const sortedEntities = Object.values(entities).map(ent => {
+      const avgSecs = ent.totalSecs / ent.count;
+      let iconUrl = 'assets/mario.png';
+      if (mode === "players") {
+        let favoriteChar = null;
+        let maxCount = 0;
+        Object.entries(ent.characters).forEach(([char, count]) => {
+          if (count > maxCount) {
+            maxCount = count;
+            favoriteChar = char;
+          }
+        });
+        if (favoriteChar) {
+          const details = api.getFighterDetails(favoriteChar) || {};
+          iconUrl = details.icon || 'assets/mario.png';
+        }
+      } else {
+        const details = api.getFighterDetails(ent.name) || {};
+        iconUrl = details.icon || 'assets/mario.png';
+      }
+      return {
+        ...ent,
+        avgSecs,
+        displayTime: formatSecondsToMMSS(avgSecs),
+        iconUrl
+      };
+    }).sort((a, b) => a.avgSecs - b.avgSecs);
+
+    const placedMarkers = { above: [], below: [] };
+    let markersHtml = "";
+    let markerIdx = 0;
+
+    sortedEntities.forEach(ent => {
+      const pct = (ent.avgSecs / 300) * 100;
+      const safePct = Math.max(0, Math.min(100, pct));
+      
+      const isAbove = (markerIdx % 2 === 0);
+      markerIdx++;
+      
+      const sideKey = isAbove ? 'above' : 'below';
+      let staggerIndex = 0;
+      
+      while (placedMarkers[sideKey].some(m => Math.abs(m.pct - safePct) < 8 && m.stagger === staggerIndex)) {
+        staggerIndex++;
+      }
+      placedMarkers[sideKey].push({ pct: safePct, stagger: staggerIndex });
+      
+      const markerColor = isAbove ? 'var(--color-neon-cyan)' : 'var(--color-neon-magenta)';
+      const offsetSize = 15 + staggerIndex * 35; // staggers are spaced out vertically
+      
+      markersHtml += `
+        <div class="timeline-marker" style="position: absolute; left: ${safePct}%; top: 50%; transform: translate(-50%, -50%); width: 24px; height: 24px; z-index: ${10 + staggerIndex};">
+          <!-- Dot bubble (character icon) -->
+          <div class="timeline-dot" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid ${markerColor}; box-shadow: 0 0 8px ${markerColor}; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+            <img src="${ent.iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${ent.name}">
+          </div>
+          <!-- Vertical connector line -->
+          <div class="timeline-connector" style="position: absolute; left: 11px; ${isAbove ? `bottom: 24px` : `top: 24px`}; width: 2px; height: ${offsetSize}px; background: ${markerColor}; opacity: 0.8; z-index: 9;"></div>
+          <!-- Label panel box -->
+          <div class="timeline-player-info panel-beveled" style="position: absolute; left: 12px; ${isAbove ? `bottom: ${24 + offsetSize}px` : `top: ${24 + offsetSize}px`}; transform: translateX(-50%); text-align: center; white-space: nowrap; background: var(--color-bg-dark); border: 1px solid ${markerColor}; padding: 3px 8px; font-size: 9px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px; pointer-events: auto; user-select: none; z-index: 10;">
+            <span style="font-weight: bold; color: #fff; text-shadow: 0 0 2px rgba(255,255,255,0.5);">${ent.name}</span>
+            <span style="color: ${markerColor}; font-weight: bold; text-shadow: 0 0 4px ${markerColor};">(${ent.displayTime})</span>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = markersHtml;
   }
 
 
@@ -1850,6 +2138,21 @@ document.addEventListener("DOMContentLoaded", () => {
       if (parts[0] === "#fighter" && parts[1]) {
         renderFighterProfile(parts[1]);
       }
+    });
+  }
+
+  // Insights Timeframe Toggles
+  const insightsTimeframeFilters = document.getElementById("insights-timeframe-filters");
+  if (insightsTimeframeFilters) {
+    insightsTimeframeFilters.addEventListener("click", (e) => {
+      const btn = e.target.closest(".toggle-btn");
+      if (!btn) return;
+      
+      insightsTimeframeFilters.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      
+      currentInsightsTimeframe = btn.getAttribute("data-timeframe");
+      renderInsights();
     });
   }
 
