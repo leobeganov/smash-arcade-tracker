@@ -27,6 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentPodiumTimeframe = "7days";
   let currentLeaderboardTimeframe = "alltime";
   let currentPlayerTimeframe = "alltime";
+  let currentPlayerMatchType = "all";
   let currentFighterTimeframe = "alltime";
   let currentInsightsTimeframe = "alltime";
   let currentFighterId = null;
@@ -77,6 +78,41 @@ document.addEventListener("DOMContentLoaded", () => {
     vsOverlay.classList.remove("active");
   }
 
+  // --- Section Loader Utilities ---
+  function showSectionLoader(elementOrId, themeClass = "cyan") {
+    const el = typeof elementOrId === "string" ? document.getElementById(elementOrId) : elementOrId;
+    if (!el) return;
+
+    el.classList.add("section-loading-container");
+
+    let overlay = el.querySelector(":scope > .section-loader-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.className = "section-loader-overlay";
+      overlay.innerHTML = `<div class="standard-spinner ${themeClass}"></div>`;
+      el.appendChild(overlay);
+    } else {
+      const spinner = overlay.querySelector(".standard-spinner");
+      if (spinner) {
+        spinner.className = `standard-spinner ${themeClass}`;
+      }
+    }
+
+    overlay.offsetHeight; // trigger reflow
+    overlay.classList.add("active");
+  }
+
+  function hideSectionLoader(elementOrId) {
+    const el = typeof elementOrId === "string" ? document.getElementById(elementOrId) : elementOrId;
+    if (!el) return;
+
+    const overlay = el.querySelector(":scope > .section-loader-overlay");
+    if (overlay) {
+      overlay.classList.remove("active");
+    }
+  }
+
+
   // ==========================================
   // Client Router
   // ==========================================
@@ -126,6 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
       await renderHome();
     } else if (target === "player") {
       currentPlayerTimeframe = "alltime";
+      currentPlayerMatchType = "all";
       await renderPlayerProfile(id);
     } else if (target === "fighter") {
       currentFighterTimeframe = "alltime";
@@ -235,15 +272,53 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function initQrCode() {
+    const qrImg = document.getElementById("qr-code-img");
+    const qrStatus = document.getElementById("qr-code-status");
+    if (!qrImg) return;
+
+    const currentUrl = window.location.href;
+    const isLocalFile = currentUrl.startsWith("file://");
+    const isLocalhost = currentUrl.includes("localhost") || currentUrl.includes("127.0.0.1");
+
+    let qrUrl = currentUrl;
+    
+    if (isLocalFile) {
+      if (qrStatus) {
+        qrStatus.textContent = "FILE PROTOCOL DETECTED ⚠️";
+        qrStatus.style.color = "var(--color-neon-yellow)";
+        qrStatus.title = "Standard mobile phones cannot open local file:// paths. Use a local network server to sync with mobile.";
+      }
+    } else if (isLocalhost) {
+      if (qrStatus) {
+        qrStatus.textContent = "LOCAL DEV DETECTED 💻";
+        qrStatus.style.color = "var(--color-neon-cyan)";
+        qrStatus.title = "Ensure your mobile device is on the same network to access this local development server.";
+      }
+    } else {
+      if (qrStatus) {
+        qrStatus.textContent = "LINK SYNCED 📱";
+        qrStatus.style.color = "var(--color-neon-cyan)";
+      }
+    }
+
+    // Set the QR image source using the free, fast qrserver API
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&color=000000&bgcolor=ffffff&data=${encodeURIComponent(qrUrl)}`;
+  }
+
 
   // ==========================================
   // 3. Render Home (The Main Stage)
   // ==========================================
   async function renderHome() {
-    const loader = document.getElementById("podium-loader");
-    if (loader) {
-      loader.style.display = "inline-flex";
-    }
+    // Sync dynamic QR code link
+    initQrCode();
+
+    const podiumStage = document.querySelector(".podium-stage");
+    const matchesList = document.getElementById("history-matches-list");
+    showSectionLoader(podiumStage, "yellow");
+    showSectionLoader(matchesList, "cyan");
+
     const startTime = Date.now();
 
     // Gather selected styles
@@ -418,9 +493,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (elapsed < 250) {
       await new Promise(resolve => setTimeout(resolve, 250 - elapsed));
     }
-    if (loader) {
-      loader.style.display = "none";
-    }
+    
+    hideSectionLoader(podiumStage);
+    hideSectionLoader(matchesList);
   }
 
 
@@ -428,11 +503,27 @@ document.addEventListener("DOMContentLoaded", () => {
   // 4. Render Player Profile
   // ==========================================
   async function renderPlayerProfile(playerId) {
+    const profileContent = document.querySelector("#player-profile-view .profile-content-area");
+    showSectionLoader(profileContent, "magenta");
+    const startTime = Date.now();
+
     // Sync timeframe filter toggle buttons
     const ptf = document.getElementById("player-timeframe-filters");
     if (ptf) {
       ptf.querySelectorAll(".toggle-btn").forEach(btn => {
         if (btn.getAttribute("data-timeframe") === currentPlayerTimeframe) {
+          btn.classList.add("active");
+        } else {
+          btn.classList.remove("active");
+        }
+      });
+    }
+
+    // Sync match type filter toggle buttons
+    const pmf = document.getElementById("player-matchtype-filters");
+    if (pmf) {
+      pmf.querySelectorAll(".toggle-btn").forEach(btn => {
+        if (btn.getAttribute("data-matchtype") === currentPlayerMatchType) {
           btn.classList.add("active");
         } else {
           btn.classList.remove("active");
@@ -455,16 +546,38 @@ document.addEventListener("DOMContentLoaded", () => {
       matches = matches.filter(m => m.timestamp >= thirtyDaysAgo);
     }
 
+    // Filter matches by match type
+    if (currentPlayerMatchType !== 'all') {
+      matches = matches.filter(m => {
+        const is1v1 = (m.gameMode && m.gameMode.toLowerCase() === '1v1') || 
+                      (m.gameStyle && m.gameStyle.toLowerCase() === '1v1') || 
+                      (m.players && m.players.length === 2);
+        if (is1v1) {
+          return currentPlayerMatchType === '1v1';
+        }
+        const isTeams = m.gameStyle && m.gameStyle.toLowerCase() === 'teams';
+        if (isTeams) {
+          return currentPlayerMatchType === 'teams';
+        }
+        // Otherwise Free-for-all
+        return currentPlayerMatchType === 'free-for-all' || currentPlayerMatchType === 'ffa';
+      });
+    }
+
     const stats = await api.getPlayerProfile(playerId, matches);
-    if (!stats) return;
+    if (!stats) {
+      hideSectionLoader(profileContent);
+      return;
+    }
 
     // Sidebar Portrait and Info
     document.getElementById("player-profile-fighter-img").src = stats.mostUsedFighter ? stats.mostUsedFighter.img : "assets/mario.png?v=5";
     document.getElementById("player-profile-name").textContent = stats.player.name;
 
     // Stat grids
-    document.getElementById("player-stat-wins").textContent = stats.adjustedWins;
-    document.getElementById("player-stat-wins-raw").textContent = `${stats.wins} / ${stats.totalMatches} WINS`;
+    document.getElementById("player-stat-games").textContent = stats.totalMatches;
+    document.getElementById("player-stat-wins").textContent = stats.wins;
+    document.getElementById("player-stat-wins-raw").textContent = `RATING: ${stats.adjustedWins}`;
     document.getElementById("player-stat-losses").textContent = stats.losses;
     document.getElementById("player-stat-winrate").textContent = `${stats.winRate}%`;
     document.getElementById("player-stat-kd").textContent = stats.kdRatio;
@@ -548,6 +661,12 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.hash = "#home";
       };
     }
+    // Enforce smooth minimum display delay of 250ms
+    const elapsed = Date.now() - startTime;
+    if (elapsed < 250) {
+      await new Promise(resolve => setTimeout(resolve, 250 - elapsed));
+    }
+    hideSectionLoader(profileContent);
   }  // Helper to update active variant display
   function updateVariantDisplayGlobal() {
     if (!currentFighterStats) return;
@@ -790,6 +909,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // 5. Render Fighter Profile
   // ==========================================
   async function renderFighterProfile(fighterId) {
+    const profileContent = document.querySelector("#fighter-profile-view .profile-content-area");
+    showSectionLoader(profileContent, "cyan");
+    const startTime = Date.now();
+
     // Sync timeframe filter toggle buttons
     const ftf = document.getElementById("fighter-timeframe-filters");
     if (ftf) {
@@ -818,7 +941,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const stats = await api.getFighterProfile(fighterId, matches);
-    if (!stats) return;
+    if (!stats) {
+      hideSectionLoader(profileContent);
+      return;
+    }
 
     // Track active IDs and assign global stats for variants
     if (currentFighterId !== fighterId) {
@@ -1082,6 +1208,12 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.hash = "#home";
       };
     }
+    // Enforce smooth minimum display delay of 250ms
+    const elapsed = Date.now() - startTime;
+    if (elapsed < 250) {
+      await new Promise(resolve => setTimeout(resolve, 250 - elapsed));
+    }
+    hideSectionLoader(profileContent);
   }
 
 
@@ -1089,10 +1221,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // 6. Render Global Leaderboard
   // ==========================================
   async function renderLeaderboard() {
-    const loader = document.getElementById("leaderboard-loader");
-    if (loader) {
-      loader.style.display = "inline-flex";
-    }
+    const leaderboardContainer = document.querySelector(".leaderboard-table-container");
+    showSectionLoader(leaderboardContainer, "yellow");
     const startTime = Date.now();
 
     const isFighterMode = currentLeaderboardMode === "fighters";
@@ -1179,9 +1309,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (elapsed < 250) {
       await new Promise(resolve => setTimeout(resolve, 250 - elapsed));
     }
-    if (loader) {
-      loader.style.display = "none";
-    }
+    hideSectionLoader(leaderboardContainer);
   }
 
 
@@ -1604,6 +1732,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // Insights Dashboard View Controllers
   // ==========================================
   async function renderInsights() {
+    const telemetryLayout = document.querySelector("#insights-view .telemetry-view-layout");
+    showSectionLoader(telemetryLayout, "cyan");
+    const startTime = Date.now();
+
+    // Ensure roster slots data is fully initialized for synchronous details queries
+    await api.getFullRoster();
+
     // Sync timeframe filter toggle buttons
     const timeframeFilters = document.getElementById("insights-timeframe-filters");
     if (timeframeFilters) {
@@ -1650,6 +1785,12 @@ document.addEventListener("DOMContentLoaded", () => {
     renderPlayerCombatOutcomes("player-combat-outcomes-container", stats.players);
     renderAverageKOTimeline("player-average-timeline-markers", matches, "players");
     renderAverageKOTimeline("character-average-timeline-markers", matches, "characters");
+
+    const elapsed = Date.now() - startTime;
+    if (elapsed < 250) {
+      await new Promise(resolve => setTimeout(resolve, 250 - elapsed));
+    }
+    hideSectionLoader(telemetryLayout);
   }
 
   function renderMostPlayedFighters(containerId, characters, matches) {
@@ -2694,8 +2835,17 @@ document.addEventListener("DOMContentLoaded", () => {
   // Render Fighters Library View
   // ==========================================
   async function renderFightersLibrary() {
+    const gridWrapper = document.querySelector(".fighters-grid-wrapper");
+    if (gridWrapper) {
+      showSectionLoader(gridWrapper, "cyan");
+    }
+    const startTime = Date.now();
+
     const roster = await api.getFullRoster();
-    if (!roster) return;
+    if (!roster) {
+      if (gridWrapper) hideSectionLoader(gridWrapper);
+      return;
+    }
 
     // 1. One-time Controls & Listeners Initialization
     if (!isFightersControlsInitialized) {
@@ -2833,6 +2983,11 @@ document.addEventListener("DOMContentLoaded", () => {
             NO FIGHTERS MATCHING THE CURRENT PROTOCOLS FOUND.
           </div>
         `;
+        const elapsed = Date.now() - startTime;
+        if (elapsed < 250) {
+          await new Promise(resolve => setTimeout(resolve, 250 - elapsed));
+        }
+        if (gridWrapper) hideSectionLoader(gridWrapper);
         return;
       }
 
@@ -2840,6 +2995,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const cardNode = createLibraryCardNode(r);
         gridEl.appendChild(cardNode);
       });
+    }
+
+    if (gridWrapper) {
+      const elapsed = Date.now() - startTime;
+      if (elapsed < 250) {
+        await new Promise(resolve => setTimeout(resolve, 250 - elapsed));
+      }
+      hideSectionLoader(gridWrapper);
     }
   }
 
