@@ -4494,7 +4494,7 @@ body.theme-retro .btn-arcade {
   width: 100%;
   max-width: 1125px;
   box-sizing: border-box;
-  margin-bottom: -15px;
+  margin-bottom: -35px;
 }
 
 .home-welcome-panel {
@@ -4515,7 +4515,7 @@ body.theme-retro .btn-arcade {
   .home-top-row {
     flex-direction: column;
     gap: 15px;
-    margin-bottom: -5px;
+    margin-bottom: -20px;
   }
   
   .home-welcome-panel {
