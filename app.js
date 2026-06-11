@@ -2134,26 +2134,28 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("tel-kpi-matches").textContent = stats.totalMatches;
     
     const kpiPlayerEl = document.getElementById("tel-kpi-player");
-    kpiPlayerEl.textContent = stats.topPlayer;
-    if (stats.topPlayer && stats.topPlayer !== "N/A") {
-      kpiPlayerEl.style.cursor = "pointer";
-      kpiPlayerEl.style.transition = "color 0.2s, text-shadow 0.2s";
-      kpiPlayerEl.onclick = () => {
-        window.location.hash = `#player/${stats.topPlayer.toLowerCase().replace(/\s+/g, '-')}`;
-      };
-      kpiPlayerEl.onmouseover = () => {
-        kpiPlayerEl.style.color = "var(--color-neon-yellow)";
-        kpiPlayerEl.style.textShadow = "0 0 10px var(--color-neon-yellow)";
-      };
-      kpiPlayerEl.onmouseout = () => {
-        kpiPlayerEl.style.color = "";
-        kpiPlayerEl.style.textShadow = "";
-      };
-    } else {
-      kpiPlayerEl.style.cursor = "";
-      kpiPlayerEl.onclick = null;
-      kpiPlayerEl.onmouseover = null;
-      kpiPlayerEl.onmouseout = null;
+    if (kpiPlayerEl) {
+      kpiPlayerEl.textContent = stats.topPlayer;
+      if (stats.topPlayer && stats.topPlayer !== "N/A") {
+        kpiPlayerEl.style.cursor = "pointer";
+        kpiPlayerEl.style.transition = "color 0.2s, text-shadow 0.2s";
+        kpiPlayerEl.onclick = () => {
+          window.location.hash = `#player/${stats.topPlayer.toLowerCase().replace(/\s+/g, '-')}`;
+        };
+        kpiPlayerEl.onmouseover = () => {
+          kpiPlayerEl.style.color = "var(--color-neon-yellow)";
+          kpiPlayerEl.style.textShadow = "0 0 10px var(--color-neon-yellow)";
+        };
+        kpiPlayerEl.onmouseout = () => {
+          kpiPlayerEl.style.color = "";
+          kpiPlayerEl.style.textShadow = "";
+        };
+      } else {
+        kpiPlayerEl.style.cursor = "";
+        kpiPlayerEl.onclick = null;
+        kpiPlayerEl.onmouseover = null;
+        kpiPlayerEl.onmouseout = null;
+      }
     }
 
     const kpiCharEl = document.getElementById("tel-kpi-character");
