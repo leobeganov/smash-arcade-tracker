@@ -1012,6 +1012,70 @@ const POC_SEED_MATCHES = [
   }
 ];
 
+function getSeedHourAndMinute(id) {
+  if (id === "match-seed-sudden-death-1") {
+    return { hour: 18, minute: 30 }; // 6:30 PM (one of the "rest of the day" matches)
+  }
+  
+  const match = id.match(/match-seed-(\d+)/);
+  if (!match) return null;
+  const num = parseInt(match[1], 10);
+  
+  // 1. Lots around 3pm (approx 35 matches): indices 1 to 35
+  //    Spread between 2:20 PM (14:20) and 3:40 PM (15:40)
+  if (num >= 1 && num <= 35) {
+    const startMinutes = 14 * 60 + 20; // 860
+    const endMinutes = 15 * 60 + 40; // 940
+    const step = (endMinutes - startMinutes) / 34;
+    const currentMinutes = Math.round(startMinutes + (num - 1) * step);
+    const hour = Math.floor(currentMinutes / 60);
+    const minute = currentMinutes % 60;
+    return { hour, minute };
+  }
+  
+  // 2. Some around 12pm (approx 15 matches): indices 36 to 50
+  //    Spread between 11:35 AM and 12:25 PM
+  if (num >= 36 && num <= 50) {
+    const startMinutes = 11 * 60 + 35; // 695
+    const endMinutes = 12 * 60 + 25; // 745
+    const step = (endMinutes - startMinutes) / 14;
+    const currentMinutes = Math.round(startMinutes + (num - 36) * step);
+    const hour = Math.floor(currentMinutes / 60);
+    const minute = currentMinutes % 60;
+    return { hour, minute };
+  }
+  
+  // 3. A few around 5pm (approx 12 matches): indices 51 to 62
+  //    Spread between 4:35 PM and 5:25 PM
+  if (num >= 51 && num <= 62) {
+    const startMinutes = 16 * 60 + 35; // 995
+    const endMinutes = 17 * 60 + 25; // 1045
+    const step = (endMinutes - startMinutes) / 11;
+    const currentMinutes = Math.round(startMinutes + (num - 51) * step);
+    const hour = Math.floor(currentMinutes / 60);
+    const minute = currentMinutes % 60;
+    return { hour, minute };
+  }
+  
+  // 4. One or two throughout the rest of the day (approx 8 matches): indices 63 to 70
+  //    Times scattered: 8:15 AM, 9:40 AM, 10:25 AM, 11:05 AM, 1:15 PM, 1:55 PM, 4:10 PM, 5:50 PM
+  const restOfTimes = [
+    { hour: 8, minute: 15 },
+    { hour: 9, minute: 40 },
+    { hour: 10, minute: 25 },
+    { hour: 11, minute: 5 },
+    { hour: 13, minute: 15 },
+    { hour: 13, minute: 55 },
+    { hour: 16, minute: 10 },
+    { hour: 17, minute: 50 }
+  ];
+  if (num >= 63 && num <= 70) {
+    return restOfTimes[num - 63];
+  }
+  
+  return null;
+}
+
 const Database = {
   /**
    * Retrieves all matches from Local Storage.
@@ -1054,6 +1118,21 @@ const Database = {
         matches.push(sdMatch);
         updated = true;
       }
+
+      // Apply seed distribution adjustment to all seed matches
+      matches.forEach(m => {
+        if (m.id && m.id.startsWith("match-seed-")) {
+          const timeInfo = getSeedHourAndMinute(m.id);
+          if (timeInfo) {
+            const date = new Date(m.timestamp);
+            if (date.getHours() !== timeInfo.hour || date.getMinutes() !== timeInfo.minute) {
+              date.setHours(timeInfo.hour, timeInfo.minute, 0, 0);
+              m.timestamp = date.getTime();
+              updated = true;
+            }
+          }
+        }
+      });
 
       if (updated) {
         this.saveMatches(matches);
@@ -1118,7 +1197,7 @@ const Database = {
       }
       matches[index] = merged;
       this.saveMatches(matches);
-      return matches[index];
+      return merged;
     }
     return null;
   },
@@ -1138,6 +1217,18 @@ const Database = {
 
     // Incorporate POC's multi-player seeds
     mergedSeeds = mergedSeeds.concat(POC_SEED_MATCHES);
+
+    // Apply seed distribution adjustment
+    mergedSeeds.forEach(m => {
+      if (m.id && m.id.startsWith("match-seed-")) {
+        const timeInfo = getSeedHourAndMinute(m.id);
+        if (timeInfo) {
+          const date = new Date(m.timestamp);
+          date.setHours(timeInfo.hour, timeInfo.minute, 0, 0);
+          m.timestamp = date.getTime();
+        }
+      }
+    });
 
     // Sort chronologically descending
     mergedSeeds.sort((a, b) => b.timestamp - a.timestamp);
