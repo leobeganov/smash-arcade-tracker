@@ -123,7 +123,7 @@ const Charts = {
               style="transition: stroke-width 0.3s; cursor: pointer;"
               onmouseover="this.setAttribute('stroke-width', '${strokeWidth + 4}'); this.style.filter = 'url(#donut-glow)';"
               onmouseout="this.setAttribute('stroke-width', '${strokeWidth}'); this.style.filter = 'none';"
-              ${!isOthers ? `onclick="window.location.hash = '#fighter/${char.name.toLowerCase().replace(/\\s+/g, '-')}'"` : ''}
+              ${!isOthers ? `onclick="window.location.hash = '#fighter/${char.name.toLowerCase().replace(/\s+/g, '-')}'"` : ''}
         />
       `;
     });
@@ -142,7 +142,7 @@ const Charts = {
       const color = CHART_COLORS[i % CHART_COLORS.length];
       const isOthers = char.name === 'Others';
       legendHtml += `
-        <div class="legend-item" style="--legend-color: ${color}; ${isOthers ? '' : 'cursor: pointer;'}" ${isOthers ? '' : `onclick="window.location.hash = '#fighter/${char.name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.querySelector('.legend-name').style.color='var(--legend-color)'; this.querySelector('.legend-name').style.textShadow='0 0 6px var(--legend-color)';" onmouseout="this.querySelector('.legend-name').style.color=''; this.querySelector('.legend-name').style.textShadow='';"`}>
+        <div class="legend-item" style="--legend-color: ${color}; ${isOthers ? '' : 'cursor: pointer;'}" ${isOthers ? '' : `onclick="window.location.hash = '#fighter/${char.name.toLowerCase().replace(/\s+/g, '-')}'" onmouseover="this.querySelector('.legend-name').style.color='var(--legend-color)'; this.querySelector('.legend-name').style.textShadow='0 0 6px var(--legend-color)';" onmouseout="this.querySelector('.legend-name').style.color=''; this.querySelector('.legend-name').style.textShadow='';"`}>
           <span class="legend-badge"></span>
           <span class="legend-name" style="${isOthers ? '' : 'transition: color 0.2s, text-shadow 0.2s;'}">${char.name}</span>
           <span class="legend-count">${char.games} <small class="pct-label">(${pct}%)</small></span>
@@ -197,7 +197,7 @@ const Charts = {
 
       html += `
         <div class="bar-chart-row">
-          <div class="bar-row-label" style="cursor: pointer; transition: color 0.2s, text-shadow 0.2s;" onclick="window.location.hash = '#player/${player.name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.color='var(--color-neon-cyan)'; this.style.textShadow='0 0 6px var(--color-neon-cyan)';" onmouseout="this.style.color=''; this.style.textShadow='';">
+          <div class="bar-row-label" style="cursor: pointer; transition: color 0.2s, text-shadow 0.2s;" onclick="window.location.hash = '#player/${player.name.toLowerCase().replace(/\s+/g, '-')}'" onmouseover="this.style.color='var(--color-neon-cyan)'; this.style.textShadow='0 0 6px var(--color-neon-cyan)';" onmouseout="this.style.color=''; this.style.textShadow='';">
             ${player.name}
           </div>
           <div class="bar-track-wrapper">
@@ -220,6 +220,7 @@ const Charts = {
 
     html += '</div>';
     container.innerHTML = html;
+    container.style.height = "auto";
   },
 
   /**
@@ -250,7 +251,7 @@ const Charts = {
       const glowId = `gauge-glow-${i}`;
 
       html += `
-        <div class="gauge-card" style="--gauge-color: ${color}; flex: 1; min-width: 100px; max-width: 140px; cursor: pointer; transition: transform 0.25s cubic-bezier(0.165, 0.84, 0.44, 1), background-color 0.25s ease, box-shadow 0.25s ease;" onclick="window.location.hash = '#player/${player.name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.transform='translateY(-4px)'; this.style.backgroundColor='rgba(255, 255, 255, 0.03)'; this.querySelector('.gauge-name').style.color='var(--gauge-color)'; this.querySelector('.gauge-name').style.textShadow='0 0 6px var(--gauge-color)';" onmouseout="this.style.transform=''; this.style.backgroundColor=''; this.querySelector('.gauge-name').style.color=''; this.querySelector('.gauge-name').style.textShadow='';" >
+        <div class="gauge-card" style="--gauge-color: ${color}; flex: 1; min-width: 100px; max-width: 140px; cursor: pointer; transition: transform 0.25s cubic-bezier(0.165, 0.84, 0.44, 1), background-color 0.25s ease, box-shadow 0.25s ease;" onclick="window.location.hash = '#player/${player.name.toLowerCase().replace(/\s+/g, '-')}'" onmouseover="this.style.transform='translateY(-4px)'; this.style.backgroundColor='rgba(255, 255, 255, 0.03)'; this.querySelector('.gauge-name').style.color='var(--gauge-color)'; this.querySelector('.gauge-name').style.textShadow='0 0 6px var(--gauge-color)';" onmouseout="this.style.transform=''; this.style.backgroundColor=''; this.querySelector('.gauge-name').style.color=''; this.querySelector('.gauge-name').style.textShadow='';" >
           <div class="gauge-svg-wrapper" style="width: ${size}px; height: ${size}px; position: relative;">
             <svg viewBox="0 0 ${size} ${size}" class="gauge-svg">
               <defs>
