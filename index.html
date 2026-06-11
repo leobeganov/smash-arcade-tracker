@@ -755,7 +755,7 @@
 
         <div class="telemetry-grid">
           <!-- Win Rates / Gauges -->
-          <div class="panel-beveled tel-chart-box neon-cyan">
+          <div class="panel-beveled tel-chart-box neon-cyan full-width-chart">
             <h3 class="font-arcade text-glow-cyan chart-box-title">WIN RATE PERFORMANCE</h3>
             <div class="chart-content" id="win-rate-gauges-container">
               <!-- Injected SVGs of Glowing Win Rate Gauges -->
@@ -764,7 +764,7 @@
 
           <!-- Most Played Fighter (Vertical Bar Chart) -->
           <div class="panel-beveled tel-chart-box neon-magenta">
-            <h3 class="font-arcade text-glow-magenta chart-box-title">MOST PLAYED FIGHTERS</h3>
+            <h3 class="font-arcade text-glow-magenta chart-box-title">MOST PLAYED FIGHTERS (TOP 10)</h3>
             <div class="chart-content flex-center" style="position: relative; padding: 15px; box-sizing: border-box; min-height: 250px;">
               <div id="most-played-fighters-container" style="width: 100%; height: 100%; min-height: 240px; display: flex; align-items: flex-end; justify-content: space-around; padding-bottom: 20px; box-sizing: border-box; overflow: visible;">
                 <!-- Vertical Bars Injected Here -->
@@ -772,21 +772,13 @@
             </div>
           </div>
 
-          <!-- Player Placements Stacked Bar -->
+          <!-- Most Popular Fighter by Unique Players (Vertical Bar Chart) -->
           <div class="panel-beveled tel-chart-box neon-yellow">
-            <h3 class="font-arcade text-glow-yellow chart-box-title">PLAYER PLACEMENT DISTRIBUTION</h3>
-            <div class="chart-content" style="min-height: 250px;">
-              <div id="outcomes-stacked-bar-container" style="width:100%; height:100%; min-height:220px;">
-                <!-- Stacked Bar Chart SVG -->
+            <h3 class="font-arcade text-glow-yellow chart-box-title">MOST POPULAR FIGHTERS (BY UNIQUE PLAYER COUNT)</h3>
+            <div class="chart-content flex-center" style="position: relative; padding: 15px; box-sizing: border-box; min-height: 250px;">
+              <div id="most-popular-fighters-container" style="width: 100%; height: 100%; min-height: 240px; display: flex; align-items: flex-end; justify-content: space-around; padding-bottom: 20px; box-sizing: border-box; overflow: visible;">
+                <!-- Vertical Bars Injected Here -->
               </div>
-            </div>
-          </div>
-
-          <!-- Player Combat Outcomes (KOs, Falls, SDs) -->
-          <div class="panel-beveled tel-chart-box neon-cyan">
-            <h3 class="font-arcade text-glow-cyan chart-box-title">PLAYER COMBAT OUTCOMES</h3>
-            <div class="chart-content" style="min-height: 250px; overflow-y: auto; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; gap: 15px;" id="player-combat-outcomes-container">
-              <!-- Player combat outcome progress tracks injected here -->
             </div>
           </div>
         </div>
@@ -798,15 +790,31 @@
           <!-- Visual Search Filter Controls -->
           <div class="timeline-filter-controls" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 30px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 20px;">
             <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-              <div class="search-input-wrapper" style="position: relative; flex: 1; min-width: 250px; max-width: 400px;">
-                <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; opacity: 0.6;">🔍</span>
-                <input type="text" id="timeline-search-input" placeholder="SEARCH TIMELINE PARTICIPANTS..." 
-                       style="box-sizing: border-box; width: 100%; padding: 10px 15px 10px 38px; background: rgba(0, 0, 0, 0.4); border: 2px solid var(--color-neon-cyan); border-radius: 4px; color: #fff; font-family: var(--font-stats); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; outline: none; transition: border-color 0.2s, box-shadow 0.2s;" 
-                       onfocus="this.style.borderColor='var(--color-neon-yellow)'; this.style.boxShadow='0 0 8px var(--color-neon-yellow)';" 
-                       onblur="this.style.borderColor='var(--color-neon-cyan)'; this.style.boxShadow='none';" />
+              
+              <!-- Custom Multi-select Player Dropdown -->
+              <div class="retro-multi-select-container" id="timeline-multi-select-players-container">
+                <button type="button" class="retro-select retro-multi-select-btn" id="btn-timeline-multi-players" style="border-color: var(--color-neon-cyan); text-shadow: 0 0 5px rgba(0, 240, 255, 0.3);">
+                  <span class="selected-text">ALL PLAYERS</span>
+                  <span class="dropdown-caret">▼</span>
+                </button>
+                <div class="retro-multi-select-dropdown dropdown-hidden" id="dropdown-timeline-multi-players">
+                  <!-- Dynamic JS options -->
+                </div>
               </div>
-              <button type="button" class="btn-arcade cyan" id="btn-clear-timeline-search" style="font-size: 9px; padding: 8px 12px; border-radius: 4px; font-family: var(--font-arcade); font-weight: bold; height: 35px; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; text-shadow: 0 0 5px rgba(0, 240, 255, 0.5);">
-                CLEAR SEARCH
+
+              <!-- Custom Multi-select Fighter Dropdown -->
+              <div class="retro-multi-select-container" id="timeline-multi-select-fighters-container">
+                <button type="button" class="retro-select retro-multi-select-btn" id="btn-timeline-multi-fighters" style="border-color: var(--color-neon-cyan); text-shadow: 0 0 5px rgba(0, 240, 255, 0.3);">
+                  <span class="selected-text">ALL FIGHTERS</span>
+                  <span class="dropdown-caret">▼</span>
+                </button>
+                <div class="retro-multi-select-dropdown dropdown-hidden" id="dropdown-timeline-multi-fighters">
+                  <!-- Dynamic JS options -->
+                </div>
+              </div>
+
+              <button type="button" class="btn-arcade cyan" id="btn-clear-timeline-filters" style="font-size: 9px; padding: 8px 12px; border-radius: 4px; font-family: var(--font-arcade); font-weight: bold; height: 32px; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; text-shadow: 0 0 5px rgba(0, 240, 255, 0.5);">
+                RESET FILTERS
               </button>
             </div>
             <p class="font-stats" style="margin: 6px 0 0 0; font-size: 10px; color: #a3a6b5; letter-spacing: 0.2px; text-transform: uppercase; opacity: 0.85;">
@@ -854,6 +862,26 @@
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="telemetry-grid">
+          <!-- Player Placements Stacked Bar -->
+          <div class="panel-beveled tel-chart-box neon-yellow">
+            <h3 class="font-arcade text-glow-yellow chart-box-title">PLAYER PLACEMENT DISTRIBUTION</h3>
+            <div class="chart-content" style="min-height: 250px;">
+              <div id="outcomes-stacked-bar-container" style="width:100%; height:100%; min-height:220px;">
+                <!-- Stacked Bar Chart SVG -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Player Combat Outcomes (KOs, Falls, SDs) -->
+          <div class="panel-beveled tel-chart-box neon-cyan">
+            <h3 class="font-arcade text-glow-cyan chart-box-title">PLAYER COMBAT OUTCOMES</h3>
+            <div class="chart-content" style="min-height: 250px; overflow-y: auto; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; gap: 15px;" id="player-combat-outcomes-container">
+              <!-- Player combat outcome progress tracks injected here -->
             </div>
           </div>
         </div>

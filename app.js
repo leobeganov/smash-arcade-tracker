@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentPlayerMatchType = "all";
   let currentFighterTimeframe = "alltime";
   let currentInsightsTimeframe = "alltime";
+  let currentInsightsMatchType = "all";
   let currentFighterId = null;
   let currentVariantIndex = 0;
   let currentFighterStats = null;
@@ -43,7 +44,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- Fighters Library State ---
   let fightersSearchQuery = "";
-  let timelineSearchQuery = "";
+  let timelineSelectedPlayers = [];
+  let timelineSelectedFighters = [];
   let fightersSelectedSeries = "all";
   let fightersSortBy = "alpha"; // "alpha" or "mostplayed"
   const cardVariantIndices = {}; // Track active variant index per fighter slug/ID
@@ -1810,6 +1812,37 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+  // --- Insights Filter Helper ---
+  async function getInsightsFilteredMatches() {
+    let matches = await window.Database.getMatchesAsync();
+    const now = Date.now();
+    if (currentInsightsTimeframe === 'today') {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      matches = matches.filter(m => m.timestamp >= todayStart.getTime());
+    } else if (currentInsightsTimeframe === '7days') {
+      const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
+      matches = matches.filter(m => m.timestamp >= sevenDaysAgo);
+    } else if (currentInsightsTimeframe === '30days') {
+      const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
+      matches = matches.filter(m => m.timestamp >= thirtyDaysAgo);
+    }
+
+    if (currentInsightsMatchType !== 'all') {
+      matches = matches.filter(m => {
+        const style = (m.gameStyle || m.matchType || "").toLowerCase().trim();
+        if (style === '1v1') {
+          return currentInsightsMatchType === '1v1';
+        }
+        if (style === 'teams' || style === 'team') {
+          return currentInsightsMatchType === 'teams';
+        }
+        return currentInsightsMatchType === 'free-for-all' || currentInsightsMatchType === 'ffa';
+      });
+    }
+    return matches;
+  }
+
   // ==========================================
   // Insights Dashboard View Controllers
   // ==========================================
@@ -1833,22 +1866,22 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // Fetch and filter matches dynamically
-    let matches = await window.Database.getMatchesAsync();
-    const now = Date.now();
-    if (currentInsightsTimeframe === 'today') {
-      const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
-      matches = matches.filter(m => m.timestamp >= todayStart.getTime());
-    } else if (currentInsightsTimeframe === '7days') {
-      const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
-      matches = matches.filter(m => m.timestamp >= sevenDaysAgo);
-    } else if (currentInsightsTimeframe === '30days') {
-      const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
-      matches = matches.filter(m => m.timestamp >= thirtyDaysAgo);
+    // Sync match type filter toggle buttons
+    const matchtypeFilters = document.getElementById("insights-matchtype-filters");
+    if (matchtypeFilters) {
+      matchtypeFilters.querySelectorAll(".toggle-btn").forEach(btn => {
+        if (btn.getAttribute("data-matchtype") === currentInsightsMatchType) {
+          btn.classList.add("active");
+        } else {
+          btn.classList.remove("active");
+        }
+      });
     }
 
-    // Request stats based on pre-filtered timeframe matches
+    // Fetch and filter matches dynamically
+    const matches = await getInsightsFilteredMatches();
+
+    // Request stats based on pre-filtered matches
     const stats = await window.Database.getStatsAsync({ matches });
 
     // Populate KPI panels
@@ -1908,9 +1941,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Trigger custom html/css dynamic renderings
     renderMostPlayedFighters("most-played-fighters-container", stats.characters, matches);
+    renderFightersByPlayers("most-popular-fighters-container", stats.characters, matches);
     renderPlayerCombatOutcomes("player-combat-outcomes-container", stats.players);
-    renderAverageKOTimeline("player-average-timeline-markers", matches, "players", timelineSearchQuery);
-    renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", timelineSearchQuery);
+    // Initialize timeline multi-select filters dynamically
+    const allStats = await window.Database.getStatsAsync();
+    const playerNames = allStats.players.map(p => p.name).sort();
+    const fightersList = await api.getAllFighters();
+
+    setupRetroMultiSelect("timeline-multi-select-players-container", playerNames, timelineSelectedPlayers, () => {
+      renderAverageKOTimeline("player-average-timeline-markers", matches, "players", timelineSelectedPlayers);
+    });
+
+    setupRetroMultiSelect("timeline-multi-select-fighters-container", fightersList, timelineSelectedFighters, () => {
+      renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", timelineSelectedFighters);
+    });
+
+    // Handle RESET button click
+    const btnClearTimelineFilters = document.getElementById("btn-clear-timeline-filters");
+    if (btnClearTimelineFilters) {
+      btnClearTimelineFilters.onclick = () => {
+        timelineSelectedPlayers.length = 0;
+        timelineSelectedFighters.length = 0;
+        
+        setupRetroMultiSelect("timeline-multi-select-players-container", playerNames, timelineSelectedPlayers, () => {
+          renderAverageKOTimeline("player-average-timeline-markers", matches, "players", timelineSelectedPlayers);
+        });
+        setupRetroMultiSelect("timeline-multi-select-fighters-container", fightersList, timelineSelectedFighters, () => {
+          renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", timelineSelectedFighters);
+        });
+
+        renderAverageKOTimeline("player-average-timeline-markers", matches, "players", timelineSelectedPlayers);
+        renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", timelineSelectedFighters);
+      };
+    }
+
+    renderAverageKOTimeline("player-average-timeline-markers", matches, "players", timelineSelectedPlayers);
+    renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", timelineSelectedFighters);
 
     const elapsed = Date.now() - startTime;
     if (elapsed < 250) {
@@ -1931,8 +1997,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Limit to top 8 most played characters
-    const topChars = playedChars.slice(0, 8);
+    // Limit to top 10 most played characters
+    const topChars = playedChars.slice(0, 10);
     const maxPlays = Math.max(...topChars.map(c => c.games), 1);
 
     let html = "";
@@ -2003,6 +2069,96 @@ document.addEventListener("DOMContentLoaded", () => {
     container.innerHTML = html;
   }
 
+  function renderFightersByPlayers(containerId, characters, matches) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    // Map each character to their unique player stats
+    const charPlayersList = characters.map(c => {
+      const playerMap = {};
+      matches.forEach(m => {
+        if (m.players) {
+          m.players.forEach(p => {
+            if (p.character === c.name) {
+              if (!playerMap[p.playerName]) {
+                playerMap[p.playerName] = { games: 0, wins: 0, losses: 0 };
+              }
+              playerMap[p.playerName].games++;
+              if (p.placement === 1) {
+                playerMap[p.playerName].wins++;
+              } else {
+                playerMap[p.playerName].losses++;
+              }
+            }
+          });
+        }
+      });
+      const uniquePlayersCount = Object.keys(playerMap).length;
+      return {
+        ...c,
+        uniquePlayersCount,
+        playerMap
+      };
+    }).filter(c => c.uniquePlayersCount > 0)
+      .sort((a, b) => b.uniquePlayersCount - a.uniquePlayersCount || b.games - a.games);
+
+    if (charPlayersList.length === 0) {
+      container.innerHTML = `<div class="chart-empty" style="font-family: var(--font-arcade); font-size: 13px; opacity: 0.6; width: 100%; text-align: center; line-height: 100px;">NO ENCOUNTERS RECORDED</div>`;
+      return;
+    }
+
+    // Limit to top 10 characters played by the most unique people
+    const topChars = charPlayersList.slice(0, 10);
+    const maxPlayersCount = Math.max(...topChars.map(c => c.uniquePlayersCount), 1);
+
+    let html = "";
+    topChars.forEach(c => {
+      const pct = (c.uniquePlayersCount / maxPlayersCount) * 100;
+      const details = api.getFighterDetails(c.name) || {};
+      const iconUrl = details.icon || 'assets/mario.png';
+
+      // Build tooltip list sorted by playcount under this character
+      const tooltipRows = Object.entries(c.playerMap)
+        .sort((a, b) => b[1].games - a[1].games)
+        .map(([name, pStats]) => `
+          <div class="tooltip-player-row" style="display: flex; justify-content: space-between; gap: 15px; font-size: 9px; border-bottom: 1px dashed rgba(255,255,255,0.08); padding: 4px 0;">
+            <span class="tooltip-p-name" style="color: #fff; font-weight: bold; cursor: pointer; transition: color 0.2s, text-shadow 0.2s;" onclick="window.location.hash = '#player/${name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.color='var(--color-neon-cyan)'; this.style.textShadow='0 0 6px var(--color-neon-cyan)';" onmouseout="this.style.color='#fff'; this.style.textShadow='';">${name}</span>
+            <span class="tooltip-p-stats" style="color: #ccc;">${pStats.games} plays <span style="color: var(--color-neon-yellow); font-weight: bold;">(${pStats.wins}W / ${pStats.losses}L)</span></span>
+          </div>
+        `).join('');
+
+      html += `
+        <div class="v-bar-col" style="display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; position: relative; width: 45px; overflow: visible;">
+          
+          <!-- Custom Retro Beveled Tooltip (CSS Hover Driven) -->
+          <div class="fighter-hover-tooltip panel-beveled neon-yellow" style="position: absolute; bottom: 65px; left: 50%; transform: translateX(-50%) translateY(10px); width: 200px; background: rgba(15, 17, 22, 0.95); border: 1px solid var(--color-neon-yellow); border-radius: 6px; box-shadow: 0 0 15px rgba(255,230,0,0.5); padding: 12px; box-sizing: border-box; display: flex; flex-direction: column; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease; z-index: 100;">
+            <div class="tooltip-header font-arcade text-glow-yellow" style="font-size: 11px; margin-bottom: 6px; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,230,0,0.3); padding-bottom: 6px;">${c.name.toUpperCase()}</div>
+            <div class="tooltip-subheader font-stats" style="font-size: 10px; margin-bottom: 8px; color: #8a8d9a;">UNIQUE PLAYERS: <strong style="color: #fff;">${c.uniquePlayersCount}</strong></div>
+            <div class="tooltip-players-list" style="display: flex; flex-direction: column; gap: 2px;">
+              ${tooltipRows}
+            </div>
+          </div>
+          
+          <!-- Value Label -->
+          <span class="v-bar-value font-stats text-glow-yellow" style="font-size: 11px; margin-bottom: 6px; font-weight: bold; color: #fff; z-index: 2;">${c.uniquePlayersCount}</span>
+          
+          <!-- Animated vertical bar track -->
+          <div class="v-bar-track" style="width: 18px; height: calc(${pct}% - 35px); min-height: 4px; background: linear-gradient(180deg, var(--color-neon-yellow) 0%, rgba(255,230,0,0.2) 100%); border: 1px solid var(--color-neon-yellow); box-shadow: 0 0 10px rgba(255,230,0,0.3); border-radius: 4px 4px 0 0; cursor: pointer; transition: height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);" onclick="window.location.hash = '#fighter/${c.name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.boxShadow='0 0 15px var(--color-neon-yellow)';" onmouseout="this.style.boxShadow='';" ></div>
+          
+          <!-- Head icon bubble centered underneath -->
+          <div class="v-bar-icon-bubble" style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--color-neon-yellow); background: var(--color-bg-dark); box-shadow: 0 0 8px rgba(255,230,0,0.4); display: flex; align-items: center; justify-content: center; overflow: hidden; margin-top: 8px; flex-shrink: 0; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onclick="window.location.hash = '#fighter/${c.name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.transform='scale(1.15)'; this.style.boxShadow='0 0 12px var(--color-neon-yellow)';" onmouseout="this.style.transform=''; this.style.boxShadow='';" >
+            <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${c.name}">
+          </div>
+          
+          <!-- Character name centered underneath -->
+          <span class="v-bar-char-name font-stats" style="cursor: pointer; transition: color 0.2s, text-shadow 0.2s;" onclick="window.location.hash = '#fighter/${c.name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.color='var(--color-neon-yellow)'; this.style.textShadow='0 0 6px var(--color-neon-yellow)';" onmouseout="this.style.color=''; this.style.textShadow='';" >${c.name}</span>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
   function renderPlayerCombatOutcomes(containerId, players) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -2061,7 +2217,7 @@ document.addEventListener("DOMContentLoaded", () => {
     container.innerHTML = html;
   }
 
-  function renderAverageKOTimeline(containerId, matches, mode, searchQuery = "") {
+  function renderAverageKOTimeline(containerId, matches, mode, selectedFilters = []) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
@@ -2134,11 +2290,11 @@ document.addEventListener("DOMContentLoaded", () => {
       };
     }).sort((a, b) => a.avgSecs - b.avgSecs);
 
-    // Apply timeline search filter
+    // Apply timeline filters
     let filteredEntities = sortedEntities;
-    if (searchQuery && searchQuery.trim() !== "") {
-      const q = searchQuery.toLowerCase().trim();
-      filteredEntities = sortedEntities.filter(ent => ent.name.toLowerCase().includes(q));
+    if (Array.isArray(selectedFilters) && selectedFilters.length > 0) {
+      const lowerFilters = selectedFilters.map(f => f.toLowerCase().trim());
+      filteredEntities = sortedEntities.filter(ent => lowerFilters.includes(ent.name.toLowerCase().trim()));
     }
 
     const placedMarkers = { above: [], below: [] };
@@ -2918,57 +3074,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Timeline Participant Search Filter Control
-  const timelineSearchInput = document.getElementById("timeline-search-input");
-  if (timelineSearchInput) {
-    timelineSearchInput.value = timelineSearchQuery;
-    timelineSearchInput.addEventListener("input", async (e) => {
-      timelineSearchQuery = e.target.value;
-      
-      // Fetch currently filtered matches based on timeframe
-      let matches = await window.Database.getMatchesAsync();
-      const now = Date.now();
-      if (currentInsightsTimeframe === 'today') {
-        const todayStart = new Date();
-        todayStart.setHours(0, 0, 0, 0);
-        matches = matches.filter(m => m.timestamp >= todayStart.getTime());
-      } else if (currentInsightsTimeframe === '7days') {
-        const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
-        matches = matches.filter(m => m.timestamp >= sevenDaysAgo);
-      } else if (currentInsightsTimeframe === '30days') {
-        const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
-        matches = matches.filter(m => m.timestamp >= thirtyDaysAgo);
-      }
-      
-      renderAverageKOTimeline("player-average-timeline-markers", matches, "players", timelineSearchQuery);
-      renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", timelineSearchQuery);
-    });
-  }
 
-  const btnClearTimelineSearch = document.getElementById("btn-clear-timeline-search");
-  if (btnClearTimelineSearch) {
-    btnClearTimelineSearch.addEventListener("click", async () => {
-      timelineSearchQuery = "";
-      if (timelineSearchInput) timelineSearchInput.value = "";
-      
-      let matches = await window.Database.getMatchesAsync();
-      const now = Date.now();
-      if (currentInsightsTimeframe === 'today') {
-        const todayStart = new Date();
-        todayStart.setHours(0, 0, 0, 0);
-        matches = matches.filter(m => m.timestamp >= todayStart.getTime());
-      } else if (currentInsightsTimeframe === '7days') {
-        const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
-        matches = matches.filter(m => m.timestamp >= sevenDaysAgo);
-      } else if (currentInsightsTimeframe === '30days') {
-        const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000;
-        matches = matches.filter(m => m.timestamp >= thirtyDaysAgo);
-      }
-      
-      renderAverageKOTimeline("player-average-timeline-markers", matches, "players", "");
-      renderAverageKOTimeline("character-average-timeline-markers", matches, "characters", "");
-    });
-  }
 
   // Clear / Reset podium search filters
   const btnClearPodiumSearch = document.getElementById("btn-clear-podium-search");

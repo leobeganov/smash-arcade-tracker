@@ -206,7 +206,6 @@ const Charts = {
               ${remainingPct > 0 ? `<div class="bar-segment placement-4" style="width: ${remainingPct}%;" title="Other Placements: ${remainingCount} times"></div>` : ''}
             </div>
             <div class="bar-stats-summary">
-              <span>GP: <strong class="text-white">${total}</strong></span>
               <span>1st: <strong class="text-placement-1">${counts[1]}</strong></span>
               <span>2nd: <strong class="text-placement-2">${counts[2]}</strong></span>
               <span>3rd: <strong class="text-placement-3">${counts[3]}</strong></span>
