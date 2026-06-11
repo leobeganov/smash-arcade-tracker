@@ -274,36 +274,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function initQrCode() {
     const qrImg = document.getElementById("qr-code-img");
-    const qrStatus = document.getElementById("qr-code-status");
     if (!qrImg) return;
 
     const currentUrl = window.location.href;
-    const isLocalFile = currentUrl.startsWith("file://");
-    const isLocalhost = currentUrl.includes("localhost") || currentUrl.includes("127.0.0.1");
-
-    let qrUrl = currentUrl;
-    
-    if (isLocalFile) {
-      if (qrStatus) {
-        qrStatus.textContent = "FILE PROTOCOL DETECTED ⚠️";
-        qrStatus.style.color = "var(--color-neon-yellow)";
-        qrStatus.title = "Standard mobile phones cannot open local file:// paths. Use a local network server to sync with mobile.";
-      }
-    } else if (isLocalhost) {
-      if (qrStatus) {
-        qrStatus.textContent = "LOCAL DEV DETECTED 💻";
-        qrStatus.style.color = "var(--color-neon-cyan)";
-        qrStatus.title = "Ensure your mobile device is on the same network to access this local development server.";
-      }
-    } else {
-      if (qrStatus) {
-        qrStatus.textContent = "LINK SYNCED 📱";
-        qrStatus.style.color = "var(--color-neon-cyan)";
-      }
-    }
-
     // Set the QR image source using the free, fast qrserver API
-    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&color=000000&bgcolor=ffffff&data=${encodeURIComponent(qrUrl)}`;
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&color=000000&bgcolor=ffffff&data=${encodeURIComponent(currentUrl)}`;
   }
 
 
@@ -1771,8 +1746,52 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Populate KPI panels
     document.getElementById("tel-kpi-matches").textContent = stats.totalMatches;
-    document.getElementById("tel-kpi-player").textContent = stats.topPlayer;
-    document.getElementById("tel-kpi-character").textContent = stats.dominantCharacter;
+    
+    const kpiPlayerEl = document.getElementById("tel-kpi-player");
+    kpiPlayerEl.textContent = stats.topPlayer;
+    if (stats.topPlayer && stats.topPlayer !== "N/A") {
+      kpiPlayerEl.style.cursor = "pointer";
+      kpiPlayerEl.style.transition = "color 0.2s, text-shadow 0.2s";
+      kpiPlayerEl.onclick = () => {
+        window.location.hash = `#player/${stats.topPlayer.toLowerCase().replace(/\s+/g, '-')}`;
+      };
+      kpiPlayerEl.onmouseover = () => {
+        kpiPlayerEl.style.color = "var(--color-neon-yellow)";
+        kpiPlayerEl.style.textShadow = "0 0 10px var(--color-neon-yellow)";
+      };
+      kpiPlayerEl.onmouseout = () => {
+        kpiPlayerEl.style.color = "";
+        kpiPlayerEl.style.textShadow = "";
+      };
+    } else {
+      kpiPlayerEl.style.cursor = "";
+      kpiPlayerEl.onclick = null;
+      kpiPlayerEl.onmouseover = null;
+      kpiPlayerEl.onmouseout = null;
+    }
+
+    const kpiCharEl = document.getElementById("tel-kpi-character");
+    kpiCharEl.textContent = stats.dominantCharacter;
+    if (stats.dominantCharacter && stats.dominantCharacter !== "N/A") {
+      kpiCharEl.style.cursor = "pointer";
+      kpiCharEl.style.transition = "color 0.2s, text-shadow 0.2s";
+      kpiCharEl.onclick = () => {
+        window.location.hash = `#fighter/${stats.dominantCharacter.toLowerCase().replace(/\s+/g, '-')}`;
+      };
+      kpiCharEl.onmouseover = () => {
+        kpiCharEl.style.color = "var(--color-neon-magenta)";
+        kpiCharEl.style.textShadow = "0 0 10px var(--color-neon-magenta)";
+      };
+      kpiCharEl.onmouseout = () => {
+        kpiCharEl.style.color = "";
+        kpiCharEl.style.textShadow = "";
+      };
+    } else {
+      kpiCharEl.style.cursor = "";
+      kpiCharEl.onclick = null;
+      kpiCharEl.onmouseover = null;
+      kpiCharEl.onmouseout = null;
+    }
 
     // Trigger SVG Renderings
     if (window.Charts) {
@@ -1840,7 +1859,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .sort((a, b) => b[1].games - a[1].games)
         .map(([name, pStats]) => `
           <div class="tooltip-player-row" style="display: flex; justify-content: space-between; gap: 15px; font-size: 9px; border-bottom: 1px dashed rgba(255,255,255,0.08); padding: 4px 0;">
-            <span class="tooltip-p-name" style="color: #fff; font-weight: bold;">${name}</span>
+            <span class="tooltip-p-name" style="color: #fff; font-weight: bold; cursor: pointer; transition: color 0.2s, text-shadow 0.2s;" onclick="window.location.hash = '#player/${name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.color='var(--color-neon-cyan)'; this.style.textShadow='0 0 6px var(--color-neon-cyan)';" onmouseout="this.style.color='#fff'; this.style.textShadow='';">${name}</span>
             <span class="tooltip-p-stats" style="color: #ccc;">${pStats.games} plays <span style="color: var(--color-neon-yellow); font-weight: bold;">(${pStats.wins}W / ${pStats.losses}L)</span></span>
           </div>
         `).join('');
@@ -1861,15 +1880,15 @@ document.addEventListener("DOMContentLoaded", () => {
           <span class="v-bar-value font-stats text-glow-cyan" style="font-size: 11px; margin-bottom: 6px; font-weight: bold; color: #fff; z-index: 2;">${c.games}</span>
           
           <!-- Animated vertical bar track -->
-          <div class="v-bar-track" style="width: 18px; height: calc(${pct}% - 35px); min-height: 4px; background: linear-gradient(180deg, var(--color-neon-magenta) 0%, rgba(255,0,127,0.2) 100%); border: 1px solid var(--color-neon-magenta); box-shadow: 0 0 10px rgba(255,0,127,0.3); border-radius: 4px 4px 0 0; cursor: pointer; transition: height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);"></div>
+          <div class="v-bar-track" style="width: 18px; height: calc(${pct}% - 35px); min-height: 4px; background: linear-gradient(180deg, var(--color-neon-magenta) 0%, rgba(255,0,127,0.2) 100%); border: 1px solid var(--color-neon-magenta); box-shadow: 0 0 10px rgba(255,0,127,0.3); border-radius: 4px 4px 0 0; cursor: pointer; transition: height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);" onclick="window.location.hash = '#fighter/${c.name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.boxShadow='0 0 15px var(--color-neon-magenta)';" onmouseout="this.style.boxShadow='';" ></div>
           
           <!-- Head icon bubble centered underneath -->
-          <div class="v-bar-icon-bubble" style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--color-neon-magenta); background: var(--color-bg-dark); box-shadow: 0 0 8px rgba(255,0,127,0.4); display: flex; align-items: center; justify-content: center; overflow: hidden; margin-top: 8px; flex-shrink: 0; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">
+          <div class="v-bar-icon-bubble" style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--color-neon-magenta); background: var(--color-bg-dark); box-shadow: 0 0 8px rgba(255,0,127,0.4); display: flex; align-items: center; justify-content: center; overflow: hidden; margin-top: 8px; flex-shrink: 0; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onclick="window.location.hash = '#fighter/${c.name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.transform='scale(1.15)'; this.style.boxShadow='0 0 12px var(--color-neon-magenta)';" onmouseout="this.style.transform=''; this.style.boxShadow='';" >
             <img src="${iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${c.name}">
           </div>
           
           <!-- Character name centered underneath -->
-          <span class="v-bar-char-name font-stats">${c.name}</span>
+          <span class="v-bar-char-name font-stats" style="cursor: pointer; transition: color 0.2s, text-shadow 0.2s;" onclick="window.location.hash = '#fighter/${c.name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.color='var(--color-neon-magenta)'; this.style.textShadow='0 0 6px var(--color-neon-magenta)';" onmouseout="this.style.color=''; this.style.textShadow='';" >${c.name}</span>
         </div>
       `;
     });
@@ -1898,7 +1917,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       html += `
         <div class="player-combat-row" style="display: flex; flex-direction: column; gap: 6px; border-bottom: 1px dashed rgba(255,255,255,0.08); padding-bottom: 12px; margin-bottom: 4px; overflow: visible;">
-          <div class="player-combat-name font-arcade text-glow-cyan" style="font-size: 11px; color: #fff; letter-spacing: 0.5px; text-shadow: 0 0 4px rgba(0,240,255,0.3);">${p.name.toUpperCase()}</div>
+          <div class="player-combat-name font-arcade text-glow-cyan" style="font-size: 11px; color: #fff; letter-spacing: 0.5px; text-shadow: 0 0 4px rgba(0,240,255,0.3); cursor: pointer; transition: color 0.2s, text-shadow 0.2s;" onclick="window.location.hash = '#player/${p.name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.color='var(--color-neon-cyan)'; this.style.textShadow='0 0 8px var(--color-neon-cyan)';" onmouseout="this.style.color=''; this.style.textShadow='';" >${p.name.toUpperCase()}</div>
           
           <div class="combat-bars-stack" style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
             <!-- KOs Bar (Cyan) -->
@@ -2033,13 +2052,13 @@ document.addEventListener("DOMContentLoaded", () => {
       markersHtml += `
         <div class="timeline-marker" style="position: absolute; left: ${safePct}%; top: 50%; transform: translate(-50%, -50%); width: 24px; height: 24px; z-index: ${10 + staggerIndex};">
           <!-- Dot bubble (character icon) -->
-          <div class="timeline-dot" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid ${markerColor}; box-shadow: 0 0 8px ${markerColor}; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+          <div class="timeline-dot" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; background: var(--color-bg-dark); border: 2px solid ${markerColor}; box-shadow: 0 0 8px ${markerColor}; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onclick="window.location.hash = '#${mode === 'players' ? 'player' : 'fighter'}/${ent.name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.transform='scale(1.15)'; this.style.boxShadow='0 0 14px ${markerColor}';" onmouseout="this.style.transform=''; this.style.boxShadow='';" >
             <img src="${ent.iconUrl}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" alt="${ent.name}">
           </div>
           <!-- Vertical connector line -->
           <div class="timeline-connector" style="position: absolute; left: 11px; ${isAbove ? `bottom: 24px` : `top: 24px`}; width: 2px; height: ${offsetSize}px; background: ${markerColor}; opacity: 0.8; z-index: 9;"></div>
           <!-- Label panel box -->
-          <div class="timeline-player-info panel-beveled" style="position: absolute; left: 12px; ${isAbove ? `bottom: ${24 + offsetSize}px` : `top: ${24 + offsetSize}px`}; transform: translateX(-50%); text-align: center; white-space: nowrap; background: var(--color-bg-dark); border: 1px solid ${markerColor}; padding: 3px 8px; font-size: 9px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px; pointer-events: auto; user-select: none; z-index: 10;">
+          <div class="timeline-player-info panel-beveled" style="position: absolute; left: 12px; ${isAbove ? `bottom: ${24 + offsetSize}px` : `top: ${24 + offsetSize}px`}; transform: translateX(-50%); text-align: center; white-space: nowrap; background: var(--color-bg-dark); border: 1px solid ${markerColor}; padding: 3px 8px; font-size: 9px; font-family: var(--font-stats); box-shadow: 0 0 8px rgba(0,0,0,0.8); border-radius: 4px; pointer-events: auto; user-select: none; z-index: 10; cursor: pointer; transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;" onclick="window.location.hash = '#${mode === 'players' ? 'player' : 'fighter'}/${ent.name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.borderColor='#fff'; this.style.boxShadow='0 0 12px ${markerColor}';" onmouseout="this.style.borderColor=''; this.style.boxShadow='';" >
             <span style="font-weight: bold; color: #fff; text-shadow: 0 0 2px rgba(255,255,255,0.5);">${ent.name}</span>
             <span style="color: ${markerColor}; font-weight: bold; text-shadow: 0 0 4px ${markerColor};">(${ent.displayTime})</span>
           </div>
@@ -2260,6 +2279,24 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.classList.add("active");
       
       currentPlayerTimeframe = btn.getAttribute("data-timeframe");
+      const parts = window.location.hash.split("/");
+      if (parts[0] === "#player" && parts[1]) {
+        renderPlayerProfile(parts[1]);
+      }
+    });
+  }
+
+  // Player Profile Match Type Toggles
+  const playerMatchtypeFilters = document.getElementById("player-matchtype-filters");
+  if (playerMatchtypeFilters) {
+    playerMatchtypeFilters.addEventListener("click", (e) => {
+      const btn = e.target.closest(".toggle-btn");
+      if (!btn) return;
+      
+      playerMatchtypeFilters.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      
+      currentPlayerMatchType = btn.getAttribute("data-matchtype");
       const parts = window.location.hash.split("/");
       if (parts[0] === "#player" && parts[1]) {
         renderPlayerProfile(parts[1]);
@@ -3190,6 +3227,32 @@ document.addEventListener("DOMContentLoaded", () => {
         if (welcomeCaret) welcomeCaret.style.transform = "rotate(180deg)";
         welcomePanelToggle.style.backgroundColor = "rgba(255, 230, 0, 0.05)";
         welcomePanelToggle.style.borderBottomColor = "rgba(255, 230, 0, 0.2)";
+      }
+    });
+  }
+
+  // --- Mobile Sync Collapsible (Accordion) Toggle Coordinator ---
+  const qrPanelToggle = document.getElementById("qr-panel-toggle");
+  const qrPanelContent = document.getElementById("qr-panel-content");
+  const qrCaret = document.getElementById("qr-caret");
+
+  if (qrPanelToggle && qrPanelContent) {
+    qrPanelToggle.addEventListener("click", () => {
+      const isExpanded = qrPanelContent.style.maxHeight && qrPanelContent.style.maxHeight !== "0px";
+      if (isExpanded) {
+        // Collapse
+        qrPanelContent.style.maxHeight = "0px";
+        qrPanelContent.style.padding = "0 25px";
+        if (qrCaret) qrCaret.style.transform = "rotate(0deg)";
+        qrPanelToggle.style.backgroundColor = "transparent";
+        qrPanelToggle.style.borderBottomColor = "rgba(0, 240, 255, 0)";
+      } else {
+        // Expand
+        qrPanelContent.style.maxHeight = qrPanelContent.scrollHeight + "px";
+        qrPanelContent.style.padding = "0 25px 0 25px";
+        if (qrCaret) qrCaret.style.transform = "rotate(180deg)";
+        qrPanelToggle.style.backgroundColor = "rgba(0, 240, 255, 0.05)";
+        qrPanelToggle.style.borderBottomColor = "rgba(0, 240, 255, 0.2)";
       }
     });
   }

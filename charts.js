@@ -109,6 +109,7 @@ const Charts = {
       const safeEndAngle = endAngle >= 359.9 ? 359.9 : endAngle;
       const arcPath = this.describeArc(center, center, radius, startAngle, safeEndAngle);
       const color = CHART_COLORS[i % CHART_COLORS.length];
+      const isOthers = char.name === 'Others';
 
       svgHtml += `
         <path d="${arcPath}" 
@@ -122,6 +123,7 @@ const Charts = {
               style="transition: stroke-width 0.3s; cursor: pointer;"
               onmouseover="this.setAttribute('stroke-width', '${strokeWidth + 4}'); this.style.filter = 'url(#donut-glow)';"
               onmouseout="this.setAttribute('stroke-width', '${strokeWidth}'); this.style.filter = 'none';"
+              ${!isOthers ? `onclick="window.location.hash = '#fighter/${char.name.toLowerCase().replace(/\\s+/g, '-')}'"` : ''}
         />
       `;
     });
@@ -138,10 +140,11 @@ const Charts = {
     topChars.forEach((char, i) => {
       const pct = Math.round((char.games / totalGames) * 100);
       const color = CHART_COLORS[i % CHART_COLORS.length];
+      const isOthers = char.name === 'Others';
       legendHtml += `
-        <div class="legend-item" style="--legend-color: ${color}">
+        <div class="legend-item" style="--legend-color: ${color}; ${isOthers ? '' : 'cursor: pointer;'}" ${isOthers ? '' : `onclick="window.location.hash = '#fighter/${char.name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.querySelector('.legend-name').style.color='var(--legend-color)'; this.querySelector('.legend-name').style.textShadow='0 0 6px var(--legend-color)';" onmouseout="this.querySelector('.legend-name').style.color=''; this.querySelector('.legend-name').style.textShadow='';"`}>
           <span class="legend-badge"></span>
-          <span class="legend-name">${char.name}</span>
+          <span class="legend-name" style="${isOthers ? '' : 'transition: color 0.2s, text-shadow 0.2s;'}">${char.name}</span>
           <span class="legend-count">${char.games} <small class="pct-label">(${pct}%)</small></span>
         </div>
       `;
@@ -192,7 +195,7 @@ const Charts = {
 
       html += `
         <div class="bar-chart-row">
-          <div class="bar-row-label">
+          <div class="bar-row-label" style="cursor: pointer; transition: color 0.2s, text-shadow 0.2s;" onclick="window.location.hash = '#player/${player.name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.color='var(--color-neon-cyan)'; this.style.textShadow='0 0 6px var(--color-neon-cyan)';" onmouseout="this.style.color=''; this.style.textShadow='';">
             ${player.name}
           </div>
           <div class="bar-track-wrapper">
@@ -240,14 +243,14 @@ const Charts = {
       return;
     }
 
-    // Sort by win rate, limit to 4 players
-    const sortedPlayers = [...playersData].sort((a, b) => b.winRate - a.winRate).slice(0, 4);
+    // Sort by win rate, limit to top 3 players
+    const sortedPlayers = [...playersData].sort((a, b) => b.winRate - a.winRate).slice(0, 3);
 
-    const size = 110;
-    const radius = 40;
+    const size = 95;
+    const radius = 34;
     const circumference = 2 * Math.PI * radius;
 
-    let html = '<div class="gauges-grid">';
+    let html = '<div class="gauges-grid" style="display: flex; justify-content: space-around; gap: 15px; width: 100%; flex-wrap: wrap;">';
 
     sortedPlayers.forEach((player, i) => {
       const wr = Math.round(player.winRate);
@@ -256,8 +259,8 @@ const Charts = {
       const glowId = `gauge-glow-${i}`;
 
       html += `
-        <div class="gauge-card" style="--gauge-color: ${color};">
-          <div class="gauge-svg-wrapper">
+        <div class="gauge-card" style="--gauge-color: ${color}; flex: 1; min-width: 100px; max-width: 140px; cursor: pointer; transition: transform 0.25s cubic-bezier(0.165, 0.84, 0.44, 1), background-color 0.25s ease, box-shadow 0.25s ease;" onclick="window.location.hash = '#player/${player.name.toLowerCase().replace(/\\s+/g, '-')}'" onmouseover="this.style.transform='translateY(-4px)'; this.style.backgroundColor='rgba(255, 255, 255, 0.03)'; this.querySelector('.gauge-name').style.color='var(--gauge-color)'; this.querySelector('.gauge-name').style.textShadow='0 0 6px var(--gauge-color)';" onmouseout="this.style.transform=''; this.style.backgroundColor=''; this.querySelector('.gauge-name').style.color=''; this.querySelector('.gauge-name').style.textShadow='';" >
+          <div class="gauge-svg-wrapper" style="width: ${size}px; height: ${size}px; position: relative;">
             <svg viewBox="0 0 ${size} ${size}" class="gauge-svg">
               <defs>
                 <filter id="${glowId}" x="-20%" y="-20%" width="140%" height="140%">
@@ -274,12 +277,12 @@ const Charts = {
                       class="gauge-progress-circle" />
             </svg>
             <div class="gauge-text">
-              <span class="gauge-number">${wr}%</span>
-              <span class="gauge-label">W/R</span>
+              <span class="gauge-number" style="font-size: 13px;">${wr}%</span>
+              <span class="gauge-label" style="font-size: 7px; white-space: nowrap; letter-spacing: 0.2px; margin-top: 2px;">WIN RATE</span>
             </div>
           </div>
           <div class="gauge-details">
-            <span class="gauge-name">${player.name}</span>
+            <span class="gauge-name" style="font-size: 11px; transition: color 0.2s, text-shadow 0.2s;">${player.name}</span>
             <span class="gauge-gp">${player.wins} Wins / ${player.games} Games</span>
           </div>
         </div>

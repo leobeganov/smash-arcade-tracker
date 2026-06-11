@@ -100,15 +100,26 @@
           </div>
 
           <!-- Desktop Only QR Code Mobile Sync Panel -->
-          <div class="panel-beveled neon-cyan home-qr-panel" style="box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(12, 13, 18, 0.7); backdrop-filter: blur(10px); border-radius: 4px; padding: 15px 20px;">
-            <h3 class="font-arcade text-glow-cyan" style="font-size: 11px; margin: 0 0 10px 0; text-align: center; letter-spacing: 1px;">MOBILE SYNC</h3>
-            <p style="font-family: var(--font-stats); font-size: 10px; color: #a3a6b5; text-align: center; margin: 0 0 15px 0; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.4;">Scan to load cabinet on mobile browser</p>
-            
-            <div class="qr-code-glow-box" style="background: #ffffff; padding: 10px; border: 3px solid var(--color-neon-cyan); border-radius: 6px; box-shadow: 0 0 15px rgba(0, 240, 255, 0.45); display: flex; align-items: center; justify-content: center; width: 156px; height: 156px; margin: 0 auto;">
-              <img id="qr-code-img" src="" alt="Scan QR Code" style="width: 130px; height: 130px; display: block;" />
+          <div class="panel-beveled neon-cyan home-qr-panel" style="box-sizing: border-box; display: flex; flex-direction: column; background: rgba(12, 13, 18, 0.7); backdrop-filter: blur(10px); padding: 0; overflow: hidden; border-radius: 4px;">
+            <!-- Accordion Toggle Header -->
+            <div id="qr-panel-toggle" style="display: flex; align-items: center; justify-content: space-between; padding: 15px 25px; cursor: pointer; user-select: none; border-bottom: 2px solid rgba(0, 240, 255, 0); transition: border-color 0.3s, background-color 0.2s;" onmouseover="this.style.backgroundColor='rgba(0, 240, 255, 0.03)'" onmouseout="if(!document.getElementById('qr-panel-content').style.maxHeight || document.getElementById('qr-panel-content').style.maxHeight === '0px') this.style.backgroundColor='transparent';">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 18px; text-shadow: 0 0 8px var(--color-neon-cyan);" id="qr-toggle-icon">📱</span>
+                <h3 class="font-arcade text-glow-cyan" style="font-size: var(--font-size-md); margin: 0; letter-spacing: 1px;">VIEW THIS ON MOBILE</h3>
+              </div>
+              <span id="qr-caret" class="font-arcade" style="font-size: 12px; color: var(--color-neon-cyan); transition: transform 0.3s ease; transform: rotate(0deg);">▼</span>
             </div>
-            
-            <p id="qr-code-status" class="font-arcade title-blink" style="font-size: 9px; text-align: center; margin: 15px 0 0 0; font-weight: bold; letter-spacing: 0.5px; line-height: 1.2;"></p>
+
+            <!-- Collapsible Accordion Content -->
+            <div id="qr-panel-content" style="max-height: 0px; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.35s ease; padding: 0 25px;">
+              <div style="padding-top: 15px; padding-bottom: 35px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                <p style="font-family: var(--font-stats); font-size: 10px; color: #a3a6b5; text-align: center; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.4;">Scan this QR code to view the app on your phone</p>
+                
+                <div class="qr-code-glow-box" style="background: #ffffff; padding: 10px; border: 3px solid var(--color-neon-cyan); border-radius: 6px; box-shadow: 0 0 15px rgba(0, 240, 255, 0.45); display: flex; align-items: center; justify-content: center; width: 156px; height: 156px; margin: 0 auto;">
+                  <img id="qr-code-img" src="" alt="Scan QR Code" style="width: 130px; height: 130px; display: block;" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
