@@ -730,11 +730,24 @@
             <h2 class="text-glow-cyan font-arcade" style="margin: 0; font-size: 16px; letter-spacing: 1px;">MATCH INSIGHTS</h2>
             <p class="cabinet-subtitle" style="margin: 4px 0 0 0; font-size: 10px; color: #8a8d9a; font-family: var(--font-stats);">DASHBOARD RECAP & ANALYTICS</p>
           </div>
-          <div class="toggle-switch-beveled" id="insights-timeframe-filters" style="min-width: 280px;">
-            <button class="toggle-btn" data-timeframe="today">TODAY</button>
-            <button class="toggle-btn" data-timeframe="7days">7 DAYS</button>
-            <button class="toggle-btn" data-timeframe="30days">30 DAYS</button>
-            <button class="toggle-btn active" data-timeframe="alltime">ALL TIME</button>
+          <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+            <!-- Match Type Filter -->
+            <div class="matchtype-filter-wrapper" style="display: flex; align-items: center; gap: 10px;">
+              <span class="mode-toggle-label" style="font-size: 10px; color: var(--color-neon-cyan); letter-spacing: 0.5px; font-family: var(--font-arcade);">MATCH TYPE:</span>
+              <div class="toggle-switch-beveled" id="insights-matchtype-filters">
+                <button class="toggle-btn active" data-matchtype="all">All</button>
+                <button class="toggle-btn" data-matchtype="1v1">1v1</button>
+                <button class="toggle-btn" data-matchtype="free-for-all">FFA</button>
+                <button class="toggle-btn" data-matchtype="teams">Teams</button>
+              </div>
+            </div>
+            <!-- Timeframe Filter -->
+            <div class="toggle-switch-beveled" id="insights-timeframe-filters" style="min-width: 280px;">
+              <button class="toggle-btn" data-timeframe="today">TODAY</button>
+              <button class="toggle-btn" data-timeframe="7days">7 DAYS</button>
+              <button class="toggle-btn" data-timeframe="30days">30 DAYS</button>
+              <button class="toggle-btn active" data-timeframe="alltime">ALL TIME</button>
+            </div>
           </div>
         </div>
 
